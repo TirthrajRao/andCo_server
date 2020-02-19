@@ -130,10 +130,10 @@ if (config.env.name === "production") {
 	server.on("listening", onListen);
 } else if (config.env.name === "test") {
 	var server = https.createServer(
-		// {
-		// 	key: fs.readFileSync("/var/www/html/conduct-testing/ssl/privkey1.pem"),
-		// 	cert: fs.readFileSync("/var/www/html/conduct-testing/ssl/fullchain1.pem")
-		// },
+		{
+			key: fs.readFileSync("/var/www/html/Aso-ebi/ssl/privkey1.pem"),
+			cert: fs.readFileSync("/var/www/html/Aso-ebi/ssl/fullchain1.pem")
+		},
 		app
 	);
 	// var server = http.createServer(app);
