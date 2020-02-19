@@ -1,0 +1,16 @@
+if image
+    - var imageUrl = image
+else
+   -  var imageUrl = 'https://andcowith.me/server/uploads/default/thank_you_card.jpg' 
+
+if message
+    - var myMessage = message
+else 
+    - var myMessage = 'A great big thank you for shopping with Aso-Ebi.'
+
+h3 #{myMessage}
+
+div(style="height: 500px; width: 600px; overflow: hidden;")
+    img(src=imageUrl style="max-height: 100%; max-width: 100%; min-height: 100%; min-width: 100%; object-fit: cover;")
+
+
