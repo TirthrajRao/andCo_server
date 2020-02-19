@@ -139,7 +139,7 @@ if (config.env.name === "production") {
 	// var server = http.createServer(app);
 	console.log(`Server started on port ${config.env.port}`);
 	databaseConnectivity(config.env.name);
-	server.listen(config.env.port);
+	// server.listen(config.env.port);
 	// server.on("error", onError);
 	// server.on("listening", onListen);
 	// Development and Testing mode
