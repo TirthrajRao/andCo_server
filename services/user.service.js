@@ -525,6 +525,7 @@ const mailService = require('../services/mail.service');
                  if (err) {
                      reject({ status: 500, message: 'Internal Server Error' });
                  } else if (user) {
+                     // console.log("chec")
                      const payload = { user };
                      var token = jwt.sign(payload, config.jwtSecret);
                      const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName }

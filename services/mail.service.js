@@ -2,9 +2,10 @@
 const mailer = require('nodemailer');
 const path = require('path');
 const async = require("async");
-
+// const config = require('.')
 // Static variables
 const compiler = require(path.join(__dirname, 'pug.service'));
+const config = require('../config/env.config');
 
 module.exports.mail = mail;
 module.exports.verifyEmail = verifyEmail;
@@ -47,12 +48,12 @@ function mail(options, data, attach, callback) {
 
 
     const transporter = mailer.createTransport({
-        host: process.env.HOST,
-        port: process.env.SMTPPORT,
-        secure: process.env.SECURE,
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false,
         auth: {
-            user: process.env.SMTPUSERNAME,
-            pass: process.env.PASSWORD,
+            user: 'raoinfotechp@gmail.com',
+            pass: 'raoinfotech@123',
         },
     });
 

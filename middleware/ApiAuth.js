@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+CYPHERKEY = 'asoebi'
 /**
  * Function To Validation Of JWT Token
  * @param {authorization} - AccessToken
@@ -8,7 +9,7 @@ module.exports.validateToken = async (req, res, next) => {
 	const { authorization } = req.headers;
 	new Promise(async (resolve, reject) => {
 		if (authorization && authorization !== "") {
-			jwt.verify(authorization, process.env.CYPHERKEY, (err, decoded) => {
+			jwt.verify(authorization, CYPHERKEY, (err, decoded) => {
 				if (err) {
 					reject({ status: false, message: "Failed to authenticate token.", });
 				} else {
