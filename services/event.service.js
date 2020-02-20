@@ -33,7 +33,7 @@ module.exports.createNewEvent = (eventData) => {
                     } else {
                         console.log("new event created", newEvent)
                         fnGenerateEventLink(newEvent).then((Response) => {
-                            resolve({ status: 201, message: 'New Event Created Successfully.', data: Response.data });
+                            resolve({ status: 201, message: 'Yayy! Your new event is created.', data: Response.data });
                         }).catch((error) => {
                             reject({ status: 500, message: 'Internal Server Error' });
                         });
@@ -52,69 +52,69 @@ module.exports.createNewEvent = (eventData) => {
  * Function For Check Hashtag Availability
  * @param {string} hashTag 
  */
-function fnHashtagAvailable(hashTag) {
-    return new Promise((resolve, reject) => {
-        EventModel.findOne({ hashTag: hashTag }, (error, event) => {
-            if (error) {
-                console.log("Internal Server Error");
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else if (!event) {
-                console.log('HashTag Is Available');
-                resolve(true)
-            } else {
-                console.log('HashTag Is Not Available');
-                resolve(false)
-            }
-        });
-    });
-}
+ function fnHashtagAvailable(hashTag) {
+     return new Promise((resolve, reject) => {
+         EventModel.findOne({ hashTag: hashTag }, (error, event) => {
+             if (error) {
+                 console.log("Internal Server Error");
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else if (!event) {
+                 console.log('HashTag Is Available');
+                 resolve(true)
+             } else {
+                 console.log('HashTag Is Not Available');
+                 resolve(false)
+             }
+         });
+     });
+ }
 
 /**
  * Function For Generate Event Link For Event
  * @param {object} event 
  */
-function fnGenerateEventLink(event) {
-    return new Promise((resolve, reject) => {
-        const param = String(event._id);
-        const baseParam = Buffer.from(param).toString('base64');
-        const link = config.baseUrl + config.welcomeGuest + baseParam;
-        const eventLink = { eventLink: link }
-        EventModel.findByIdAndUpdate({ _id: event._id }, eventLink, { upsert: true }, (eventError, updatedEvent) => {
-            if (eventError) {
-                console.log('usererror: ', eventError);
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                resolve({ status: 200, message: 'Event Created Successfully.', data: updatedEvent });
-            }
-        });
-    });
-}
+ function fnGenerateEventLink(event) {
+     return new Promise((resolve, reject) => {
+         const param = String(event._id);
+         const baseParam = Buffer.from(param).toString('base64');
+         const link = config.baseUrl + config.welcomeGuest + baseParam;
+         const eventLink = { eventLink: link }
+         EventModel.findByIdAndUpdate({ _id: event._id }, eventLink, { upsert: true }, (eventError, updatedEvent) => {
+             if (eventError) {
+                 console.log('usererror: ', eventError);
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else {
+                 resolve({ status: 200, message: 'Event Created Successfully.', data: updatedEvent });
+             }
+         });
+     });
+ }
 
 /**
  * Update a Event Inside Specific Activity
  * @param {object} body - Event data to update
  * @returns {Promise} - updated Event or reason why failed
  */
-module.exports.updateExistingEvent = (eventId, eventData) => {
-    return new Promise((resolve, reject) => {
-        fnHashtagAvailableOnUpdate(eventId, eventData.hashTag).then((response) => {
-            if (response) {
-                EventModel.findByIdAndUpdate({ _id: eventId }, eventData, { upsert: true }, (eventError, updatedEvent) => {
-                    if (eventError) {
-                        console.log('usererror: ', eventError);
-                        reject({ status: 500, message: 'Internal Server Error' });
-                    } else {
-                        resolve({ status: 200, message: 'Event Updated Successfully.', data: updatedEvent });
-                    }
-                });
-            } else {
-                reject({ status: 500, message: 'Hashtag Not Available.' });
-            }
-        }).catch((error) => {
-            reject({ status: 500, message: 'Internal Server Error' });
-        });
-    });
-}
+ module.exports.updateExistingEvent = (eventId, eventData) => {
+     return new Promise((resolve, reject) => {
+         fnHashtagAvailableOnUpdate(eventId, eventData.hashTag).then((response) => {
+             if (response) {
+                 EventModel.findByIdAndUpdate({ _id: eventId }, eventData, { upsert: true }, (eventError, updatedEvent) => {
+                     if (eventError) {
+                         console.log('usererror: ', eventError);
+                         reject({ status: 500, message: 'Internal Server Error' });
+                     } else {
+                         resolve({ status: 200, message: 'Event Updated Successfully.', data: updatedEvent });
+                     }
+                 });
+             } else {
+                 reject({ status: 500, message: 'Hashtag Not Available.' });
+             }
+         }).catch((error) => {
+             reject({ status: 500, message: 'Internal Server Error' });
+         });
+     });
+ }
 
 /**
  * Function For Check Hashtag Availability On Update Event
@@ -122,226 +122,226 @@ module.exports.updateExistingEvent = (eventId, eventData) => {
  * @param {string} hashTag 
  * @returns {Promise} available Or Not or reason why failed
  */
-function fnHashtagAvailableOnUpdate(eventId, hashTag) {
-    return new Promise((resolve, reject) => {
-        EventModel.findOne({ _id: eventId }, (error, event) => {
-            if (error) {
-                console.log("Internal Server Error", error);
-                resolve(false);
-            } else if (event.hashTag == hashTag) {
-                resolve(true);
-            } else {
-                EventModel.findOne({ hashTag: hashTag }, (error, event) => {
-                    if (!event) {
-                        resolve(true)
-                    } else if (error) {
-                        console.log("Internal Server Error", error);
-                        reject({ status: 500, message: 'Internal Server Error' });
-                    } else {
-                        resolve(false)
-                    }
-                });
-            }
-        });
-    });
-}
+ function fnHashtagAvailableOnUpdate(eventId, hashTag) {
+     return new Promise((resolve, reject) => {
+         EventModel.findOne({ _id: eventId }, (error, event) => {
+             if (error) {
+                 console.log("Internal Server Error", error);
+                 resolve(false);
+             } else if (event.hashTag == hashTag) {
+                 resolve(true);
+             } else {
+                 EventModel.findOne({ hashTag: hashTag }, (error, event) => {
+                     if (!event) {
+                         resolve(true)
+                     } else if (error) {
+                         console.log("Internal Server Error", error);
+                         reject({ status: 500, message: 'Internal Server Error' });
+                     } else {
+                         resolve(false)
+                     }
+                 });
+             }
+         });
+     });
+ }
 
 /**
  * Create New Activity Inside Event Function
  * @param {object} body - Activity data to Create New Activity Inside Event
  * @returns {Promise} - New Activity or reason why failed
  */
-module.exports.newActivityInsideEvent = (activityData) => {
-    const eventId = activityData[0].eventId;
-    return new Promise((resolve, reject) => {
-        EventModel.findByIdAndUpdate({ _id: eventId }, { $push: { activities: activityData } }, { new: true }, (activityError, newActivity) => {
-            if (activityError) {
-                console.log('Activity Error: ', activityError);
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                resolve({ status: 200, message: 'New Activities Created', data: newActivity.activities });
-            }
-        });
-    });
-}
+ module.exports.newActivityInsideEvent = (activityData) => {
+     const eventId = activityData[0].eventId;
+     return new Promise((resolve, reject) => {
+         EventModel.findByIdAndUpdate({ _id: eventId }, { $push: { activities: activityData } }, { new: true }, (activityError, newActivity) => {
+             if (activityError) {
+                 console.log('Activity Error: ', activityError);
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else {
+                 resolve({ status: 200, message: 'New Activities Created', data: newActivity.activities });
+             }
+         });
+     });
+ }
 
 /**
  * Create New Group Inside Activity
  * @param {object} body - Group data to Create New Group Inside Activity
  * @returns {Promise} - New Group or reason why failed
  */
-module.exports.newGroupInsideActivity = (groupData) => {
+ module.exports.newGroupInsideActivity = (groupData) => {
 
-    console.log('New Group data', groupData);
+     console.log('New Group data', groupData);
 
-    return new Promise((resolve, reject) => {
+     return new Promise((resolve, reject) => {
 
-        async.eachSeries(groupData.group, (singleGroup, callback) => {
+         async.eachSeries(groupData.group, (singleGroup, callback) => {
 
-            let newGroup = {
-                eventId: groupData.eventId,
-                activityId: singleGroup.activityId,
-                groupName: singleGroup.groupName,
-                item: [],
-            }
-            _.forEach(singleGroup.male, (maleArray) => {
-                maleArray.itemGender = 'male';
-                newGroup.item.push(maleArray);
-            })
+             let newGroup = {
+                 eventId: groupData.eventId,
+                 activityId: singleGroup.activityId,
+                 groupName: singleGroup.groupName,
+                 item: [],
+             }
+             _.forEach(singleGroup.male, (maleArray) => {
+                 maleArray.itemGender = 'male';
+                 newGroup.item.push(maleArray);
+             })
 
-            _.forEach(singleGroup.female, (femaleArray) => {
-                femaleArray.itemGender = 'female';
-                newGroup.item.push(femaleArray);
-            })
+             _.forEach(singleGroup.female, (femaleArray) => {
+                 femaleArray.itemGender = 'female';
+                 newGroup.item.push(femaleArray);
+             })
 
-            GroupModel.create(newGroup, (groupError, groupRes) => {
-                if (groupError) {
-                    console.log('callbackError: ', groupError);
-                    reject({ status: 500, message: 'Internal Server Error' });
-                } else {
-                    callback();
-                }
-            });
-        }, (callbackError, callbackResponse) => {
-            if (callbackError) {
-                console.log('callbackError: ', callbackError);
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                resolve({ status: 200, message: 'New Event Created Successfully.' });
-            }
-        });
-    });
-}
+             GroupModel.create(newGroup, (groupError, groupRes) => {
+                 if (groupError) {
+                     console.log('callbackError: ', groupError);
+                     reject({ status: 500, message: 'Internal Server Error' });
+                 } else {
+                     callback();
+                 }
+             });
+         }, (callbackError, callbackResponse) => {
+             if (callbackError) {
+                 console.log('callbackError: ', callbackError);
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else {
+                 resolve({ status: 200, message: 'New Event Created Successfully.' });
+             }
+         });
+     });
+ }
 
 /**
  * Update a Group Inside Specific Activity
  * @param {object} body - group data to update
  * @returns {Promise} - updated group or reason why failed
  */
-module.exports.updateGroupInsideActivity = (groupData) => {
-    return new Promise((resolve, reject) => {
+ module.exports.updateGroupInsideActivity = (groupData) => {
+     return new Promise((resolve, reject) => {
 
-        async.eachSeries(groupData.group, (singleGroup, parentcb) => {
+         async.eachSeries(groupData.group, (singleGroup, parentcb) => {
 
-            if (singleGroup.groupId) {
+             if (singleGroup.groupId) {
 
-                async.parallel({
-                    group: function (cb) {
-                        GroupModel.findByIdAndUpdate({ _id: singleGroup.groupId }, { $set: { groupName: singleGroup.groupName } }).exec((error, updateGroup) => {
-                            if (error) {
-                                console.log('Internal Server Error');
-                            } else {
-                                cb();
-                            }
-                        });
-                    },
-                    male: function (cb) {
-                        async.eachSeries(singleGroup.male, (maleData, callback) => {
-                            if (maleData.itemId) {
-                                const newValues = { $set: { 'item.$.itemName': maleData.itemName, 'item.$.itemPrice': maleData.itemPrice, 'item.$.itemGender': 'male' } }
-                                GroupModel.updateOne({ _id: singleGroup.groupId, 'item._id': ObjectId(maleData.itemId) }, newValues)
-                                    .exec((error, response) => {
-                                        if (error) {
-                                            console.log('Internal Server Error');
-                                        } else {
-                                            callback();
-                                        }
-                                    });
-                            } else {
-                                const maleItem = { itemName: maleData.itemName, itemPrice: maleData.itemPrice, itemGender: 'male', }
-                                GroupModel.updateOne({ _id: singleGroup.groupId }, { $push: { item: maleItem } }, { new: true, upsert: true }).exec((error, response) => {
-                                    if (error) {
-                                        console.log('Internal Server Error');
-                                    } else {
-                                        callback();
-                                    }
-                                });
-                            }
-                        }, (callbackError, callbackResponse) => {
-                            if (callbackError) {
-                                console.log('Internal Server Error');
-                            } else {
-                                cb();
-                            }
-                        });
+                 async.parallel({
+                     group: function (cb) {
+                         GroupModel.findByIdAndUpdate({ _id: singleGroup.groupId }, { $set: { groupName: singleGroup.groupName } }).exec((error, updateGroup) => {
+                             if (error) {
+                                 console.log('Internal Server Error');
+                             } else {
+                                 cb();
+                             }
+                         });
+                     },
+                     male: function (cb) {
+                         async.eachSeries(singleGroup.male, (maleData, callback) => {
+                             if (maleData.itemId) {
+                                 const newValues = { $set: { 'item.$.itemName': maleData.itemName, 'item.$.itemPrice': maleData.itemPrice, 'item.$.itemGender': 'male' } }
+                                 GroupModel.updateOne({ _id: singleGroup.groupId, 'item._id': ObjectId(maleData.itemId) }, newValues)
+                                 .exec((error, response) => {
+                                     if (error) {
+                                         console.log('Internal Server Error');
+                                     } else {
+                                         callback();
+                                     }
+                                 });
+                             } else {
+                                 const maleItem = { itemName: maleData.itemName, itemPrice: maleData.itemPrice, itemGender: 'male', }
+                                 GroupModel.updateOne({ _id: singleGroup.groupId }, { $push: { item: maleItem } }, { new: true, upsert: true }).exec((error, response) => {
+                                     if (error) {
+                                         console.log('Internal Server Error');
+                                     } else {
+                                         callback();
+                                     }
+                                 });
+                             }
+                         }, (callbackError, callbackResponse) => {
+                             if (callbackError) {
+                                 console.log('Internal Server Error');
+                             } else {
+                                 cb();
+                             }
+                         });
 
-                    },
-                    female: function (cb) {
+                     },
+                     female: function (cb) {
 
-                        async.eachSeries(singleGroup.female, (femaleData, callback) => {
-                            if (femaleData.itemId) {
-                                const newValues = { $set: { 'item.$.itemName': femaleData.itemName, 'item.$.itemPrice': femaleData.itemPrice, 'item.$.itemGender': 'female' } }
-                                GroupModel.updateOne({ _id: singleGroup.groupId, 'item._id': ObjectId(femaleData.itemId) }, newValues)
-                                    .exec((error, response) => {
-                                        if (error) {
-                                            console.log('Internal Server Error');
-                                        } else {
-                                            callback();
-                                        }
-                                    });
-                            } else {
-                                const femaleItem = { itemName: femaleData.itemName, itemPrice: femaleData.itemPrice, itemGender: 'female', }
-                                GroupModel.updateOne({ _id: singleGroup.groupId }, { $push: { item: femaleItem } }, { new: true, upsert: true }).exec((error, response) => {
-                                    if (error) {
-                                        console.log('Internal Server Error');
-                                    } else {
-                                        callback();
-                                    }
-                                });
-                            }
-                        }, (callbackError, callbackResponse) => {
-                            if (callbackError) {
-                                console.log('Internal Server Error');
-                            } else {
-                                cb();
-                            }
-                        });
+                         async.eachSeries(singleGroup.female, (femaleData, callback) => {
+                             if (femaleData.itemId) {
+                                 const newValues = { $set: { 'item.$.itemName': femaleData.itemName, 'item.$.itemPrice': femaleData.itemPrice, 'item.$.itemGender': 'female' } }
+                                 GroupModel.updateOne({ _id: singleGroup.groupId, 'item._id': ObjectId(femaleData.itemId) }, newValues)
+                                 .exec((error, response) => {
+                                     if (error) {
+                                         console.log('Internal Server Error');
+                                     } else {
+                                         callback();
+                                     }
+                                 });
+                             } else {
+                                 const femaleItem = { itemName: femaleData.itemName, itemPrice: femaleData.itemPrice, itemGender: 'female', }
+                                 GroupModel.updateOne({ _id: singleGroup.groupId }, { $push: { item: femaleItem } }, { new: true, upsert: true }).exec((error, response) => {
+                                     if (error) {
+                                         console.log('Internal Server Error');
+                                     } else {
+                                         callback();
+                                     }
+                                 });
+                             }
+                         }, (callbackError, callbackResponse) => {
+                             if (callbackError) {
+                                 console.log('Internal Server Error');
+                             } else {
+                                 cb();
+                             }
+                         });
 
-                    }
-                }, function (callbackError, callbackResponse) {
-                    if (callbackError) {
-                        console.log('Final cb Error');
-                    } else {
-                        parentcb();
-                    }
-                });
-            }
-            else {
+                     }
+                 }, function (callbackError, callbackResponse) {
+                     if (callbackError) {
+                         console.log('Final cb Error');
+                     } else {
+                         parentcb();
+                     }
+                 });
+}
+else {
 
-                const newGroup = {
-                    eventId: groupData.eventId,
-                    activityId: singleGroup.activityId,
-                    groupName: singleGroup.groupName,
-                    item: [],
-                }
+    const newGroup = {
+        eventId: groupData.eventId,
+        activityId: singleGroup.activityId,
+        groupName: singleGroup.groupName,
+        item: [],
+    }
 
-                _.forEach(singleGroup.male, (maleArray) => {
-                    maleArray.itemGender = 'male';
-                    newGroup.item.push(maleArray);
-                })
+    _.forEach(singleGroup.male, (maleArray) => {
+        maleArray.itemGender = 'male';
+        newGroup.item.push(maleArray);
+    })
 
-                _.forEach(singleGroup.female, (femaleArray) => {
-                    femaleArray.itemGender = 'female';
-                    newGroup.item.push(femaleArray);
-                })
+    _.forEach(singleGroup.female, (femaleArray) => {
+        femaleArray.itemGender = 'female';
+        newGroup.item.push(femaleArray);
+    })
 
-                GroupModel.create(newGroup, (groupError, groupRes) => {
-                    if (groupError) {
-                        console.log('Internal Server Error');
-                    } else {
-                        parentcb();
-                    }
-                });
-            }
-        }, (callbackError, callbackResponse) => {
-            if (callbackError) {
-                console.log('callbackError: ', callbackError);
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                resolve({ status: 200, message: 'New Groups Created Successfully.' });
-            }
-        });
+    GroupModel.create(newGroup, (groupError, groupRes) => {
+        if (groupError) {
+            console.log('Internal Server Error');
+        } else {
+            parentcb();
+        }
     });
+}
+}, (callbackError, callbackResponse) => {
+    if (callbackError) {
+        console.log('callbackError: ', callbackError);
+        reject({ status: 500, message: 'Internal Server Error' });
+    } else {
+        resolve({ status: 200, message: 'New Groups Created Successfully.' });
+    }
+});
+});
 }
 
 /**
@@ -349,10 +349,10 @@ module.exports.updateGroupInsideActivity = (groupData) => {
  * @param {eventId} - EventId for Delete Event
  * @returns {Promise} - Event Detail or reason why failed
  */
-const eventDetail = (eventId, userId) => {
-    console.log("Event Id:", eventId);
-    return new Promise((resolve, reject) => {
-        EventModel.aggregate([
+ const eventDetail = (eventId, userId) => {
+     console.log("Event Id:", eventId);
+     return new Promise((resolve, reject) => {
+         EventModel.aggregate([
             //Match Of EventId In Event Model
             {
                 $match: { '_id': ObjectId(eventId) }
@@ -387,16 +387,16 @@ const eventDetail = (eventId, userId) => {
                     from: 'group',
                     let: { activityId: '$activities._id' },
                     pipeline: [
-                        {
-                            $match: {
-                                $expr: {
-                                    $and: [
-                                        { $eq: ['$$activityId', '$activityId'] },
-                                        { $eq: ['$isDeleted', false] }
-                                    ]
-                                }
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                { $eq: ['$$activityId', '$activityId'] },
+                                { $eq: ['$isDeleted', false] }
+                                ]
                             }
                         }
+                    }
                     ],
                     as: 'activities.group'
                 }
@@ -446,24 +446,24 @@ const eventDetail = (eventId, userId) => {
                     },
                 }
             },
-        ]).exec(function (eventDetailError, eventDetail) {
-            if (eventDetailError) {
-                reject({ status: 500, message: 'Internal Server Error', data: eventDetailError });
-            } else {
-                fnCheckForCelebrant(eventId, userId).then((response) => {
-                    eventDetail[0].isCelebrant = response;
-                    fnCheckForGuestJoined(eventId, userId).then((response) => {
-                        eventDetail[0].isJoined = response;
-                        resolve({ status: 200, message: 'Event Detail fetch Successfully!', data: eventDetail[0] });
+            ]).exec(function (eventDetailError, eventDetail) {
+                if (eventDetailError) {
+                    reject({ status: 500, message: 'Internal Server Error', data: eventDetailError });
+                } else {
+                    fnCheckForCelebrant(eventId, userId).then((response) => {
+                        eventDetail[0].isCelebrant = response;
+                        fnCheckForGuestJoined(eventId, userId).then((response) => {
+                            eventDetail[0].isJoined = response;
+                            resolve({ status: 200, message: 'Event Detail fetch Successfully!', data: eventDetail[0] });
+                        }).catch((error) => {
+                            reject({ status: 500, message: 'Internal Server Error', data: eventDetailError });
+                        });
                     }).catch((error) => {
-                        reject({ status: 500, message: 'Internal Server Error', data: eventDetailError });
+                        reject({ status: 500, message: 'Internal Server Error' });
                     });
-                }).catch((error) => {
-                    reject({ status: 500, message: 'Internal Server Error' });
-                });
-            }
+                }
+            });
         });
-    });
 }
 
 const onlyEventDetail = (eventId) => {
@@ -492,14 +492,14 @@ const onlyEventDetail = (eventId) => {
                     paymentDeadlineDate: '$paymentDeadlineDate',
                 }
             },
-        ]).exec(function (eventDetailError, eventDetail) {
-            if (eventDetailError) {
-                reject({ status: 500, message: 'Internal Server Error', data: eventDetailError });
-            } else {
-                resolve(eventDetail[0]);
-            }
+            ]).exec(function (eventDetailError, eventDetail) {
+                if (eventDetailError) {
+                    reject({ status: 500, message: 'Internal Server Error', data: eventDetailError });
+                } else {
+                    resolve(eventDetail[0]);
+                }
+            });
         });
-    });
 }
 
 /**
@@ -507,79 +507,79 @@ const onlyEventDetail = (eventId) => {
  * @param {string} eventId 
  * @param {string} userId 
  */
-function fnCheckForCelebrant(eventId, userId) {
-    return new Promise((resolve, reject) => {
-        EventModel.findOne({ _id: eventId, userId: userId }, (eventError, event) => {
-            if (eventError) {
-                console.log('Event Error:', eventError);
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else if (!event) {
-                resolve(false);
-            } else {
-                resolve(true);
-            }
-        });
-    });
-}
+ function fnCheckForCelebrant(eventId, userId) {
+     return new Promise((resolve, reject) => {
+         EventModel.findOne({ _id: eventId, userId: userId }, (eventError, event) => {
+             if (eventError) {
+                 console.log('Event Error:', eventError);
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else if (!event) {
+                 resolve(false);
+             } else {
+                 resolve(true);
+             }
+         });
+     });
+ }
 
 /**
  * Function For Checking User Is Joined Particular event
  * @param {string} eventId 
  * @param {string} userId 
  */
-function fnCheckForGuestJoined(eventId, userId) {
-    return new Promise((resolve, reject) => {
-        EventModel.findOne({ _id: eventId, guest: userId }, (eventError, event) => {
-            if (eventError) {
-                console.log('Event Error:', eventError);
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else if (!event) {
-                resolve(false);
-            } else {
-                resolve(true);
-            }
-        });
-    });
-}
+ function fnCheckForGuestJoined(eventId, userId) {
+     return new Promise((resolve, reject) => {
+         EventModel.findOne({ _id: eventId, guest: userId }, (eventError, event) => {
+             if (eventError) {
+                 console.log('Event Error:', eventError);
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else if (!event) {
+                 resolve(false);
+             } else {
+                 resolve(true);
+             }
+         });
+     });
+ }
 
 /**
  * Function For Remove Group From Activity Using GroupId
  * @param {GroupId} - GroupId for Delete Particular Group
  * @returns {Promise} - Deleted Group or reason why failed
  */
-module.exports.deleteGroupFromActivity = (GroupId) => {
-    console.log('GroupId:', GroupId);
-    return new Promise((resolve, reject) => {
-        GroupModel.findByIdAndRemove({ _id: GroupId }, {}, (groupError, group) => {
-            if (groupError) {
-                console.log("Delete Group Error:", groupError);
-                reject({ status: 500, message: 'Internal Server Error' });
-            }
-            else {
-                resolve({ status: 200, message: 'Group Deleted Successfully.' });
-            }
-        });
-    });
-}
+ module.exports.deleteGroupFromActivity = (GroupId) => {
+     console.log('GroupId:', GroupId);
+     return new Promise((resolve, reject) => {
+         GroupModel.findByIdAndRemove({ _id: GroupId }, {}, (groupError, group) => {
+             if (groupError) {
+                 console.log("Delete Group Error:", groupError);
+                 reject({ status: 500, message: 'Internal Server Error' });
+             }
+             else {
+                 resolve({ status: 200, message: 'Group Deleted Successfully.' });
+             }
+         });
+     });
+ }
 
 /**
  * Remove Item From Particular Group
  * @param {String} GroupId 
  * @param {String} ItemId 
  */
-const deleteItemFromGroup = (GroupId, ItemId) => {
-    console.log('groupId and ItemId', GroupId, ItemId);
-    return new Promise((resolve, reject) => {
-        GroupModel.update({ _id: GroupId }, { $pull: { item: { _id: ItemId } } }, (groupErr, group) => {
-            if (groupErr) {
-                console.log("Delete Item From Group:", groupErr);
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                resolve({ status: 200, message: 'Item Deleted Successfully.', data: group });
-            }
-        });
-    });
-}
+ const deleteItemFromGroup = (GroupId, ItemId) => {
+     console.log('groupId and ItemId', GroupId, ItemId);
+     return new Promise((resolve, reject) => {
+         GroupModel.update({ _id: GroupId }, { $pull: { item: { _id: ItemId } } }, (groupErr, group) => {
+             if (groupErr) {
+                 console.log("Delete Item From Group:", groupErr);
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else {
+                 resolve({ status: 200, message: 'Item Deleted Successfully.', data: group });
+             }
+         });
+     });
+ }
 
 
 
@@ -588,33 +588,33 @@ const deleteItemFromGroup = (GroupId, ItemId) => {
  * @param {activity} - EventId for Delete Event
  * @returns {Promise} - Deleted Event or reason why failed
  */
-module.exports.deleteActivityFromEvent = (eventId, activityId) => {
-    console.log('EventID and', eventId, activityId);
-    return new Promise((resolve, reject) => {
-        EventModel.update({ _id: eventId }, { $pull: { activities: { _id: activityId } } }, (activityError, activity) => {
-            if (activityError) {
-                console.log("Delete Activity Error:", activityError);
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                onlyActivityList(eventId).then((response) => {
-                    console.log('Response From:', response);
-                    resolve({ status: 200, message: 'Activity Deleted Successfully.', data: response.data });
-                }).catch((error) => {
-                    reject({ status: 500, message: 'Internal Server Error' });
-                })
-            }
-        });
-    });
-}
+ module.exports.deleteActivityFromEvent = (eventId, activityId) => {
+     console.log('EventID and', eventId, activityId);
+     return new Promise((resolve, reject) => {
+         EventModel.update({ _id: eventId }, { $pull: { activities: { _id: activityId } } }, (activityError, activity) => {
+             if (activityError) {
+                 console.log("Delete Activity Error:", activityError);
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else {
+                 onlyActivityList(eventId).then((response) => {
+                     console.log('Response From:', response);
+                     resolve({ status: 200, message: 'Activity Deleted Successfully.', data: response.data });
+                 }).catch((error) => {
+                     reject({ status: 500, message: 'Internal Server Error' });
+                 })
+             }
+         });
+     });
+ }
 
 /**
  * Function For Only Activities Array Using EventId
  * @param {String} eventId 
  */
-const onlyActivityList = (eventId) => {
-    console.log("Event Id:", eventId);
-    return new Promise((resolve, reject) => {
-        EventModel.aggregate([
+ const onlyActivityList = (eventId) => {
+     console.log("Event Id:", eventId);
+     return new Promise((resolve, reject) => {
+         EventModel.aggregate([
             // Match Of EventId In Event Model
             {
                 $match: { '_id': ObjectId(eventId) }
@@ -625,16 +625,16 @@ const onlyActivityList = (eventId) => {
                     activities: '$activities'
                 }
             },
-        ]).exec(function (activitiesErr, activitiesList) {
-            if (activitiesErr) {
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                console.log('activitiesList:', activitiesList);
-                resolve({ status: 200, message: 'Activity List Fetch Successfully.', data: activitiesList[0] });
-            }
+            ]).exec(function (activitiesErr, activitiesList) {
+                if (activitiesErr) {
+                    reject({ status: 500, message: 'Internal Server Error' });
+                } else {
+                    console.log('activitiesList:', activitiesList);
+                    resolve({ status: 200, message: 'Activity List Fetch Successfully.', data: activitiesList[0] });
+                }
+            });
         });
-    });
-}
+ }
 
 
 /**
@@ -642,28 +642,28 @@ const onlyActivityList = (eventId) => {
  * @param {eventId} - EventId for Delete Event
  * @returns {Promise} - Deleted Event or reason why failed
  */
-module.exports.deleteEvent = (eventId) => {
-    return new Promise((resolve, reject) => {
-        console.log('EventId In Delete Event:', eventId);
-        EventModel.findOneAndRemove({ _id: eventId }, { $set: { isDeleted: true } }, (activityError, event) => {
-            if (activityError) {
-                console.log("Delete Activity Error:", activityError);
-                reject({ status: 500, message: 'Internal Server Error' });
-            }
-            else {
-                removeAllGroupUsingEventId(eventId).then((response) => {
-                    removeAllTransactionUsingEventId(eventId).then((response) => {
-                        resolve({ status: 200, message: 'Event Deleted Successfully.' });
-                    }).catch((err) => {
-                        reject({ status: 500, message: 'Internal Server Error' });
-                    })
-                }).catch((err) => {
-                    reject({ status: 500, message: 'Internal Server Error' });
-                })
-            }
-        });
-    });
-}
+ module.exports.deleteEvent = (eventId) => {
+     return new Promise((resolve, reject) => {
+         console.log('EventId In Delete Event:', eventId);
+         EventModel.findOneAndRemove({ _id: eventId }, { $set: { isDeleted: true } }, (activityError, event) => {
+             if (activityError) {
+                 console.log("Delete Activity Error:", activityError);
+                 reject({ status: 500, message: 'Internal Server Error' });
+             }
+             else {
+                 removeAllGroupUsingEventId(eventId).then((response) => {
+                     removeAllTransactionUsingEventId(eventId).then((response) => {
+                         resolve({ status: 200, message: 'Event Deleted Successfully.' });
+                     }).catch((err) => {
+                         reject({ status: 500, message: 'Internal Server Error' });
+                     })
+                 }).catch((err) => {
+                     reject({ status: 500, message: 'Internal Server Error' });
+                 })
+             }
+         });
+     });
+ }
 
 // Remove all Group Using EventId
 
@@ -701,107 +701,107 @@ const removeAllTransactionUsingEventId = (eventId) => {
  * @param {object} body - message data to add new message
  * @returns {Promise} - New Message or reason why failed
  */
-module.exports.thanksMessageDetail = (messageData) => {
-    const newmessage = { thanksMessage: { attachment: messageData.attachment, message: messageData.message } }
-    return new Promise((resolve, reject) => {
-        EventModel.findByIdAndUpdate({ _id: messageData.eventId }, newmessage, (messageError, newMessage) => {
-            if (messageError) {
-                console.log('Message Creation Error: ', messageError);
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                resolve({ status: 200, message: 'New Thanks Message Created Successfully.' });
-            }
-        });
-    });
-}
+ module.exports.thanksMessageDetail = (messageData) => {
+     const newmessage = { thanksMessage: { attachment: messageData.attachment, message: messageData.message } }
+     return new Promise((resolve, reject) => {
+         EventModel.findByIdAndUpdate({ _id: messageData.eventId }, newmessage, (messageError, newMessage) => {
+             if (messageError) {
+                 console.log('Message Creation Error: ', messageError);
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else {
+                 resolve({ status: 200, message: 'New Thanks Message Created Successfully.' });
+             }
+         });
+     });
+ }
 
 /**
  *event list of all public event for homepage display
  * @returns {Promise} - All Public Event List or reason why failed
  */
-module.exports.eventList = () => {
-    return new Promise((resolve, reject) => {
-        EventModel.aggregate([
-            {
-                $match: {
-                    $and: [
-                        { 'isDeleted': false },
-                    ]
-                }
-            },
-            {
-                $project: {
-                    hashTag: '$hashTag',
-                    eventType: '$eventType',
-                    eventTitle: '$eventTitle',
-                    isPublic: '$isPublic',
-                    hashTag: '$hashTag',
-                    profilePhoto: '$profilePhoto',
-                    paymentDeadlineDate: '$paymentDeadlineDate',
-                    eventTheme: '$eventTheme',
-                    defaultImage: '$defaultImage',
-                    isPaymentAccept:
-                    {
-                        $cond: { if: { $lt: ["$paymentDeadlineDate", new Date()] }, then: false, else: true }
-                    }
-                }
-            },
-        ]).exec(function (eventListError, eventList) {
-            if (eventListError) {
-                reject(eventListError);
-            } else {
-                resolve({ status: 200, message: 'Event List!', data: eventList });
-            }
-        });
-    });
-}
+ module.exports.eventList = () => {
+     return new Promise((resolve, reject) => {
+         EventModel.aggregate([
+         {
+             $match: {
+                 $and: [
+                 { 'isDeleted': false },
+                 ]
+             }
+         },
+         {
+             $project: {
+                 hashTag: '$hashTag',
+                 eventType: '$eventType',
+                 eventTitle: '$eventTitle',
+                 isPublic: '$isPublic',
+                 hashTag: '$hashTag',
+                 profilePhoto: '$profilePhoto',
+                 paymentDeadlineDate: '$paymentDeadlineDate',
+                 eventTheme: '$eventTheme',
+                 defaultImage: '$defaultImage',
+                 isPaymentAccept:
+                 {
+                     $cond: { if: { $lt: ["$paymentDeadlineDate", new Date()] }, then: false, else: true }
+                 }
+             }
+         },
+         ]).exec(function (eventListError, eventList) {
+             if (eventListError) {
+                 reject(eventListError);
+             } else {
+                 resolve({ status: 200, message: 'Event List!', data: eventList });
+             }
+         });
+     });
+ }
 
 /**
  * Update a Activity Inside Specific Event
  * @param {object} body - Activity data to update
  * @returns {Promise} - updated Activity or reason why failed
  */
-module.exports.updateActivityInsideEvent = (activityData) => {
-    return new Promise((resolve, reject) => {
-        const eventId = activityData[0].eventId;
-        async.eachSeries(activityData, (singleActivity, callback) => {
-            if (singleActivity.activityId) {
-                EventModel.updateOne({ _id: singleActivity.eventId, 'activities._id': ObjectId(singleActivity.activityId) }, { $set: { 'activities.$.activityStartDate': singleActivity.activityStartDate, 'activities.$.activityEndDate': singleActivity.activityEndDate, 'activities.$.activityName': singleActivity.activityName, 'activities.$.activityDate': singleActivity.activityDate } })
-                    .exec((error, response) => {
-                        if (error) {
-                            reject({ status: 500, message: 'Internal Server Error' });
-                        } else {
-                            callback();
-                        }
-                    });
-            } else {
-                const activityData = {
-                    activityName: singleActivity.activityName,
-                    eventId: singleActivity.eventId,
-                    activityStartDate: singleActivity.activityStartDate,
-                    activityEndDate: singleActivity.activityEndDate
-                }
-                EventModel.findByIdAndUpdate({ _id: singleActivity.eventId }, { $push: { activities: activityData } }, { new: true }, (activityError, newActivity) => {
-                    if (activityError) {
-                        reject({ status: 500, message: 'Internal Server Error' });
-                    } else {
-                        callback();
-                    }
-                });
-            }
-        }, (callbackError, callbackResponse) => {
-            if (callbackError) {
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                eventDetail(eventId).then((response) => {
-                    resolve({ status: 200, message: 'Activities Updated Successfully.', data: response.data });
-                }).catch((err) => {
-                    console.log('Error', err);
-                })
-            }
-        });
-    });
-}
+ module.exports.updateActivityInsideEvent = (activityData) => {
+     return new Promise((resolve, reject) => {
+         const eventId = activityData[0].eventId;
+         async.eachSeries(activityData, (singleActivity, callback) => {
+             if (singleActivity.activityId) {
+                 EventModel.updateOne({ _id: singleActivity.eventId, 'activities._id': ObjectId(singleActivity.activityId) }, { $set: { 'activities.$.activityStartDate': singleActivity.activityStartDate, 'activities.$.activityEndDate': singleActivity.activityEndDate, 'activities.$.activityName': singleActivity.activityName, 'activities.$.activityDate': singleActivity.activityDate } })
+                 .exec((error, response) => {
+                     if (error) {
+                         reject({ status: 500, message: 'Internal Server Error' });
+                     } else {
+                         callback();
+                     }
+                 });
+             } else {
+                 const activityData = {
+                     activityName: singleActivity.activityName,
+                     eventId: singleActivity.eventId,
+                     activityStartDate: singleActivity.activityStartDate,
+                     activityEndDate: singleActivity.activityEndDate
+                 }
+                 EventModel.findByIdAndUpdate({ _id: singleActivity.eventId }, { $push: { activities: activityData } }, { new: true }, (activityError, newActivity) => {
+                     if (activityError) {
+                         reject({ status: 500, message: 'Internal Server Error' });
+                     } else {
+                         callback();
+                     }
+                 });
+             }
+         }, (callbackError, callbackResponse) => {
+             if (callbackError) {
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else {
+                 eventDetail(eventId).then((response) => {
+                     resolve({ status: 200, message: 'Activities Updated Successfully.', data: response.data });
+                 }).catch((err) => {
+                     console.log('Error', err);
+                 })
+             }
+         });
+     });
+ }
 
 /**
  * Event List By Particular User
@@ -809,25 +809,25 @@ module.exports.updateActivityInsideEvent = (activityData) => {
  * @returns {Promise} - My Event List or reason why failed
  */
 
-module.exports.MyEventList = (userId) => {
-    return new Promise((resolve, reject) => {
-        EventModel.aggregate([
+ module.exports.MyEventList = (userId) => {
+     return new Promise((resolve, reject) => {
+         EventModel.aggregate([
             //Match Event Using UserId
             {
                 $match: {
                     $or: [
-                        {
-                            $and: [
-                                { 'userId': ObjectId(userId) },
-                                { 'isDeleted': false },
-                            ]
-                        },
-                        {
-                            $and: [
-                                { 'guest': ObjectId(userId) },
-                                { 'isDeleted': false },
-                            ]
-                        },
+                    {
+                        $and: [
+                        { 'userId': ObjectId(userId) },
+                        { 'isDeleted': false },
+                        ]
+                    },
+                    {
+                        $and: [
+                        { 'guest': ObjectId(userId) },
+                        { 'isDeleted': false },
+                        ]
+                    },
                     ]
                 }
             },
@@ -845,87 +845,87 @@ module.exports.MyEventList = (userId) => {
                     defaultImage: '$defaultImage'
                 }
             },
-        ]).exec(function (eventListError, eventList) {
-            if (eventListError) {
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                resolve({ status: 200, message: 'MyEvent List!', data: eventList });
-            }
-        });
-    });
-}
-
-const MyEventListTotalTransaction = (userId) => {
-    return new Promise((resolve, reject) => {
-        EventModel.aggregate([
-            {
-                $match: { 'userId': ObjectId(userId) },
-            },
-            {
-                $project: {
-                    _id: 0,
-                    eventId: '$_id',
-                    userId: '$userId'
-                }
-            },
-            {
-                $group: {
-                    _id: '$userId',
-                    eventArray: {
-                        $push: '$eventId'
-                    }
-                }
-            }
-        ]).exec(function (collectionErr, collectionRes) {
-            if (collectionErr) {
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                var grandCollection = 0;
-                if (collectionRes == '') {
-                    resolve({ status: 200, message: 'My Collection!', data: grandCollection });
+            ]).exec(function (eventListError, eventList) {
+                if (eventListError) {
+                    reject({ status: 500, message: 'Internal Server Error' });
                 } else {
-                    _.forEach(collectionRes[0].eventArray, (singleEvent) => {
-                        TransactionUsingEventId(singleEvent).then((response) => {
-                            if (response == '') {
-                                grandCollection = 0;
-                            } else {
-                                grandCollection = grandCollection + response.TransactionTotal;
-                            }
-                            resolve({ status: 200, message: 'My Collection!', data: grandCollection });
-                        }).catch((err) => {
-                            reject({ status: 500, message: 'Internal Server Error' });
-                        })
-                    });
+                    resolve({ status: 200, message: 'MyEvent List!', data: eventList });
                 }
-            }
+            });
         });
-    });
-}
+ }
 
-const TransactionUsingEventId = (eventId) => {
-    return new Promise((resolve, reject) => {
-        TransactionModel.aggregate([
-            {
-                $match: { 'eventId': ObjectId(eventId) },
-            },
-            {
-                $group: {
-                    _id: '$eventId',
-                    TransactionTotal: {
-                        $sum: '$finalTotal'
-                    }
-                }
-            }
-        ]).exec(function (collectionErr, collectionRes) {
-            if (collectionErr) {
-                reject(collectionErr);
-            } else {
+ const MyEventListTotalTransaction = (userId) => {
+     return new Promise((resolve, reject) => {
+         EventModel.aggregate([
+         {
+             $match: { 'userId': ObjectId(userId) },
+         },
+         {
+             $project: {
+                 _id: 0,
+                 eventId: '$_id',
+                 userId: '$userId'
+             }
+         },
+         {
+             $group: {
+                 _id: '$userId',
+                 eventArray: {
+                     $push: '$eventId'
+                 }
+             }
+         }
+         ]).exec(function (collectionErr, collectionRes) {
+             if (collectionErr) {
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else {
+                 var grandCollection = 0;
+                 if (collectionRes == '') {
+                     resolve({ status: 200, message: 'My Collection!', data: grandCollection });
+                 } else {
+                     _.forEach(collectionRes[0].eventArray, (singleEvent) => {
+                         TransactionUsingEventId(singleEvent).then((response) => {
+                             if (response == '') {
+                                 grandCollection = 0;
+                             } else {
+                                 grandCollection = grandCollection + response.TransactionTotal;
+                             }
+                             resolve({ status: 200, message: 'My Collection!', data: grandCollection });
+                         }).catch((err) => {
+                             reject({ status: 500, message: 'Internal Server Error' });
+                         })
+                     });
+                 }
+             }
+         });
+     });
+ }
 
-                resolve(collectionRes[0]);
-            }
-        });
-    });
-}
+ const TransactionUsingEventId = (eventId) => {
+     return new Promise((resolve, reject) => {
+         TransactionModel.aggregate([
+         {
+             $match: { 'eventId': ObjectId(eventId) },
+         },
+         {
+             $group: {
+                 _id: '$eventId',
+                 TransactionTotal: {
+                     $sum: '$finalTotal'
+                 }
+             }
+         }
+         ]).exec(function (collectionErr, collectionRes) {
+             if (collectionErr) {
+                 reject(collectionErr);
+             } else {
+
+                 resolve(collectionRes[0]);
+             }
+         });
+     });
+ }
 
 
 
@@ -962,38 +962,38 @@ module.exports.addItemToCart = (itemData) => {
  * @param {object} itemData 
  * @returns {Promise} return Boolen or reason why failed
  */
-function fncheckForItemInCart(itemData) {
-    return new Promise((resolve, reject) => {
-        CartModel.findOneAndUpdate({ userId: itemData.userId, itemId: itemData.itemId }, { $inc: { quantity: 1 } }, (error, Item) => {
-            if (!Item) {
-                resolve(true)
-            } else if (error) {
-                console.log("Internal Server Error", error);
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                resolve(false);
-            }
-        });
-    });
-}
+ function fncheckForItemInCart(itemData) {
+     return new Promise((resolve, reject) => {
+         CartModel.findOneAndUpdate({ userId: itemData.userId, itemId: itemData.itemId }, { $inc: { quantity: 1 } }, (error, Item) => {
+             if (!Item) {
+                 resolve(true)
+             } else if (error) {
+                 console.log("Internal Server Error", error);
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else {
+                 resolve(false);
+             }
+         });
+     });
+ }
 
 /**
  * Function For Updated Item Of Cart
  * @param {itemData} - itemData Object As a Input 
  * @returns {Promise} - Updated Cart Item
  */
-module.exports.updateItemToCart = (itemData) => {
-    return new Promise((resolve, reject) => {
-        CartModel.findByIdAndUpdate({ _id: itemData._id }, itemData, (itemError, updatedItem) => {
-            if (itemError) {
-                console.log('Itemerror: ', itemError);
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                resolve({ status: 200, message: 'ItemCart updated Successfully.', data: updatedItem });
-            }
-        });
-    });
-}
+ module.exports.updateItemToCart = (itemData) => {
+     return new Promise((resolve, reject) => {
+         CartModel.findByIdAndUpdate({ _id: itemData._id }, itemData, (itemError, updatedItem) => {
+             if (itemError) {
+                 console.log('Itemerror: ', itemError);
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else {
+                 resolve({ status: 200, message: 'ItemCart updated Successfully.', data: updatedItem });
+             }
+         });
+     });
+ }
 
 /**
  * event list of all cartItem Using UserId and EventId 
@@ -1001,23 +1001,23 @@ module.exports.updateItemToCart = (itemData) => {
  * @param {String} userId userId Of User
  * @returns {Promise}- All Cart Item List or reason why failed
  */
-const cartItemList = (eventId, userId) => {
-    console.log("EventId and UserId", eventId, userId);
-    return new Promise((resolve, reject) => {
-        CartModel.aggregate([
-            {
-                $match: {
-                    $and: [
-                        { 'eventId': ObjectId(eventId) },
-                        { 'userId': ObjectId(userId) },
-                    ]
-                }
-            },
-            {
-                $lookup: {
-                    from: 'group',
-                    let: { 'itemId': '$itemId' },
-                    pipeline: [{
+ const cartItemList = (eventId, userId) => {
+     console.log("EventId and UserId", eventId, userId);
+     return new Promise((resolve, reject) => {
+         CartModel.aggregate([
+         {
+             $match: {
+                 $and: [
+                 { 'eventId': ObjectId(eventId) },
+                 { 'userId': ObjectId(userId) },
+                 ]
+             }
+         },
+         {
+             $lookup: {
+                 from: 'group',
+                 let: { 'itemId': '$itemId' },
+                 pipeline: [{
                         $unwind: '$item' // $expr cannot digest arrays so we need to unwind
                     }, {
                         $match: { $expr: { $eq: ['$item._id', '$$itemId'] } }
@@ -1061,22 +1061,22 @@ const cartItemList = (eventId, userId) => {
                     itemId: '$GroupDetail.item._id'
                 }
             }
-        ]).exec(function (cartListError, cartList) {
-            if (cartListError) {
-                reject({ status: 500, message: 'Internal Server Error', data: cartListError });
-            } else {
-                eventDetail(eventId).then((response) => {
-                    const cartDetail = {};
-                    cartDetail.eventDetail = response.data;
-                    cartDetail.cartList = cartList;
-                    resolve({ status: 200, message: 'Cart Item List!', data: cartDetail });
-                }).catch((error) => {
+            ]).exec(function (cartListError, cartList) {
+                if (cartListError) {
                     reject({ status: 500, message: 'Internal Server Error', data: cartListError });
-                })
-            }
+                } else {
+                    eventDetail(eventId).then((response) => {
+                        const cartDetail = {};
+                        cartDetail.eventDetail = response.data;
+                        cartDetail.cartList = cartList;
+                        resolve({ status: 200, message: 'Cart Item List!', data: cartDetail });
+                    }).catch((error) => {
+                        reject({ status: 500, message: 'Internal Server Error', data: cartListError });
+                    })
+                }
+            });
         });
-    });
-}
+ }
 
 /**
 * Remove Item From Cart Function
@@ -1130,130 +1130,130 @@ module.exports.eventJoining = (userId, eventId) => {
  * @param {callback} next return true or false 
  */
 
-function fnIsGuestJoined(eventId, userId, next) {
-    console.log('EventId,userId', eventId, userId);
-    EventModel.findOne({ _id: eventId, guest: userId }, (eventError, event) => {
-        if (eventError) {
-            console.log("Error:", eventError);
-            next(false)
-        } else if (event) {
-            console.log("User Already Join");
-            next(false)
-        } else {
-            console.log("User Not Join Event");
-            next(true)
-        }
-    });
-}
+ function fnIsGuestJoined(eventId, userId, next) {
+     console.log('EventId,userId', eventId, userId);
+     EventModel.findOne({ _id: eventId, guest: userId }, (eventError, event) => {
+         if (eventError) {
+             console.log("Error:", eventError);
+             next(false)
+         } else if (event) {
+             console.log("User Already Join");
+             next(false)
+         } else {
+             console.log("User Not Join Event");
+             next(true)
+         }
+     });
+ }
 
 /**
  * Update Cart Item With Updated New Quntity
  * @param {object} body - Array Of Cart Item To Update
  * @returns {Promise} - Updated Item List or reason why failed
  */
-module.exports.updateItemFromCart = (cartItem) => {
-    return new Promise((resolve, reject) => {
-        async.eachSeries(cartItem, (singleItem, callback) => {
-            const newItem = {
-                quantity: parseInt(singleItem.quantity),
-            }
-            CartModel.findOneAndUpdate({ _id: singleItem._id }, newItem, { upsert: true }, (activityError, newActivity) => {
-                if (activityError) {
-                    console.log('Cart Update Error: ', activityError);
-                    reject({ status: 500, message: 'Internal Server Error' });
-                } else {
-                    callback();
-                }
-            });
-        }, (callbackError, callbackResponse) => {
-            if (callbackError) {
-                console.log('callbackError: ', callbackError);
-            } else {
-                resolve({ status: 200, message: 'Cart Updated Successfully.' });
-            }
-        });
-    });
-}
+ module.exports.updateItemFromCart = (cartItem) => {
+     return new Promise((resolve, reject) => {
+         async.eachSeries(cartItem, (singleItem, callback) => {
+             const newItem = {
+                 quantity: parseInt(singleItem.quantity),
+             }
+             CartModel.findOneAndUpdate({ _id: singleItem._id }, newItem, { upsert: true }, (activityError, newActivity) => {
+                 if (activityError) {
+                     console.log('Cart Update Error: ', activityError);
+                     reject({ status: 500, message: 'Internal Server Error' });
+                 } else {
+                     callback();
+                 }
+             });
+         }, (callbackError, callbackResponse) => {
+             if (callbackError) {
+                 console.log('callbackError: ', callbackError);
+             } else {
+                 resolve({ status: 200, message: 'Cart Updated Successfully.' });
+             }
+         });
+     });
+ }
 
 /**
  *Cart list of all cartItem Using UserId and EventId with Total 
  * @returns {Promise} - All Cart Item List or reason why failed
  */
-module.exports.cartItemListWithTotal = (eventId, userId) => {
-    console.log("EventId and UserId", eventId, userId);
-    return new Promise((resolve, reject) => {
-        CartModel.aggregate([
-            {
-                $match: {
-                    $and: [
-                        { 'eventId': ObjectId(eventId) },
-                        { 'userId': ObjectId(userId) },
-                    ]
-                }
-            },
-            {
-                $lookup: {
-                    from: 'group',
-                    let: { 'itemId': '$itemId' },
-                    pipeline: [{
-                        $unwind: '$item'
-                    }, {
-                        $match: { $expr: { $eq: ['$item._id', '$$itemId'] } }
-                    },],
-                    as: 'GroupDetail'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$GroupDetail',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $lookup: {
-                    from: 'event',
-                    let: { 'activityId': '$GroupDetail.activityId' },
-                    pipeline: [{
-                        $unwind: '$activities'
-                    }, {
-                        $match: { $expr: { $eq: ['$activities._id', '$$activityId'] } }
-                    },],
-                    as: 'GroupDetail.item.activity'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$GroupDetail.item.activity',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $project: {
-                    quantity: 1,
-                    activityName: '$GroupDetail.item.activity.activities.activityName',
-                    groupName: '$GroupDetail.groupName',
-                    itemName: '$GroupDetail.item.itemName',
-                    itemPrice: '$GroupDetail.item.itemPrice',
-                    itemType: '$GroupDetail.item.itemType',
-                    itemGender: '$GroupDetail.item.itemGender',
-                    itemId: '$GroupDetail.item._id'
-                }
-            }
-        ]).exec(function (eventListError, itemList) {
-            if (eventListError) {
-                console.log("eventListError", eventListError);
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                eventDetail(eventId).then((response) => {
-                    const cartData = { cartItem: itemList, eventDetail: response.data }
-                    resolve({ status: 200, message: 'Event List!', data: cartData });
-                }).catch((err) => {
-                    reject({ status: 500, message: 'Internal Server Error' });
-                })
-            }
-        });
-    });
-}
+ module.exports.cartItemListWithTotal = (eventId, userId) => {
+     console.log("EventId and UserId", eventId, userId);
+     return new Promise((resolve, reject) => {
+         CartModel.aggregate([
+         {
+             $match: {
+                 $and: [
+                 { 'eventId': ObjectId(eventId) },
+                 { 'userId': ObjectId(userId) },
+                 ]
+             }
+         },
+         {
+             $lookup: {
+                 from: 'group',
+                 let: { 'itemId': '$itemId' },
+                 pipeline: [{
+                     $unwind: '$item'
+                 }, {
+                     $match: { $expr: { $eq: ['$item._id', '$$itemId'] } }
+                 },],
+                 as: 'GroupDetail'
+             }
+         },
+         {
+             $unwind: {
+                 path: '$GroupDetail',
+                 preserveNullAndEmptyArrays: true
+             }
+         },
+         {
+             $lookup: {
+                 from: 'event',
+                 let: { 'activityId': '$GroupDetail.activityId' },
+                 pipeline: [{
+                     $unwind: '$activities'
+                 }, {
+                     $match: { $expr: { $eq: ['$activities._id', '$$activityId'] } }
+                 },],
+                 as: 'GroupDetail.item.activity'
+             }
+         },
+         {
+             $unwind: {
+                 path: '$GroupDetail.item.activity',
+                 preserveNullAndEmptyArrays: true
+             }
+         },
+         {
+             $project: {
+                 quantity: 1,
+                 activityName: '$GroupDetail.item.activity.activities.activityName',
+                 groupName: '$GroupDetail.groupName',
+                 itemName: '$GroupDetail.item.itemName',
+                 itemPrice: '$GroupDetail.item.itemPrice',
+                 itemType: '$GroupDetail.item.itemType',
+                 itemGender: '$GroupDetail.item.itemGender',
+                 itemId: '$GroupDetail.item._id'
+             }
+         }
+         ]).exec(function (eventListError, itemList) {
+             if (eventListError) {
+                 console.log("eventListError", eventListError);
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else {
+                 eventDetail(eventId).then((response) => {
+                     const cartData = { cartItem: itemList, eventDetail: response.data }
+                     resolve({ status: 200, message: 'Event List!', data: cartData });
+                 }).catch((err) => {
+                     reject({ status: 500, message: 'Internal Server Error' });
+                 })
+             }
+         });
+     });
+ }
 
 /**
 * Final Order Checkout With Donation and Delivery Address
@@ -1335,38 +1335,38 @@ module.exports.orderCheckout = (userId, cartData) => {
  * @param {String} userId UserId Of User 
  * @returns {Promise} User Detail Of User
  */
-const findEmailUsingUserId = (userId) => {
-    return new Promise((resolve, reject) => {
-        console.log('UserId In Email Function:', userId);
-        UserModel.findById({ _id: userId }, (userErr, userRes) => {
-            if (userErr) {
-                console.log('User Error:', userErr);
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                resolve({ status: 200, message: 'User Detail Fetch Successfully', data: userRes });
-            }
-        });
-    });
-}
+ const findEmailUsingUserId = (userId) => {
+     return new Promise((resolve, reject) => {
+         console.log('UserId In Email Function:', userId);
+         UserModel.findById({ _id: userId }, (userErr, userRes) => {
+             if (userErr) {
+                 console.log('User Error:', userErr);
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else {
+                 resolve({ status: 200, message: 'User Detail Fetch Successfully', data: userRes });
+             }
+         });
+     });
+ }
 
 /**
  * Function To Find Thanks Message Detail Using EventId
  * @param {String} eventId eventId Of Event 
  * @returns {Promise} Event Detail Of Event
  */
-const findMessageUsingEventId = (eventId) => {
-    return new Promise((resolve, reject) => {
-        console.log('eventId In Email Function:', eventId);
-        EventModel.findById({ _id: eventId }, (eventErr, eventRes) => {
-            if (eventErr) {
-                console.log('Event Error:', eventErr);
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                resolve({ status: 200, message: 'Event Detail Fetch Successfully', data: eventRes });
-            }
-        });
-    });
-}
+ const findMessageUsingEventId = (eventId) => {
+     return new Promise((resolve, reject) => {
+         console.log('eventId In Email Function:', eventId);
+         EventModel.findById({ _id: eventId }, (eventErr, eventRes) => {
+             if (eventErr) {
+                 console.log('Event Error:', eventErr);
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else {
+                 resolve({ status: 200, message: 'Event Detail Fetch Successfully', data: eventRes });
+             }
+         });
+     });
+ }
 
 
 /**
@@ -1375,19 +1375,19 @@ const findMessageUsingEventId = (eventId) => {
  * @param {String} eventId EventId Of Event
  * @returns {Promise} return Promise or Reason to failed
  */
-const clearCartAfterCheckout = (userId, eventId) => {
-    return new Promise((resolve, reject) => {
-        CartModel.deleteMany({ eventId: eventId, userId: userId }, (cartErr, cartRes) => {
-            if (cartErr) {
-                console.log('Cart Clear Error:', cartErr);
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                console.log('Cart Clear Response', cartRes);
-                resolve({ status: 200, message: 'Cart Clear Successfully', data: cartRes });
-            }
-        });
-    });
-}
+ const clearCartAfterCheckout = (userId, eventId) => {
+     return new Promise((resolve, reject) => {
+         CartModel.deleteMany({ eventId: eventId, userId: userId }, (cartErr, cartRes) => {
+             if (cartErr) {
+                 console.log('Cart Clear Error:', cartErr);
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else {
+                 console.log('Cart Clear Response', cartRes);
+                 resolve({ status: 200, message: 'Cart Clear Successfully', data: cartRes });
+             }
+         });
+     });
+ }
 
 // Get All The Counts For Admin Dashboard
 
@@ -1415,67 +1415,67 @@ module.exports.getCountForAdminDashboard = function (req, res) {
  * @param {callback} callback
  * @returns {object} return total event count 
  */
-function fnGetTotalEventsCounts(callback) {
-    EventModel.find().countDocuments().exec(function (err, eventCount) {
-        if (err) return callback(err);
-        return callback(eventCount);
-    });
-}
+ function fnGetTotalEventsCounts(callback) {
+     EventModel.find().countDocuments().exec(function (err, eventCount) {
+         if (err) return callback(err);
+         return callback(eventCount);
+     });
+ }
 
 /**
  * Function For Total Events Counts
  * @param {callback} callback
  * @returns {object} return total event count 
  */
-function fnGetTransactionCount(callback) {
-    TransactionModel.find().countDocuments().exec(function (err, eventCount) {
-        if (err) return callback(err);
-        return callback(eventCount);
-    });
-}
+ function fnGetTransactionCount(callback) {
+     TransactionModel.find().countDocuments().exec(function (err, eventCount) {
+         if (err) return callback(err);
+         return callback(eventCount);
+     });
+ }
 
 /**
  * Function For Total User Counts
  * @param {userCount} callback 
  */
-function fnGetTotalUsersCounts(callback) {
-    UserModel.find().countDocuments().exec(function (err, userCount) {
-        if (err) return callback(err);
-        return callback(userCount);
-    });
-}
+ function fnGetTotalUsersCounts(callback) {
+     UserModel.find().countDocuments().exec(function (err, userCount) {
+         if (err) return callback(err);
+         return callback(userCount);
+     });
+ }
 
 /**
  * Function For Total Collected Amount
  * @param {transactionTotal} callback 
  */
-function fnGetTotalCollectionAmount(callback) {
-    TransactionModel.aggregate([
-        {
-            $group: {
-                _id: null,
-                grandTotal: {
-                    $sum: '$finalTotal'
-                }
-            }
-        }
-    ]).exec(function (err, transaction) {
-        if (err) {
-            return callback(err);
-        } else {
-            if (transaction == '') {
-                return callback(0);
-            } else {
-                return callback(transaction[0].grandTotal);
-            }
-        }
-    });
-}
+ function fnGetTotalCollectionAmount(callback) {
+     TransactionModel.aggregate([
+     {
+         $group: {
+             _id: null,
+             grandTotal: {
+                 $sum: '$finalTotal'
+             }
+         }
+     }
+     ]).exec(function (err, transaction) {
+         if (err) {
+             return callback(err);
+         } else {
+             if (transaction == '') {
+                 return callback(0);
+             } else {
+                 return callback(transaction[0].grandTotal);
+             }
+         }
+     });
+ }
 
-const fneventDetailOnly = (eventId) => {
-    console.log("Event Id:", eventId);
-    return new Promise((resolve, reject) => {
-        EventModel.aggregate([
+ const fneventDetailOnly = (eventId) => {
+     console.log("Event Id:", eventId);
+     return new Promise((resolve, reject) => {
+         EventModel.aggregate([
             //Match Of EventId In Event Model
             {
                 $match: { '_id': ObjectId(eventId) }
@@ -1499,26 +1499,26 @@ const fneventDetailOnly = (eventId) => {
                     activities: '$activities'
                 }
             },
-        ]).exec(function (eventDetailError, eventDetail) {
-            if (eventDetailError) {
-                reject(eventDetailError);
-            } else {
-                console.log('Event Detail:', eventDetail);
-                resolve(eventDetail);
-            }
+            ]).exec(function (eventDetailError, eventDetail) {
+                if (eventDetailError) {
+                    reject(eventDetailError);
+                } else {
+                    console.log('Event Detail:', eventDetail);
+                    resolve(eventDetail);
+                }
+            });
         });
-    });
-}
+ }
 
 /**
  * Event Detail With Guest List and Creator Details
  * @param {eventId} - EventId for Delete Event
  * @returns {Promise} - Event Detail or reason why failed
  */
-const eventDetailWithActivity = (eventId) => {
-    console.log("Event Id:", eventId);
-    return new Promise((resolve, reject) => {
-        EventModel.aggregate([
+ const eventDetailWithActivity = (eventId) => {
+     console.log("Event Id:", eventId);
+     return new Promise((resolve, reject) => {
+         EventModel.aggregate([
             //Match Of EventId In Event Model
             {
                 $match: { '_id': ObjectId(eventId) }
@@ -1619,16 +1619,16 @@ const eventDetailWithActivity = (eventId) => {
                     from: 'group',
                     let: { activityId: '$activity.activityId' },
                     pipeline: [
-                        {
-                            $match: {
-                                $expr: {
-                                    $and: [
-                                        { $eq: ['$$activityId', '$activityId'] },
-                                        { $eq: ['$isDeleted', false] }
-                                    ]
-                                }
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                { $eq: ['$$activityId', '$activityId'] },
+                                { $eq: ['$isDeleted', false] }
+                                ]
                             }
                         }
+                    }
                     ],
                     as: 'activity.group'
                 }
@@ -1780,20 +1780,20 @@ const eventDetailWithActivity = (eventId) => {
                     },
                 }
             },
-        ]).exec(function (eventDetailError, eventDetail) {
-            if (eventDetailError) {
-                console.log("Event Detail Error:", eventDetailError);
-                reject(eventDetailError);
-            } else {
-                fnListOfGuestThatMadePayment(eventId).then((response) => {
-                    eventDetail[0].guestListWithPayment = response.data;
-                    resolve({ status: 200, message: 'Event Detail With Guest!', data: eventDetail[0] });
-                }).catch((error) => {
-                    reject({ status: 500, message: 'Internal Server Error' });
-                });
-            }
+            ]).exec(function (eventDetailError, eventDetail) {
+                if (eventDetailError) {
+                    console.log("Event Detail Error:", eventDetailError);
+                    reject(eventDetailError);
+                } else {
+                    fnListOfGuestThatMadePayment(eventId).then((response) => {
+                        eventDetail[0].guestListWithPayment = response.data;
+                        resolve({ status: 200, message: 'Event Detail With Guest!', data: eventDetail[0] });
+                    }).catch((error) => {
+                        reject({ status: 500, message: 'Internal Server Error' });
+                    });
+                }
+            });
         });
-    });
 }
 
 /**
@@ -1801,114 +1801,114 @@ const eventDetailWithActivity = (eventId) => {
  * @returns {Promise} - All Group Wise Item List or reason why failed
  * @param {eventId} - EventId As a Input Parameter
  */
-function fnGroupWiseItemCollection(eventId) {
-    return new Promise((resolve, reject) => {
-        console.log("EventId In fnGroupWiseItemCollection ", eventId);
-        GroupModel.aggregate([
-            {
-                $match: {
-                    $and: [
-                        { 'eventId': ObjectId(eventId) },
-                        { 'isDeleted': false },
-                    ]
-                }
-            },
-            {
-                $project: {
-                    groupId: '$_id',
-                    groupName: '$groupName',
-                    Items: '$item'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$item',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $lookup: {
-                    from: 'cart',
-                    let: { 'itemsId': '$itemId' },
-                    pipeline: [{
-                        $unwind: '$item'
-                    }, {
-                        $match: { $expr: { $eq: ['$item._id', '$$itemsId'] } }
-                    },],
-                    as: 'ItemDetail'
-                }
-            },
-        ]).exec(function (eventListError, itemList) {
-            if (eventListError) {
-                console.log("Error:", eventListError);
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                resolve({ status: 200, message: 'ItemList Successfully', data: itemList });
-            }
-        });
-    });
-}
+ function fnGroupWiseItemCollection(eventId) {
+     return new Promise((resolve, reject) => {
+         console.log("EventId In fnGroupWiseItemCollection ", eventId);
+         GroupModel.aggregate([
+         {
+             $match: {
+                 $and: [
+                 { 'eventId': ObjectId(eventId) },
+                 { 'isDeleted': false },
+                 ]
+             }
+         },
+         {
+             $project: {
+                 groupId: '$_id',
+                 groupName: '$groupName',
+                 Items: '$item'
+             }
+         },
+         {
+             $unwind: {
+                 path: '$item',
+                 preserveNullAndEmptyArrays: true
+             }
+         },
+         {
+             $lookup: {
+                 from: 'cart',
+                 let: { 'itemsId': '$itemId' },
+                 pipeline: [{
+                     $unwind: '$item'
+                 }, {
+                     $match: { $expr: { $eq: ['$item._id', '$$itemsId'] } }
+                 },],
+                 as: 'ItemDetail'
+             }
+         },
+         ]).exec(function (eventListError, itemList) {
+             if (eventListError) {
+                 console.log("Error:", eventListError);
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else {
+                 resolve({ status: 200, message: 'ItemList Successfully', data: itemList });
+             }
+         });
+     });
+ }
 
 /**
  *Guest list Of With Payment Completed
  * @returns {Promise} - All Guest List or reason why failed
  * @param {eventId} - EventId As a Input For Function
  */
-function fnListOfGuestThatMadePayment(eventId) {
-    return new Promise((resolve, reject) => {
-        console.log("EventId In fnListOfGuestThatMadePayment ", eventId);
-        TransactionModel.aggregate([
-            {
-                $match: {
-                    $and: [
-                        { 'eventId': ObjectId(eventId) },
-                        { 'isDeleted': false },
-                    ]
-                }
-            },
-            {
-                $lookup:
-                {
-                    from: 'users',
-                    localField: 'userId',
-                    foreignField: '_id',
-                    as: 'guestDetail'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$guestDetail',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $project: {
-                    userId: '$guestDetail._id',
-                    firstName: '$guestDetail.firstName',
-                    lastName: '$guestDetail.lastName',
-                    mobile: '$guestDetail.mobile',
-                    email: '$guestDetail.email'
-                }
-            },
-        ]).exec(function (UserListError, UserList) {
-            if (UserListError) {
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                resolve({ status: 200, message: 'User List fetched Successfully', data: UserList });
-            }
-        });
-    });
-}
+ function fnListOfGuestThatMadePayment(eventId) {
+     return new Promise((resolve, reject) => {
+         console.log("EventId In fnListOfGuestThatMadePayment ", eventId);
+         TransactionModel.aggregate([
+         {
+             $match: {
+                 $and: [
+                 { 'eventId': ObjectId(eventId) },
+                 { 'isDeleted': false },
+                 ]
+             }
+         },
+         {
+             $lookup:
+             {
+                 from: 'users',
+                 localField: 'userId',
+                 foreignField: '_id',
+                 as: 'guestDetail'
+             }
+         },
+         {
+             $unwind: {
+                 path: '$guestDetail',
+                 preserveNullAndEmptyArrays: true
+             }
+         },
+         {
+             $project: {
+                 userId: '$guestDetail._id',
+                 firstName: '$guestDetail.firstName',
+                 lastName: '$guestDetail.lastName',
+                 mobile: '$guestDetail.mobile',
+                 email: '$guestDetail.email'
+             }
+         },
+         ]).exec(function (UserListError, UserList) {
+             if (UserListError) {
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else {
+                 resolve({ status: 200, message: 'User List fetched Successfully', data: UserList });
+             }
+         });
+     });
+ }
 
 /**
  *Event Search Using Hashtag For AdminSide
  * @returns {Promise} - All Event List that Contains That Hashtags or reason why failed
  * @param {keyword} - Keyword To search Inside Event Hashtag
  */
-module.exports.eventListUsingHashTag = (keyword) => {
-    return new Promise((resolve, reject) => {
-        const searchText = keyword;
-        console.log('search text:', searchText);
+ module.exports.eventListUsingHashTag = (keyword) => {
+     return new Promise((resolve, reject) => {
+         const searchText = keyword;
+         console.log('search text:', searchText);
 
         // query Contain isDeleted Condition
         const query = {
@@ -1921,25 +1921,25 @@ module.exports.eventListUsingHashTag = (keyword) => {
         }
 
         EventModel.aggregate([
-            {
-                $match: query
-            },
-            {
-                $project: {
-                    hashTag: '$hashTag',
-                    eventType: '$eventType',
-                    eventTitle: '$eventTitle',
-                    isPublic: '$isPublic',
-                    hashTag: '$hashTag',
-                    profilePhoto: '$profilePhoto',
-                    paymentDeadlineDate: '$paymentDeadlineDate',
-                    eventTheme: '$eventTheme',
-                    isPaymentAccept:
-                    {
-                        $cond: { if: { $lt: ["$paymentDeadlineDate", new Date()] }, then: false, else: true }
-                    }
+        {
+            $match: query
+        },
+        {
+            $project: {
+                hashTag: '$hashTag',
+                eventType: '$eventType',
+                eventTitle: '$eventTitle',
+                isPublic: '$isPublic',
+                hashTag: '$hashTag',
+                profilePhoto: '$profilePhoto',
+                paymentDeadlineDate: '$paymentDeadlineDate',
+                eventTheme: '$eventTheme',
+                isPaymentAccept:
+                {
+                    $cond: { if: { $lt: ["$paymentDeadlineDate", new Date()] }, then: false, else: true }
                 }
-            },
+            }
+        },
         ]).exec(function (eventListError, eventList) {
             if (eventListError) {
                 reject(eventListError);
@@ -1948,67 +1948,67 @@ module.exports.eventListUsingHashTag = (keyword) => {
             }
         });
     });
-}
+ }
 
 /**
  * event list of all public event for homepage display
  * @param {String} keyword 
  * @returns {Promise} - All Public Event List or reason why failed
  */
-const eventListForHomepage = (keyword) => {
-    return new Promise((resolve, reject) => {
-        const query = {
-            $and: [{ 'isDeleted': false }, { 'isPublic': true }]
-        }
-        if (keyword) {
-            const searchText = keyword;
-            query['$and'].push({ 'hashTag': { $regex: new RegExp(searchText, 'i') } });
-        }
-        EventModel.aggregate([
-            {
-                $match: query
-            },
-            {
-                $project: {
-                    hashTag: '$hashTag',
-                    eventType: '$eventType',
-                    eventTitle: '$eventTitle',
-                    isPublic: '$isPublic',
-                    hashTag: '$hashTag',
-                    profilePhoto: '$profilePhoto',
-                    paymentDeadlineDate: '$paymentDeadlineDate',
-                    eventTheme: '$eventTheme',
-                    isPaymentAccept:
-                    {
-                        $cond: { if: { $lt: ["$paymentDeadlineDate", new Date()] }, then: false, else: true }
-                    }
-                }
-            },
-        ]).exec(function (eventListError, eventList) {
-            if (eventListError) {
-                reject(eventListError);
-            } else {
-                resolve({ status: 200, message: 'Event List!', data: eventList });
-            }
-        });
-    });
-}
+ const eventListForHomepage = (keyword) => {
+     return new Promise((resolve, reject) => {
+         const query = {
+             $and: [{ 'isDeleted': false }, { 'isPublic': true }]
+         }
+         if (keyword) {
+             const searchText = keyword;
+             query['$and'].push({ 'hashTag': { $regex: new RegExp(searchText, 'i') } });
+         }
+         EventModel.aggregate([
+         {
+             $match: query
+         },
+         {
+             $project: {
+                 hashTag: '$hashTag',
+                 eventType: '$eventType',
+                 eventTitle: '$eventTitle',
+                 isPublic: '$isPublic',
+                 hashTag: '$hashTag',
+                 profilePhoto: '$profilePhoto',
+                 paymentDeadlineDate: '$paymentDeadlineDate',
+                 eventTheme: '$eventTheme',
+                 isPaymentAccept:
+                 {
+                     $cond: { if: { $lt: ["$paymentDeadlineDate", new Date()] }, then: false, else: true }
+                 }
+             }
+         },
+         ]).exec(function (eventListError, eventList) {
+             if (eventListError) {
+                 reject(eventListError);
+             } else {
+                 resolve({ status: 200, message: 'Event List!', data: eventList });
+             }
+         });
+     });
+ }
 
 /**
  * Transaction Model approach For Collection Details
  * @param {String} eventId 
  * @returns {Promise} Collection Detail Acording Group Of Particular Event
  */
-const activityWiseCollection = (eventId) => {
-    return new Promise((resolve, reject) => {
-        console.log('EventId In Group Wise Collection', eventId);
-        TransactionModel.aggregate([
+ const activityWiseCollection = (eventId) => {
+     return new Promise((resolve, reject) => {
+         console.log('EventId In Group Wise Collection', eventId);
+         TransactionModel.aggregate([
             // $match Using EventId
             {
                 $match: {
                     $and: [
-                        { 'eventId': ObjectId(eventId) },
-                        { 'isDeleted': false },
+                    { 'eventId': ObjectId(eventId) },
+                    { 'isDeleted': false },
                     ]
                 }
             },
@@ -2114,22 +2114,22 @@ const activityWiseCollection = (eventId) => {
                     }
                 }
             },
-        ]).exec(function (eventListError, eventList) {
-            if (eventListError) {
-                reject({ status: 500, message: 'Internal Server Error', data: eventListError });
-            } else {
-                activityCollection(eventId).then((response) => {
-                    console.log('Response:', response.data);
-                    const data = {};
-                    data.groupWise = eventList;
-                    data.activityWise = response.data;
-                    resolve({ status: 200, message: 'Collected Amount Detail!', data: data });
-                }).catch((error) => {
-                    reject({ status: 500, message: 'Internal Server Error' });
-                })
-            }
-        });
-    })
+            ]).exec(function (eventListError, eventList) {
+                if (eventListError) {
+                    reject({ status: 500, message: 'Internal Server Error', data: eventListError });
+                } else {
+                    activityCollection(eventId).then((response) => {
+                        console.log('Response:', response.data);
+                        const data = {};
+                        data.groupWise = eventList;
+                        data.activityWise = response.data;
+                        resolve({ status: 200, message: 'Collected Amount Detail!', data: data });
+                    }).catch((error) => {
+                        reject({ status: 500, message: 'Internal Server Error' });
+                    })
+                }
+            });
+        })
 }
 
 /**
@@ -2137,10 +2137,10 @@ const activityWiseCollection = (eventId) => {
  * @param {String} eventId 
  * @returns {Promise} Return Array Of Guest or Reason Why Failed
  */
-const eventGuestListWithAmount = (eventId) => {
-    console.log('EventId:', eventId);
-    return new Promise((resolve, reject) => {
-        EventModel.aggregate([
+ const eventGuestListWithAmount = (eventId) => {
+     console.log('EventId:', eventId);
+     return new Promise((resolve, reject) => {
+         EventModel.aggregate([
 
             // $match Of EventId In Event Model
             {
@@ -2292,15 +2292,15 @@ const eventGuestListWithAmount = (eventId) => {
                     }
                 }
             }
-        ]).exec(function (guestListErr, guestListRes) {
-            if (guestListErr) {
-                console.log("Guest List Error:", guestListErr);
-                reject(guestListErr);
-            } else {
-                resolve({ status: 200, message: 'Event Guest List!', data: guestListRes[0] });
-            }
+            ]).exec(function (guestListErr, guestListRes) {
+                if (guestListErr) {
+                    console.log("Guest List Error:", guestListErr);
+                    reject(guestListErr);
+                } else {
+                    resolve({ status: 200, message: 'Event Guest List!', data: guestListRes[0] });
+                }
+            });
         });
-    });
 }
 
 /**
@@ -2308,10 +2308,10 @@ const eventGuestListWithAmount = (eventId) => {
  * @param {eventId} - EventId for Delete Event
  * @returns {Promise} - Event Detail or reason why failed
  */
-const eventGuestList = (eventId) => {
-    console.log("Event Id:", eventId);
-    return new Promise((resolve, reject) => {
-        EventModel.aggregate([
+ const eventGuestList = (eventId) => {
+     console.log("Event Id:", eventId);
+     return new Promise((resolve, reject) => {
+         EventModel.aggregate([
             // Match Of EventId In Event Model
             {
                 $match: { '_id': ObjectId(eventId) }
@@ -2460,15 +2460,15 @@ const eventGuestList = (eventId) => {
                     },
                 }
             },
-        ]).exec(function (eventDetailError, eventDetail) {
-            if (eventDetailError) {
-                console.log("Guest List Error:", eventDetailError);
-                reject(eventDetailError);
-            } else {
-                resolve({ status: 200, message: 'Event Guest List!', data: eventDetail });
-            }
+            ]).exec(function (eventDetailError, eventDetail) {
+                if (eventDetailError) {
+                    console.log("Guest List Error:", eventDetailError);
+                    reject(eventDetailError);
+                } else {
+                    resolve({ status: 200, message: 'Event Guest List!', data: eventDetail });
+                }
+            });
         });
-    });
 }
 
 
@@ -2476,17 +2476,17 @@ const eventGuestList = (eventId) => {
  * Eventwise Total Collection And Donation Amount  
  * @param {eventDetail} eventId 
  */
-const eventDonationDetail = (eventId) => {
-    return new Promise((resolve, reject) => {
-        let collectionDetail = {};
-        console.log('EventId In Donation Collection', eventId);
-        TransactionModel.aggregate([
+ const eventDonationDetail = (eventId) => {
+     return new Promise((resolve, reject) => {
+         let collectionDetail = {};
+         console.log('EventId In Donation Collection', eventId);
+         TransactionModel.aggregate([
             // Match Using EventId
             {
                 $match: {
                     $and: [
-                        { 'eventId': ObjectId(eventId) },
-                        { 'isDeleted': false },
+                    { 'eventId': ObjectId(eventId) },
+                    { 'isDeleted': false },
                     ]
                 }
             },
@@ -2582,35 +2582,35 @@ const eventDonationDetail = (eventId) => {
                     },
                 }
             },
-        ]).exec(function (collectionErr, collectionRes) {
-            if (collectionErr) {
-                console.log('Error', collectionErr);
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                eventDetail(eventId).then((hashTag) => {
-                    fnGetTotalDonationAmount(eventId).then((response) => {
-                        console.log('Collection Response', collectionRes);
-                        console.log('Donation Response', response);
-                        collectionDetail.totalDonation = response;
-                        if (collectionRes == '') {
-                            collectionDetail.totalCollection = 0;
-                        } else {
-                            collectionDetail.totalCollection = collectionRes[0].totalCollection;
-                        }
-                        collectionDetail.finalTotal = response + collectionDetail.totalCollection;
-                        collectionDetail.eventHashTag = hashTag.data.hashTag;
-                        resolve({ status: 200, message: 'Successfully get collection Detail', data: collectionDetail });
+            ]).exec(function (collectionErr, collectionRes) {
+                if (collectionErr) {
+                    console.log('Error', collectionErr);
+                    reject({ status: 500, message: 'Internal Server Error' });
+                } else {
+                    eventDetail(eventId).then((hashTag) => {
+                        fnGetTotalDonationAmount(eventId).then((response) => {
+                            console.log('Collection Response', collectionRes);
+                            console.log('Donation Response', response);
+                            collectionDetail.totalDonation = response;
+                            if (collectionRes == '') {
+                                collectionDetail.totalCollection = 0;
+                            } else {
+                                collectionDetail.totalCollection = collectionRes[0].totalCollection;
+                            }
+                            collectionDetail.finalTotal = response + collectionDetail.totalCollection;
+                            collectionDetail.eventHashTag = hashTag.data.hashTag;
+                            resolve({ status: 200, message: 'Successfully get collection Detail', data: collectionDetail });
+                        }).catch((error) => {
+                            console.log('Error', error);
+                            reject({ status: 500, message: 'Internal Server Error' });
+                        });
                     }).catch((error) => {
                         console.log('Error', error);
                         reject({ status: 500, message: 'Internal Server Error' });
-                    });
-                }).catch((error) => {
-                    console.log('Error', error);
-                    reject({ status: 500, message: 'Internal Server Error' });
-                })
-            }
+                    })
+                }
+            });
         });
-    });
 }
 
 
@@ -2619,66 +2619,66 @@ const eventDonationDetail = (eventId) => {
  * @param {String} eventId 
  * @returns {totalCollection} totalCollection and reason why failed
  */
-function fnGetTotalDonationAmount(eventId) {
-    return new Promise((resolve, reject) => {
-        TransactionModel.aggregate([
-            {
-                $match: {
-                    $and: [
-                        { 'eventId': ObjectId(eventId) },
-                        { 'isDeleted': false },
-                    ]
-                }
-            },
-            {
-                $group: {
-                    _id: null,
-                    grandTotal: {
-                        $sum: '$donation'
-                    }
-                }
-            }
-        ]).exec(function (err, transaction) {
-            if (err) {
-                reject(err);
-            } else {
-                console.log('Transaction:', transaction);
-                if (transaction == '') {
-                    resolve(0);
-                } else {
-                    resolve(transaction[0].grandTotal)
-                }
-            }
-        });
-    });
-}
+ function fnGetTotalDonationAmount(eventId) {
+     return new Promise((resolve, reject) => {
+         TransactionModel.aggregate([
+         {
+             $match: {
+                 $and: [
+                 { 'eventId': ObjectId(eventId) },
+                 { 'isDeleted': false },
+                 ]
+             }
+         },
+         {
+             $group: {
+                 _id: null,
+                 grandTotal: {
+                     $sum: '$donation'
+                 }
+             }
+         }
+         ]).exec(function (err, transaction) {
+             if (err) {
+                 reject(err);
+             } else {
+                 console.log('Transaction:', transaction);
+                 if (transaction == '') {
+                     resolve(0);
+                 } else {
+                     resolve(transaction[0].grandTotal)
+                 }
+             }
+         });
+     });
+ }
 
 /**
  * Add Bank Detail To Particular Event
  * @param {object} body - Bank Detail Object
  * @returns {Promise} - Bank Detail or reason why failed
  */
-const bankDetailInsideEvent = (bankData) => {
-    console.log("bankData:", bankData);
-    const bankDetail = {
-        bankAccount: {
-            accountNumber: bankData.accountNumber,
-            bankName: bankData.bankName,
-            ifscCode: bankData.ifscCode
-        }
-    }
-    console.log("Bank Detail", bankDetail);
-    return new Promise((resolve, reject) => {
-        EventModel.findByIdAndUpdate({ _id: bankData.eventId }, bankDetail, (bankErr, bankDetail) => {
-            if (bankErr) {
-                console.log('bankErr Creation Error: ', bankErr);
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                resolve({ status: 200, message: 'Bank Added to Event Successfully.', data: bankDetail });
-            }
-        });
-    });
-}
+ const bankDetailInsideEvent = (bankData) => {
+     console.log("bankData:", bankData);
+     const bankDetail = {
+         bankAccount: {
+             accountNumber: bankData.accountNumber,
+             bankName: bankData.bankName,
+             ifscCode: bankData.ifscCode
+         }
+     }
+     console.log("Bank Detail", bankDetail);
+     return new Promise((resolve, reject) => {
+         EventModel.findByIdAndUpdate({ _id: bankData.eventId }, bankDetail, (bankErr, bankDetail) => {
+             if (bankErr) {
+                 console.log('bankErr Creation Error: ', bankErr);
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else {
+                 resolve({ status: 200, message: 'Bank Added to Event Successfully.', data: bankDetail });
+             }
+         });
+     });
+ }
 
 // This Function Check Message Date Is Equal To System Date Or Not
 const checkForEmailDateAndTime = () => {
@@ -2686,21 +2686,21 @@ const checkForEmailDateAndTime = () => {
         const currentDate = moment().format('YYYY-MM-DD');
         console.log('Current Date', currentDate);
         EventModel.aggregate([
-            {
+        {
 
-                $match: {
-                    $and: [
-                        { 'afterEventMessage.messageDate': currentDate },
-                        { 'isDeleted': false },
-                    ]
-                }
-            },
-            {
-                $project: {
-                    eventId: '$_id',
-                    messagePreference: '$afterEventMessage.messagePreference'
-                }
+            $match: {
+                $and: [
+                { 'afterEventMessage.messageDate': currentDate },
+                { 'isDeleted': false },
+                ]
             }
+        },
+        {
+            $project: {
+                eventId: '$_id',
+                messagePreference: '$afterEventMessage.messagePreference'
+            }
+        }
         ]).exec(function (err, eventList) {
             if (err) {
                 reject(err);
@@ -2725,126 +2725,126 @@ const checkForEmailDateAndTime = () => {
  * @param {String} eventId 
  * @param {String} messagePreference 
  */
-const guestListBasedOnPreference = (eventId, messagePreference) => {
-    return new Promise((resolve, reject) => {
-        const emailArray = [];
-        if (messagePreference == 'allGuest') {
-            eventDetailWithActivity(eventId).then((response) => {
-                _.forEach(response.data.guestDetail, (singleUser) => {
-                    emailArray.push(singleUser.email)
-                })
-                eventAfterMessage(eventId).then((response) => {
-                    console.log('Response From:', response);
-                    const message = response.message;
-                    cronJobForSendEmailToGuest(emailArray, message).then((response) => {
-                        resolve(true);
-                    }).catch((err) => {
-                        reject(false);
-                    })
-                }).catch((err) => {
-                    console.log('Internal Server Error', err);
-                })
+ const guestListBasedOnPreference = (eventId, messagePreference) => {
+     return new Promise((resolve, reject) => {
+         const emailArray = [];
+         if (messagePreference == 'allGuest') {
+             eventDetailWithActivity(eventId).then((response) => {
+                 _.forEach(response.data.guestDetail, (singleUser) => {
+                     emailArray.push(singleUser.email)
+                 })
+                 eventAfterMessage(eventId).then((response) => {
+                     console.log('Response From:', response);
+                     const message = response.message;
+                     cronJobForSendEmailToGuest(emailArray, message).then((response) => {
+                         resolve(true);
+                     }).catch((err) => {
+                         reject(false);
+                     })
+                 }).catch((err) => {
+                     console.log('Internal Server Error', err);
+                 })
 
-            }).catch((err) => {
-                console.log('Internal Server Error', err);
-            })
-        } else if (messagePreference == 'onlyPaidGuest') {
-            eventDetailWithActivity(eventId).then((response) => {
-                const message = response.data
-                _.forEach(response.data.guestListWithPayment, (singleUser) => {
-                    emailArray.push(singleUser.email)
-                })
-                eventAfterMessage(eventId).then((response) => {
-                    console.log('Response From:', response);
-                    const message = response.message;
-                    cronJobForSendEmailToGuest(emailArray, message).then((response) => {
-                        resolve(true);
-                    }).catch((err) => {
-                        reject(false);
-                    })
-                }).catch((err) => {
-                    console.log('Internal Server Error', err);
-                })
-            }).catch((err) => {
-                console.log('Internal Server Error', err);
-            })
-        } else {
-            console.log('Internal Server Error', err);
-        }
-    });
-}
+             }).catch((err) => {
+                 console.log('Internal Server Error', err);
+             })
+         } else if (messagePreference == 'onlyPaidGuest') {
+             eventDetailWithActivity(eventId).then((response) => {
+                 const message = response.data
+                 _.forEach(response.data.guestListWithPayment, (singleUser) => {
+                     emailArray.push(singleUser.email)
+                 })
+                 eventAfterMessage(eventId).then((response) => {
+                     console.log('Response From:', response);
+                     const message = response.message;
+                     cronJobForSendEmailToGuest(emailArray, message).then((response) => {
+                         resolve(true);
+                     }).catch((err) => {
+                         reject(false);
+                     })
+                 }).catch((err) => {
+                     console.log('Internal Server Error', err);
+                 })
+             }).catch((err) => {
+                 console.log('Internal Server Error', err);
+             })
+         } else {
+             console.log('Internal Server Error', err);
+         }
+     });
+ }
 
 
 
-const eventAfterMessage = (eventId) => {
-    console.log("Event Id:", eventId);
-    return new Promise((resolve, reject) => {
-        EventModel.aggregate([
-            {
-                $match: { '_id': ObjectId(eventId) }
-            },
-            {
-                $project: {
-                    afterEventMessage: '$afterEventMessage'
-                }
-            },
-        ]).exec(function (eventDetailError, eventDetail) {
-            if (eventDetailError) {
-                reject(eventDetailError);
-            } else {
-                resolve(eventDetail);
-            }
-        });
-    })
-}
+ const eventAfterMessage = (eventId) => {
+     console.log("Event Id:", eventId);
+     return new Promise((resolve, reject) => {
+         EventModel.aggregate([
+         {
+             $match: { '_id': ObjectId(eventId) }
+         },
+         {
+             $project: {
+                 afterEventMessage: '$afterEventMessage'
+             }
+         },
+         ]).exec(function (eventDetailError, eventDetail) {
+             if (eventDetailError) {
+                 reject(eventDetailError);
+             } else {
+                 resolve(eventDetail);
+             }
+         });
+     })
+ }
 
 /**
  * Send Mail To Provided Email Array Of Particular User
  * @param {Array} emailArray 
  */
-const cronJobForSendEmailToGuest = (emailArray, message) => {
-    return new Promise((resolve, reject) => {
-        async.eachSeries(emailArray, (singleEmail, callback) => {
-            sendInvitationEmail(singleEmail, message).then((response) => {
-                console.log('email sent Successfully:');
-                callback();
-            }).catch((error) => {
-                console.log('hey error comes', error);
-                callback();
-            });
-        }, (callbackError, callbackResponse) => {
-            if (callbackError) {
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                resolve({ status: 200, message: 'email Send For First Event.' });
-            }
-        });
-    });
-}
+ const cronJobForSendEmailToGuest = (emailArray, message) => {
+     return new Promise((resolve, reject) => {
+         async.eachSeries(emailArray, (singleEmail, callback) => {
+             sendInvitationEmail(singleEmail, message).then((response) => {
+                 console.log('email sent Successfully:');
+                 callback();
+             }).catch((error) => {
+                 console.log('hey error comes', error);
+                 callback();
+             });
+         }, (callbackError, callbackResponse) => {
+             if (callbackError) {
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else {
+                 resolve({ status: 200, message: 'email Send For First Event.' });
+             }
+         });
+     });
+ }
 
 /**
  *Sending Mail Using Mail Service For Single Email
  * @param {String} email 
  * @returns {Promise} Successfully Send Or Reason Why Failed
  */
-const sendInvitationEmail = (email, message) => {
-    return new Promise((resolve, reject) => {
+ const sendInvitationEmail = (email, message) => {
+     return new Promise((resolve, reject) => {
 
-        const defaultPasswordEmailoptions = {
-            to: email,
-            subject: 'Thank You For Your Presence',
-            template: 'afterevent-message'
-        };
+         const defaultPasswordEmailoptions = {
+             to: email,
+             subject: 'Thank You For Your Presence',
+             template: 'afterevent-message'
+         };
 
-        mailService.mail(defaultPasswordEmailoptions, message, null, function (err, mailResult) {
-            if (err) {
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                resolve({ status: 200, message: 'ResetPassword Link Send in Email' });
-            }
-        });
-    });
-}
+         mailService.mail(defaultPasswordEmailoptions, message, null, function (err, mailResult) {
+             if (err) {
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else {
+                 resolve({ status: 200, message: 'ResetPassword Link Send in Email' });
+             }
+         });
+     });
+ }
 
 
 /**
@@ -2852,27 +2852,27 @@ const sendInvitationEmail = (email, message) => {
  * @param {object} body - message data to add new message
  * @returns {Promise} - New Message or reason why failed
  */
-const afterEventMessageDetail = (messageData) => {
+ const afterEventMessageDetail = (messageData) => {
 
-    return new Promise((resolve, reject) => {
+     return new Promise((resolve, reject) => {
 
-        const newmessage = {
-            afterEventMessage: {
-                message: messageData.message,
-                messageDate: moment(messageData.messageDate).format('YYYY-MM-DD'),
-                messagePreference: messageData.messagePreference,
-            }
-        }
+         const newmessage = {
+             afterEventMessage: {
+                 message: messageData.message,
+                 messageDate: moment(messageData.messageDate).format('YYYY-MM-DD'),
+                 messagePreference: messageData.messagePreference,
+             }
+         }
 
-        EventModel.findByIdAndUpdate({ _id: messageData.eventId }, newmessage, { upsert: true }, (messageError, newMessage) => {
-            if (messageError) {
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                resolve({ status: 200, message: 'After Event Message Created Successfully.' });
-            }
-        });
-    });
-}
+         EventModel.findByIdAndUpdate({ _id: messageData.eventId }, newmessage, { upsert: true }, (messageError, newMessage) => {
+             if (messageError) {
+                 reject({ status: 500, message: 'Internal Server Error' });
+             } else {
+                 resolve({ status: 200, message: 'After Event Message Created Successfully.' });
+             }
+         });
+     });
+ }
 
 /**
  * Attach User Acc Detail To Particular Event
@@ -2880,33 +2880,33 @@ const afterEventMessageDetail = (messageData) => {
  * @param {String} accountId 
  * @param {String} paymentType 
  */
-const addBankAccountDetailToEvent = (eventId, accountId, paymentType) => {
-    return new Promise((resolve, reject) => {
+ const addBankAccountDetailToEvent = (eventId, accountId, paymentType) => {
+     return new Promise((resolve, reject) => {
 
-        const bankData = {
-            bankAccount: {
-                accountId: accountId,
-                paymentType: paymentType,
-            }
-        }
+         const bankData = {
+             bankAccount: {
+                 accountId: accountId,
+                 paymentType: paymentType,
+             }
+         }
 
-        EventModel.findOneAndUpdate(({ _id: eventId }, bankData)).exec((error, response) => {
-            if (error) {
-                console.log('error:', error);
-                reject({ status: 500, message: 'Internal Server Error' });
+         EventModel.findOneAndUpdate(({ _id: eventId }, bankData)).exec((error, response) => {
+             if (error) {
+                 console.log('error:', error);
+                 reject({ status: 500, message: 'Internal Server Error' });
 
-            } else {
-                resolve({ status: 200, message: 'Account Added Successfully.' });
-            }
-        });
-    });
-}
+             } else {
+                 resolve({ status: 200, message: 'Account Added Successfully.' });
+             }
+         });
+     });
+ }
 
 
-const thanksMessageList = (eventId) => {
-    console.log("Event Id:", eventId);
-    return new Promise((resolve, reject) => {
-        EventModel.aggregate([
+ const thanksMessageList = (eventId) => {
+     console.log("Event Id:", eventId);
+     return new Promise((resolve, reject) => {
+         EventModel.aggregate([
             // Match Of EventId In Event Model
             {
                 $match: { '_id': ObjectId(eventId) }
@@ -2918,31 +2918,31 @@ const thanksMessageList = (eventId) => {
                     thanksMessage: '$thanksMessage'
                 }
             },
-        ]).exec(function (msgError, msgList) {
-            if (msgError) {
-                reject({ status: 500, message: 'Internal Server Error' });
-            } else {
-                resolve({ status: 200, message: 'Message List Fetch Successfully.', data: msgList[0] });
-            }
+            ]).exec(function (msgError, msgList) {
+                if (msgError) {
+                    reject({ status: 500, message: 'Internal Server Error' });
+                } else {
+                    resolve({ status: 200, message: 'Message List Fetch Successfully.', data: msgList[0] });
+                }
+            });
         });
-    });
-}
+ }
 
 /**
  * Transaction Model approach For Collection Details
  * @param {String} eventId 
  * @returns {Promise} Collection Detail Acording Group Of Particular Event
  */
-const activityCollection = (eventId) => {
-    return new Promise((resolve, reject) => {
-        console.log('EventId In Group Wise Collection', eventId);
-        TransactionModel.aggregate([
+ const activityCollection = (eventId) => {
+     return new Promise((resolve, reject) => {
+         console.log('EventId In Group Wise Collection', eventId);
+         TransactionModel.aggregate([
             // $match Using EventId
             {
                 $match: {
                     $and: [
-                        { 'eventId': ObjectId(eventId) },
-                        { 'isDeleted': false },
+                    { 'eventId': ObjectId(eventId) },
+                    { 'isDeleted': false },
                     ]
                 }
             },
@@ -3043,30 +3043,30 @@ const activityCollection = (eventId) => {
                     total: '$total'
                 }
             }
-        ]).exec(function (eventListError, eventList) {
-            if (eventListError) {
-                reject({ status: 500, message: 'Internal Server Error', data: eventListError });
-            } else {
-                resolve({ status: 200, message: 'Collected Amount Detail!', data: eventList });
-            }
-        });
-    })
+            ]).exec(function (eventListError, eventList) {
+                if (eventListError) {
+                    reject({ status: 500, message: 'Internal Server Error', data: eventListError });
+                } else {
+                    resolve({ status: 200, message: 'Collected Amount Detail!', data: eventList });
+                }
+            });
+        })
 }
 
 /**
  * Function With Transaction With User Detail Of Particular Event
  * @param {String} eventId 
  */
-const eventTransactionUserDetail = (eventId) => {
-    return new Promise((resolve, reject) => {
-        console.log('EventId In Group Wise Collection', eventId);
-        TransactionModel.aggregate([
+ const eventTransactionUserDetail = (eventId) => {
+     return new Promise((resolve, reject) => {
+         console.log('EventId In Group Wise Collection', eventId);
+         TransactionModel.aggregate([
             // $match Using EventId
             {
                 $match: {
                     $and: [
-                        { 'eventId': ObjectId(eventId) },
-                        { 'isDeleted': false },
+                    { 'eventId': ObjectId(eventId) },
+                    { 'isDeleted': false },
                     ]
                 }
             },
@@ -3178,14 +3178,14 @@ const eventTransactionUserDetail = (eventId) => {
                 }
             }
 
-        ]).exec(function (eventListError, eventList) {
-            if (eventListError) {
-                reject({ status: 500, message: 'Internal Server Error', data: eventListError });
-            } else {
-                resolve({ status: 200, message: 'Collected Amount Detail!', data: eventList });
-            }
-        });
-    })
+            ]).exec(function (eventListError, eventList) {
+                if (eventListError) {
+                    reject({ status: 500, message: 'Internal Server Error', data: eventListError });
+                } else {
+                    resolve({ status: 200, message: 'Collected Amount Detail!', data: eventList });
+                }
+            });
+        })
 }
 
 
@@ -3193,16 +3193,16 @@ const eventTransactionUserDetail = (eventId) => {
  * Function With Transaction With User Detail Of Particular Event
  * @param {String} eventId 
  */
-const eventWithTransactionAndUserDetail = (eventId) => {
-    return new Promise((resolve, reject) => {
-        console.log('EventId:', eventId);
-        TransactionModel.aggregate([
+ const eventWithTransactionAndUserDetail = (eventId) => {
+     return new Promise((resolve, reject) => {
+         console.log('EventId:', eventId);
+         TransactionModel.aggregate([
             // $match Using EventId
             {
                 $match: {
                     $and: [
-                        { 'eventId': ObjectId(eventId) },
-                        { 'isDeleted': false },
+                    { 'eventId': ObjectId(eventId) },
+                    { 'isDeleted': false },
                     ]
                 }
             },
@@ -3317,28 +3317,28 @@ const eventWithTransactionAndUserDetail = (eventId) => {
                     itemGender: 1,
                 }
             }
-        ]).exec(function (eventListError, eventList) {
-            if (eventListError) {
-                reject({ status: 500, message: 'Internal Server Error', data: eventListError });
-            } else {
-                eventGuestListWithAmount(eventId).then((guestList) => {
-                    onlyEventDetail(eventId).then((eventDetail) => {
-                        const eventData = {};
-                        eventData.guestList = guestList.data;
-                        eventData.eventDetail = eventDetail;
-                        eventData.eventList = eventList;
-                        resolve({ status: 200, message: 'Collected Amount Detail!', data: eventData });
+            ]).exec(function (eventListError, eventList) {
+                if (eventListError) {
+                    reject({ status: 500, message: 'Internal Server Error', data: eventListError });
+                } else {
+                    eventGuestListWithAmount(eventId).then((guestList) => {
+                        onlyEventDetail(eventId).then((eventDetail) => {
+                            const eventData = {};
+                            eventData.guestList = guestList.data;
+                            eventData.eventDetail = eventDetail;
+                            eventData.eventList = eventList;
+                            resolve({ status: 200, message: 'Collected Amount Detail!', data: eventData });
+                        }).catch((error) => {
+                            console.log('Error:', error);
+                            reject({ status: 500, message: 'Internal Server Error' });
+                        })
                     }).catch((error) => {
                         console.log('Error:', error);
                         reject({ status: 500, message: 'Internal Server Error' });
                     })
-                }).catch((error) => {
-                    console.log('Error:', error);
-                    reject({ status: 500, message: 'Internal Server Error' });
-                })
-            }
-        });
-    })
+                }
+            });
+        })
 }
 
 

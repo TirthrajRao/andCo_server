@@ -97,7 +97,7 @@ const mailService = require('../services/mail.service');
  									} else {
  										console.log("created new user details", userres)
                                         // const finalresponse = { email: userres.email, userId: userres._id }
-                                        resolve({ status: 200, message: 'Mail Send to login user for code.' })
+                                        resolve({ status: 200, message: 'Please check your email for code ' })
                                     }
                                 });
  							}
@@ -590,20 +590,23 @@ const mailService = require('../services/mail.service');
  	return new Promise((resolve, reject) => {
  		facebookAuthentication(accessToken).then((response) => {
  			console.log("Response", response);
- 			UserModel.findOne({ email: response.email }).exec((err, user) => {
+ 			UserModel.findOne({ email: response.socialId }).exec((err, user) => {
  				if (err) {
  					reject({ status: 500, message: 'Internal Server Error' });
  				} else if (user) {
+ 					console.log("user mde che ke nai", user)
  					const payload = { user };
  					var token = jwt.sign(payload, config.jwtSecret);
  					const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName }
  					resolve({ status: 200, message: 'Login Successfully', data: tokenData })
  				} else {
+ 					console.log("jo user na mde to ama jay")
  					UserModel.create(response, (useerr, userres) => {
  						if (useerr) {
  							console.log('usererror: ', useerr);
  							res.status(500).json({ message: 'Internal Server Error' });
  						} else {
+ 							console.log("new user created ", userres)
  							const payload = { userres };
  							var token = jwt.sign(payload, config.jwtSecret);
  							const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName }
@@ -630,6 +633,7 @@ const mailService = require('../services/mail.service');
  			if (JSON.parse(response.body).error) {
  				reject(err)
  			} else {
+                 // console.log("response of facebook", response)
  				const profile = JSON.parse(response.body)
  				console.log("profile", profile);
  				const newUser = {
