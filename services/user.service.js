@@ -5,6 +5,8 @@ const bcrypt = require("bcrypt");
 const randomstring = require("randomstring");
 const request = require('request');
 
+const siteName = 'andco'
+
 // Database models 
 const UserModel = require('../models/user.model');
 const eventModel = require('../models/event.model')
@@ -22,18 +24,18 @@ const mailService = require('../services/mail.service');
  * @returns {Promise} - Register User or reason why failed
  */
  const signUp = (email, userData) => {
-     console.log("user details========", userData)
-     return new Promise((resolve, reject) => {
+ 	console.log("user details========", userData)
+ 	return new Promise((resolve, reject) => {
 
-         UserModel.findOneAndUpdate({ email: email },
-             { $set: userData }
-             ).exec((error, userUpdate) => {
-                 if (error) console.log("error while update details of user", error)
-                     else {
-                         resolve({ message: 'User update completed' })
-                         console.log("user detaoils update completed", userUpdate)
-                     }
-                 })
+ 		UserModel.findOneAndUpdate({ email: email },
+ 			{ $set: userData }
+ 			).exec((error, userUpdate) => {
+ 				if (error) console.log("error while update details of user", error)
+ 					else {
+ 						resolve({ message: 'User update completed' })
+ 						console.log("user detaoils update completed", userUpdate)
+ 					}
+ 				})
         // const emailVarification = Math.floor(100000 + Math.random() * 900000);
         // userData.emailVarification = emailVarification;
         // console.log("emailVarification code:", emailVarification);
@@ -67,45 +69,45 @@ const mailService = require('../services/mail.service');
  * Mail send to login user for send code
  */
  const mailSendToUser = (data) => {
-     console.log("email of login user", data)
-     return new Promise((resolve, reject) => {
-         UserModel.findOne({ email: data.email })
-         .exec((error, userFind) => {
-             if (error) console.log("error while get user name", error)
-                 else {
-                     console.log("user is found or not", userFind)
-                     if (userFind == null) {
-                         const emailVarification = Math.floor(100000 + Math.random() * 900000);
-                         data.emailVarification = emailVarification;
-                         UserModel.create(data, (useerr, userres) => {
-                             if (useerr) {
-                                 console.log('usererror: ', useerr);
-                                 reject({ status: 500, message: 'Internal Server Error' });
-                             } else {
-                                 data.emailVarification = emailVarification;
-                                 const defaultPasswordEmailoptions = {
-                                     to: data.email,
-                                     subject: `Welcome to ${process.env.SITENAME} Confirm your email`,
-                                     template: 'welcome'
-                                 };
-                                 mailService.mail(defaultPasswordEmailoptions, data, null, function (err, mailResult) {
-                                     if (err) {
-                                         console.log('error:', error);
-                                         reject({ status: 500, message: 'Internal Server Error' });
-                                     } else {
-                                         console.log("created new user details", userres)
+ 	console.log("email of login user", data)
+ 	return new Promise((resolve, reject) => {
+ 		UserModel.findOne({ email: data.email })
+ 		.exec((error, userFind) => {
+ 			if (error) console.log("error while get user name", error)
+ 				else {
+ 					console.log("user is found or not", userFind)
+ 					if (userFind == null) {
+ 						const emailVarification = Math.floor(100000 + Math.random() * 900000);
+ 						data.emailVarification = emailVarification;
+ 						UserModel.create(data, (useerr, userres) => {
+ 							if (useerr) {
+ 								console.log('usererror: ', useerr);
+ 								reject({ status: 500, message: 'Internal Server Error' });
+ 							} else {
+ 								data.emailVarification = emailVarification;
+ 								const defaultPasswordEmailoptions = {
+ 									to: data.email,
+ 									subject: `Welcome to ${siteName} Confirm your email`,
+ 									template: 'welcome'
+ 								};
+ 								mailService.mail(defaultPasswordEmailoptions, data, null, function (err, mailResult) {
+ 									if (err) {
+ 										console.log('error:', error);
+ 										reject({ status: 500, message: 'Internal Server Error' });
+ 									} else {
+ 										console.log("created new user details", userres)
                                         // const finalresponse = { email: userres.email, userId: userres._id }
                                         resolve({ status: 200, message: 'Mail Send to login user for code.' })
                                     }
                                 });
-                             }
-                         });
-                     } else {
-                         reject({ status: 409, message: 'User already exits' })
-                     }
-                 }
-             })
-     })
+ 							}
+ 						});
+ 					} else {
+ 						reject({ status: 409, message: 'User already exits' })
+ 					}
+ 				}
+ 			})
+ 	})
  }
 
 /**
@@ -114,24 +116,24 @@ const mailService = require('../services/mail.service');
  * @returns {Promise} - Email Verification or reason why failed
  */
  const emailVerification = (email, emailVerificationCode) => {
-     console.log("details of new user", email  , emailVerificationCode)
-     return new Promise((resolve, reject) => {
-         UserModel.findOneAndUpdate({ email: email, emailVarification: emailVerificationCode }, { $set: { isVerified: true, emailVarification: '' } }).exec((err, userres) => {
-             console.log("user is find or not", userres)
-             if (err) {
-                 console.log("Error:", err);
-                 reject({ status: 500, message: 'Internal Server Error' });
-             } else if (!userres) {
-                 console.log('Invalid Varification Code');
-                 reject({ status: 500, message: 'Invalid Varification Code' });
-             }
-             else {
-                 console.log("ama avu joye=================")
-                 const finalresponse = { email: userres.email, userId: userres._id }
-                 resolve({ status: 200, message: 'Email Verified successfully.', data: finalresponse })
-             }
-         });
-     });
+ 	console.log("details of new user", email  , emailVerificationCode)
+ 	return new Promise((resolve, reject) => {
+ 		UserModel.findOneAndUpdate({ email: email, emailVarification: emailVerificationCode }, { $set: { isVerified: true, emailVarification: '' } }).exec((err, userres) => {
+ 			console.log("user is find or not", userres)
+ 			if (err) {
+ 				console.log("Error:", err);
+ 				reject({ status: 500, message: 'Internal Server Error' });
+ 			} else if (!userres) {
+ 				console.log('Invalid Varification Code');
+ 				reject({ status: 500, message: 'Invalid Varification Code' });
+ 			}
+ 			else {
+ 				console.log("ama avu joye=================")
+ 				const finalresponse = { email: userres.email, userId: userres._id }
+ 				resolve({ status: 200, message: 'Email Verified successfully.', data: finalresponse })
+ 			}
+ 		});
+ 	});
  }
 
 
@@ -141,20 +143,20 @@ const mailService = require('../services/mail.service');
  * @returns {Promise}-Return True Or False As Per Condition
  */
  const checkVerifiedOrNot = (userId) => {
-     return new Promise((resolve, reject) => {
+ 	return new Promise((resolve, reject) => {
         // console.log('Email to Check For', email);
         const query = { _id: userId, isVerified: true };
         UserModel.findOne(query).exec((userErr, userRes) => {
-            if (userErr) {
-                console.log('User Error:', userErr);
-                reject({ status: 500, message: 'Internal Sever Error' });
-            } else if (userRes) {
-                console.log('User Is Verified');
-                resolve(true);
-            } else {
-                console.log('User Is Not Verified ');
-                resolve(false);
-            }
+        	if (userErr) {
+        		console.log('User Error:', userErr);
+        		reject({ status: 500, message: 'Internal Sever Error' });
+        	} else if (userRes) {
+        		console.log('User Is Verified');
+        		resolve(true);
+        	} else {
+        		console.log('User Is Not Verified ');
+        		resolve(false);
+        	}
         });
     });
  }
@@ -165,54 +167,54 @@ const mailService = require('../services/mail.service');
  * @returns {Promise} - JWT AccessToken or reason why failed
  */
  const login = (body) => {
-     return new Promise((resolve, reject) => {
-         UserModel.findOne({ email: body.email }).exec((err, user) => {
-             if (err) {
-                 reject({ status: 500, message: 'Internal Server Error' });
-             } else if (user) {
-                 console.log('user:', user);
-                 if (bcrypt.compareSync(body.password, user.password)) {
-                     if (user.isVerified) {
-                         const payload = { user };
-                         var token = jwt.sign(payload, config.jwtSecret);
-                         loginUserEvent(user._id).then((userEvents) => {
-                             console.log("user have event or not", userEvents)
-                             const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName, eventId: userEvents.status }
-                             resolve({ status: 200, message: 'Login Successfully', data: tokenData });
-                         }).catch((error) => {
-                             console.log("find to user event", error)
-                         })
-                     } else {
-                         const data = { useremail: user.email, isVerified: false }
-                         reject({ status: 400, message: 'User is Not Verified', data: data });
-                     }
-                 } else {
-                     reject({ status: 400, message: 'Your Password Is Invalid' });
-                 }
-             } else {
-                 reject({ status: 400, message: 'This Email Is Not Registered Please Signup' });
-             }
-         });
-     });
+ 	return new Promise((resolve, reject) => {
+ 		UserModel.findOne({ email: body.email }).exec((err, user) => {
+ 			if (err) {
+ 				reject({ status: 500, message: 'Internal Server Error' });
+ 			} else if (user) {
+ 				console.log('user:', user);
+ 				if (bcrypt.compareSync(body.password, user.password)) {
+ 					if (user.isVerified) {
+ 						const payload = { user };
+ 						var token = jwt.sign(payload, config.jwtSecret);
+ 						loginUserEvent(user._id).then((userEvents) => {
+ 							console.log("user have event or not", userEvents)
+ 							const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName, eventId: userEvents.status }
+ 							resolve({ status: 200, message: 'Login Successfully', data: tokenData });
+ 						}).catch((error) => {
+ 							console.log("find to user event", error)
+ 						})
+ 					} else {
+ 						const data = { useremail: user.email, isVerified: false }
+ 						reject({ status: 400, message: 'User is Not Verified', data: data });
+ 					}
+ 				} else {
+ 					reject({ status: 400, message: 'Your Password Is Invalid' });
+ 				}
+ 			} else {
+ 				reject({ status: 400, message: 'This Email Is Not Registered Please Signup' });
+ 			}
+ 		});
+ 	});
  }
 
  const loginUserEvent = (userId) => {
-     console.log("login user id", userId)
-     return new Promise((resolve, reject) => {
-         eventModel.findOne({ userId: ObjectId(userId) })
-         .exec((error, eventOfUser) => {
-             if (error)
-                 console.log("error while get event of user", error)
+ 	console.log("login user id", userId)
+ 	return new Promise((resolve, reject) => {
+ 		eventModel.findOne({ userId: ObjectId(userId) })
+ 		.exec((error, eventOfUser) => {
+ 			if (error)
+ 				console.log("error while get event of user", error)
                 // reject({ status: 500, message: 'Error while get event list' })
                 else {
-                    console.log("user event list", eventOfUser)
-                    if (eventOfUser) {
-                        resolve({ status: 'true' })
-                    }
-                    resolve({ status: 'false' })
+                	console.log("user event list", eventOfUser)
+                	if (eventOfUser) {
+                		resolve({ status: 'true' })
+                	}
+                	resolve({ status: 'false' })
                 }
             })
-     })
+ 	})
  }
 
 
@@ -223,32 +225,32 @@ const mailService = require('../services/mail.service');
  * @returns {Promise} - Decoded UserDetail or reason why failed
  */
  const getProfile = (authorization) => {
-     return new Promise((resolve, reject) => {
-         jwt.verify(authorization, config.jwtSecret, function (err, decoded) {
-             if (err) throw err;
-             console.log("Decoded detail", decoded);
-             const userId = decoded.customer._id;
-             UserModel.aggregate([
-             {
-                 $match: { '_id': ObjectId(userId) }
-             },
-             {
-                 $project: {
-                     id: '$_id',
-                     email: '$email',
-                     firstName: '$first_name',
-                     lastName: '$last_name',
-                 }
-             }
-             ]).exec(function (error, userDetail) {
-                 if (error) {
-                     reject(error);
-                 } else {
-                     resolve({ status: 200, message: 'Successfully Get the Profile..!', data: userDetail[0] });
-                 }
-             });
-         });
-     });
+ 	return new Promise((resolve, reject) => {
+ 		jwt.verify(authorization, config.jwtSecret, function (err, decoded) {
+ 			if (err) throw err;
+ 			console.log("Decoded detail", decoded);
+ 			const userId = decoded.customer._id;
+ 			UserModel.aggregate([
+ 			{
+ 				$match: { '_id': ObjectId(userId) }
+ 			},
+ 			{
+ 				$project: {
+ 					id: '$_id',
+ 					email: '$email',
+ 					firstName: '$first_name',
+ 					lastName: '$last_name',
+ 				}
+ 			}
+ 			]).exec(function (error, userDetail) {
+ 				if (error) {
+ 					reject(error);
+ 				} else {
+ 					resolve({ status: 200, message: 'Successfully Get the Profile..!', data: userDetail[0] });
+ 				}
+ 			});
+ 		});
+ 	});
  }
 
 /**
@@ -257,23 +259,23 @@ const mailService = require('../services/mail.service');
  * @param {Object} userData 
  */
  const changePassword = (userId, userData) => {
-     return new Promise((resolve, reject) => {
-         UserModel.findOne({ _id: userId }).exec((err, user) => {
-             if (err) {
-                 reject({ status: 500, message: 'Internal Server Error' });
-             } else if (user) {
-                 if (bcrypt.compareSync(userData.oldPassword, user.password)) {
-                     user.password = bcrypt.hashSync(userData.newPassword, 10);
-                     user.save();
-                     resolve({ status: 200, message: 'Your password has been changed Successfully', data: user })
-                 } else {
-                     reject({ status: 500, message: 'password does not match' });
-                 }
-             } else {
-                 return res.status(400).send({ errMsg: 'Bad request' });
-             }
-         });
-     });
+ 	return new Promise((resolve, reject) => {
+ 		UserModel.findOne({ _id: userId }).exec((err, user) => {
+ 			if (err) {
+ 				reject({ status: 500, message: 'Internal Server Error' });
+ 			} else if (user) {
+ 				if (bcrypt.compareSync(userData.oldPassword, user.password)) {
+ 					user.password = bcrypt.hashSync(userData.newPassword, 10);
+ 					user.save();
+ 					resolve({ status: 200, message: 'Your password has been changed Successfully', data: user })
+ 				} else {
+ 					reject({ status: 500, message: 'password does not match' });
+ 				}
+ 			} else {
+ 				return res.status(400).send({ errMsg: 'Bad request' });
+ 			}
+ 		});
+ 	});
  }
 
 /**
@@ -282,33 +284,33 @@ const mailService = require('../services/mail.service');
  * @returns {Promise} - ForgotPassword Link send in email or reason why failed
  */
  const forgotPassword = (email) => {
-     return new Promise((resolve, reject) => {
-         const resetPasswordHash = randomstring.generate();
-         console.log("Hashed Password:", resetPasswordHash);
-         UserModel.findOne({ email: email }).exec((err, user) => {
-             if (err) {
-                 reject({ status: 500, message: 'Internal Server Error' });
-             } else if (user) {
-                 user.passwordVerification = resetPasswordHash;
-                 user.save();
+ 	return new Promise((resolve, reject) => {
+ 		const resetPasswordHash = randomstring.generate();
+ 		console.log("Hashed Password:", resetPasswordHash);
+ 		UserModel.findOne({ email: email }).exec((err, user) => {
+ 			if (err) {
+ 				reject({ status: 500, message: 'Internal Server Error' });
+ 			} else if (user) {
+ 				user.passwordVerification = resetPasswordHash;
+ 				user.save();
 
-                 user.verificationUrl = config.baseUrl + config.forgotPasswordLink + resetPasswordHash;
-                 var defaultPasswordEmailoptions = {
-                     to: email,
-                     subject: 'here the link to reset your password',
-                     template: 'forgot-password'
-                 };
+ 				user.verificationUrl = config.baseUrl + config.forgotPasswordLink + resetPasswordHash;
+ 				var defaultPasswordEmailoptions = {
+ 					to: email,
+ 					subject: 'here the link to reset your password',
+ 					template: 'forgot-password'
+ 				};
 
-                 mailService.mail(defaultPasswordEmailoptions, user, null, function (err, mailResult) {
-                     if (err) {
-                         reject({ status: 500, message: 'Internal Server Error' });
-                     } else {
-                         resolve({ status: 200, message: 'ResetPassword Link Send in Email' });
-                     }
-                 });
-             }
-         });
-     });
+ 				mailService.mail(defaultPasswordEmailoptions, user, null, function (err, mailResult) {
+ 					if (err) {
+ 						reject({ status: 500, message: 'Internal Server Error' });
+ 					} else {
+ 						resolve({ status: 200, message: 'ResetPassword Link Send in Email' });
+ 					}
+ 				});
+ 			}
+ 		});
+ 	});
  }
 
 /**
@@ -317,21 +319,21 @@ const mailService = require('../services/mail.service');
  * @returns {Promise} - ChangePassword or reason why failed
  */
  const updatedPassword = (resetPasswordHash, newpassword) => {
-     console.log("details of login user with hash and password", resetPasswordHash , newpassword)
-     return new Promise((resolve, reject) => {
-         UserModel.findOne({ passwordVerification: resetPasswordHash }).exec((err, user) => {
-             if (err) {
-                 console.log("Error:", err);
-                 reject({ status: 500, message: 'Invalid Resetpassword link' });
-             } else {
-                 console.log("user password details", user)
-                 user.password = bcrypt.hashSync(newpassword, 10);
-                 user.passwordVerification = '';
-                 user.save();
-                 resolve({ status: 200, message: 'Your password changed successfully', data: user })
-             }
-         });
-     });
+ 	console.log("details of login user with hash and password", resetPasswordHash , newpassword)
+ 	return new Promise((resolve, reject) => {
+ 		UserModel.findOne({ passwordVerification: resetPasswordHash }).exec((err, user) => {
+ 			if (err) {
+ 				console.log("Error:", err);
+ 				reject({ status: 500, message: 'Invalid Resetpassword link' });
+ 			} else {
+ 				console.log("user password details", user)
+ 				user.password = bcrypt.hashSync(newpassword, 10);
+ 				user.passwordVerification = '';
+ 				user.save();
+ 				resolve({ status: 200, message: 'Your password changed successfully', data: user })
+ 			}
+ 		});
+ 	});
  }
 
 /**
@@ -339,31 +341,31 @@ const mailService = require('../services/mail.service');
  * @returns {Promise} - User List or reason why failed
  */
  const totalUserList = () => {
-     return new Promise((resolve, reject) => {
-         UserModel.aggregate([
-         {
-             $match: {
-                 $and: [
-                 { 'isDeleted': false },
-                 ]
-             }
-         },
-         {
-             $project: {
-                 firstName: '$firstName',
-                 lastName: '$lastName',
-                 email: '$email',
-                 mobile: '$mobile'
-             }
-         },
-         ]).exec(function (userListError, userList) {
-             if (userListError) {
-                 reject(userListError);
-             } else {
-                 resolve({ status: 200, message: 'Total User List!', data: userList });
-             }
-         });
-     });
+ 	return new Promise((resolve, reject) => {
+ 		UserModel.aggregate([
+ 		{
+ 			$match: {
+ 				$and: [
+ 				{ 'isDeleted': false },
+ 				]
+ 			}
+ 		},
+ 		{
+ 			$project: {
+ 				firstName: '$firstName',
+ 				lastName: '$lastName',
+ 				email: '$email',
+ 				mobile: '$mobile'
+ 			}
+ 		},
+ 		]).exec(function (userListError, userList) {
+ 			if (userListError) {
+ 				reject(userListError);
+ 			} else {
+ 				resolve({ status: 200, message: 'Total User List!', data: userList });
+ 			}
+ 		});
+ 	});
  }
 
 /**
@@ -373,36 +375,36 @@ const mailService = require('../services/mail.service');
  * @returns {Promise} Decoded User Jwt Token
  */
  const yahooLogin = (accessToken, userId) => {
-     return new Promise((resolve, reject) => {
-         yahooAuthentication(accessToken, userId).then((response) => {
-             console.log("Response", response);
-             UserModel.findOne({ email: response.email }).exec((err, user) => {
-                 if (err) {
-                     reject({ status: 500, message: 'Internal Server Error' });
-                 } else if (user) {
-                     const payload = { user };
-                     var token = jwt.sign(payload, config.jwtSecret);
-                     const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName }
+ 	return new Promise((resolve, reject) => {
+ 		yahooAuthentication(accessToken, userId).then((response) => {
+ 			console.log("Response", response);
+ 			UserModel.findOne({ email: response.email }).exec((err, user) => {
+ 				if (err) {
+ 					reject({ status: 500, message: 'Internal Server Error' });
+ 				} else if (user) {
+ 					const payload = { user };
+ 					var token = jwt.sign(payload, config.jwtSecret);
+ 					const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName }
 
-                     resolve({ status: 200, message: 'Login Successfully', data: tokenData })
-                 } else {
-                     UserModel.create(response, (useerr, userres) => {
-                         if (useerr) {
-                             console.log('usererror: ', useerr);
-                             res.status(500).json({ message: 'Internal Server Error' });
-                         } else {
-                             const payload = { userres };
-                             var token = jwt.sign(payload, config.jwtSecret);
-                             const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName }
-                             resolve({ status: 200, message: 'Login Successfully', data: tokenData })
-                         }
-                     })
-                 }
-             })
-         }).catch((error) => {
-             reject({ status: 500, message: 'Internal Sever Error' });
-         });
-     });
+ 					resolve({ status: 200, message: 'Login Successfully', data: tokenData })
+ 				} else {
+ 					UserModel.create(response, (useerr, userres) => {
+ 						if (useerr) {
+ 							console.log('usererror: ', useerr);
+ 							res.status(500).json({ message: 'Internal Server Error' });
+ 						} else {
+ 							const payload = { userres };
+ 							var token = jwt.sign(payload, config.jwtSecret);
+ 							const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName }
+ 							resolve({ status: 200, message: 'Login Successfully', data: tokenData })
+ 						}
+ 					})
+ 				}
+ 			})
+ 		}).catch((error) => {
+ 			reject({ status: 500, message: 'Internal Sever Error' });
+ 		});
+ 	});
  }
 
 /**
@@ -412,33 +414,33 @@ const mailService = require('../services/mail.service');
  * @returns {Promise} Decode User Details
  */
  function yahooAuthentication(accessToken, userId) {
-     return new Promise((resolve, reject) => {
-         const options = {
-             url: config.yahooUrl + userId + '/profile?format=json',
-             method: 'GET',
-             headers: {
-                 'Authorization': 'Bearer ' + accessToken,
-             }
-         };
-         console.log("API Url For OutLook", options.url);
-         request(options, function (err, res, body) {
-             if (err) {
-                 reject(err);
-                 console.log(err);
-             } else if (body) {
-                 let json = JSON.parse(body);
-                 const profile = json.profile;
-                 const newUser = {
-                     firstName: profile.givenName,
-                     lastName: profile.familyName,
-                     email: profile.emails[0].handle,
-                     socialId: profile.guid,
-                     mobile: profile.phones[0].number
-                 }
-                 resolve(newUser);
-             }
-         });
-     });
+ 	return new Promise((resolve, reject) => {
+ 		const options = {
+ 			url: config.yahooUrl + userId + '/profile?format=json',
+ 			method: 'GET',
+ 			headers: {
+ 				'Authorization': 'Bearer ' + accessToken,
+ 			}
+ 		};
+ 		console.log("API Url For OutLook", options.url);
+ 		request(options, function (err, res, body) {
+ 			if (err) {
+ 				reject(err);
+ 				console.log(err);
+ 			} else if (body) {
+ 				let json = JSON.parse(body);
+ 				const profile = json.profile;
+ 				const newUser = {
+ 					firstName: profile.givenName,
+ 					lastName: profile.familyName,
+ 					email: profile.emails[0].handle,
+ 					socialId: profile.guid,
+ 					mobile: profile.phones[0].number
+ 				}
+ 				resolve(newUser);
+ 			}
+ 		});
+ 	});
  }
 
 /**
@@ -447,35 +449,35 @@ const mailService = require('../services/mail.service');
  * @returns {Promise} Decoded User Jwt Token
  */
  const outLookLogin = (accessToken) => {
-     return new Promise((resolve, reject) => {
-         outLookAuthentication(accessToken).then((response) => {
-             console.log("Response", response);
-             UserModel.findOne({ email: response.email }).exec((err, user) => {
-                 if (err) {
-                     reject({ status: 500, message: 'Internal Server Error' });
-                 } else if (user) {
-                     const payload = { user };
-                     var token = jwt.sign(payload, config.jwtSecret);
-                     const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName }
-                     resolve({ status: 200, message: 'Login Successfully', data: tokenData })
-                 } else {
-                     UserModel.create(response, (useerr, userres) => {
-                         if (useerr) {
-                             console.log('usererror: ', useerr);
-                             res.status(500).json({ message: 'Internal Server Error' });
-                         } else {
-                             const payload = { userres };
-                             var token = jwt.sign(payload, config.jwtSecret);
-                             const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName }
-                             resolve({ status: 200, message: 'Login Successfully', data: tokenData })
-                         }
-                     })
-                 }
-             })
-         }).catch((error) => {
-             reject({ status: 500, message: 'Internal Sever Error' });
-         });
-     });
+ 	return new Promise((resolve, reject) => {
+ 		outLookAuthentication(accessToken).then((response) => {
+ 			console.log("Response", response);
+ 			UserModel.findOne({ email: response.email }).exec((err, user) => {
+ 				if (err) {
+ 					reject({ status: 500, message: 'Internal Server Error' });
+ 				} else if (user) {
+ 					const payload = { user };
+ 					var token = jwt.sign(payload, config.jwtSecret);
+ 					const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName }
+ 					resolve({ status: 200, message: 'Login Successfully', data: tokenData })
+ 				} else {
+ 					UserModel.create(response, (useerr, userres) => {
+ 						if (useerr) {
+ 							console.log('usererror: ', useerr);
+ 							res.status(500).json({ message: 'Internal Server Error' });
+ 						} else {
+ 							const payload = { userres };
+ 							var token = jwt.sign(payload, config.jwtSecret);
+ 							const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName }
+ 							resolve({ status: 200, message: 'Login Successfully', data: tokenData })
+ 						}
+ 					})
+ 				}
+ 			})
+ 		}).catch((error) => {
+ 			reject({ status: 500, message: 'Internal Sever Error' });
+ 		});
+ 	});
  }
 
 /**
@@ -485,31 +487,31 @@ const mailService = require('../services/mail.service');
  * @returns {Promise} Decoded User Detail
  */
  function outLookAuthentication(accessToken, userId) {
-     return new Promise((resolve, reject) => {
-         const options = {
-             url: config.outLookUrl,
-             method: 'GET',
-             headers: {
-                 'Authorization': 'Bearer ' + accessToken,
-             }
-         };
-         console.log("API Url For Yahoo", options.url);
-         request(options, function (err, res, body) {
-             if (err) {
-                 reject(err);
-                 console.log(err);
-             } else if (body) {
-                 const profile = JSON.parse(body);
-                 const newUser = {
-                     firstName: profile.surname,
-                     lastName: profile.familyName,
-                     email: profile.userPrincipalName,
-                     socialId: profile.id,
-                 }
-                 resolve(newUser);
-             }
-         });
-     });
+ 	return new Promise((resolve, reject) => {
+ 		const options = {
+ 			url: config.outLookUrl,
+ 			method: 'GET',
+ 			headers: {
+ 				'Authorization': 'Bearer ' + accessToken,
+ 			}
+ 		};
+ 		console.log("API Url For Yahoo", options.url);
+ 		request(options, function (err, res, body) {
+ 			if (err) {
+ 				reject(err);
+ 				console.log(err);
+ 			} else if (body) {
+ 				const profile = JSON.parse(body);
+ 				const newUser = {
+ 					firstName: profile.surname,
+ 					lastName: profile.familyName,
+ 					email: profile.userPrincipalName,
+ 					socialId: profile.id,
+ 				}
+ 				resolve(newUser);
+ 			}
+ 		});
+ 	});
  }
 
 /**
@@ -518,37 +520,37 @@ const mailService = require('../services/mail.service');
  * @returns {Promise} Return JWT Decoded Token
  */
  const googleLogin = (accessToken) => {
-     return new Promise((resolve, reject) => {
-         googleAuthentication(accessToken).then((response) => {
-             console.log("Response of google token", response);
-             UserModel.findOne({ email: response.email }).exec((err, user) => {
-                 if (err) {
-                     reject({ status: 500, message: 'Internal Server Error' });
-                 } else if (user) {
-                     const payload = { user };
-                     var token = jwt.sign(payload, config.jwtSecret);
-                     const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName }
+ 	return new Promise((resolve, reject) => {
+ 		googleAuthentication(accessToken).then((response) => {
+ 			console.log("Response of google token", response);
+ 			UserModel.findOne({ email: response.email }).exec((err, user) => {
+ 				if (err) {
+ 					reject({ status: 500, message: 'Internal Server Error' });
+ 				} else if (user) {
+ 					const payload = { user };
+ 					var token = jwt.sign(payload, config.jwtSecret);
+ 					const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName }
 
-                     resolve({ status: 200, message: 'Login Successfully', data: tokenData })
-                 } else {
-                     UserModel.create(response, (useerr, userres) => {
-                         if (useerr) {
-                             console.log('usererror: ', useerr);
-                             res.status(500).json({ message: 'Internal Server Error' });
-                         } else {
-                             const payload = { userres };
-                             var token = jwt.sign(payload, config.jwtSecret);
-                             const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName }
-                             resolve({ status: 200, message: 'Login Successfully', data: tokenData })
-                         }
-                     })
-                 }
-             })
-         }).catch((error) => {
-             console.log("error while get details of user", error)
-             reject({ status: 500, message: 'Internal Sever Error' });
-         });
-     });
+ 					resolve({ status: 200, message: 'Login Successfully', data: tokenData })
+ 				} else {
+ 					UserModel.create(response, (useerr, userres) => {
+ 						if (useerr) {
+ 							console.log('usererror: ', useerr);
+ 							res.status(500).json({ message: 'Internal Server Error' });
+ 						} else {
+ 							const payload = { userres };
+ 							var token = jwt.sign(payload, config.jwtSecret);
+ 							const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName }
+ 							resolve({ status: 200, message: 'Login Successfully', data: tokenData })
+ 						}
+ 					})
+ 				}
+ 			})
+ 		}).catch((error) => {
+ 			console.log("error while get details of user", error)
+ 			reject({ status: 500, message: 'Internal Sever Error' });
+ 		});
+ 	});
  }
 
 /**
@@ -557,27 +559,27 @@ const mailService = require('../services/mail.service');
  * @returns {Promise} Decode User Details
  */
  function googleAuthentication(accessToken) {
-     return new Promise((resolve, reject) => {
-         let url = config.googleUrl + accessToken;
-         console.log('API Url For Google', url);
-         request.get(url, (err, response) => {
+ 	return new Promise((resolve, reject) => {
+ 		let url = config.googleUrl + accessToken;
+ 		console.log('API Url For Google', url);
+ 		request.get(url, (err, response) => {
             // console.log("user response from google", response)
             if (config.googleClientId === JSON.parse(response.body).aud) {
-                const profile = JSON.parse(response.body);
-                const newUser = {
-                    firstName: profile.given_name,
-                    lastName: profile.family_name,
-                    email: profile.email,
-                    socialId: profile.sub
-                }
-                console.log("new user details===========", newUser)
-                resolve(newUser);
+            	const profile = JSON.parse(response.body);
+            	const newUser = {
+            		firstName: profile.given_name,
+            		lastName: profile.family_name,
+            		email: profile.email,
+            		socialId: profile.sub
+            	}
+            	console.log("new user details===========", newUser)
+            	resolve(newUser);
             } else {
-                console.log("error while get details of uuser", err)
-                reject(err)
+            	console.log("error while get details of uuser", err)
+            	reject(err)
             }
         });
-     });
+ 	});
  }
 
 /**
@@ -585,35 +587,35 @@ const mailService = require('../services/mail.service');
  * @param {String} accessToken 
  */
  const facebookLogin = (accessToken) => {
-     return new Promise((resolve, reject) => {
-         facebookAuthentication(accessToken).then((response) => {
-             console.log("Response", response);
-             UserModel.findOne({ email: response.email }).exec((err, user) => {
-                 if (err) {
-                     reject({ status: 500, message: 'Internal Server Error' });
-                 } else if (user) {
-                     const payload = { user };
-                     var token = jwt.sign(payload, config.jwtSecret);
-                     const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName }
-                     resolve({ status: 200, message: 'Login Successfully', data: tokenData })
-                 } else {
-                     UserModel.create(response, (useerr, userres) => {
-                         if (useerr) {
-                             console.log('usererror: ', useerr);
-                             res.status(500).json({ message: 'Internal Server Error' });
-                         } else {
-                             const payload = { userres };
-                             var token = jwt.sign(payload, config.jwtSecret);
-                             const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName }
-                             resolve({ status: 200, message: 'Login Successfully', data: tokenData })
-                         }
-                     });
-                 }
-             })
-         }).catch((error) => {
-             reject({ status: 500, message: 'Internal Sever Error' });
-         });
-     });
+ 	return new Promise((resolve, reject) => {
+ 		facebookAuthentication(accessToken).then((response) => {
+ 			console.log("Response", response);
+ 			UserModel.findOne({ email: response.email }).exec((err, user) => {
+ 				if (err) {
+ 					reject({ status: 500, message: 'Internal Server Error' });
+ 				} else if (user) {
+ 					const payload = { user };
+ 					var token = jwt.sign(payload, config.jwtSecret);
+ 					const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName }
+ 					resolve({ status: 200, message: 'Login Successfully', data: tokenData })
+ 				} else {
+ 					UserModel.create(response, (useerr, userres) => {
+ 						if (useerr) {
+ 							console.log('usererror: ', useerr);
+ 							res.status(500).json({ message: 'Internal Server Error' });
+ 						} else {
+ 							const payload = { userres };
+ 							var token = jwt.sign(payload, config.jwtSecret);
+ 							const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName }
+ 							resolve({ status: 200, message: 'Login Successfully', data: tokenData })
+ 						}
+ 					});
+ 				}
+ 			})
+ 		}).catch((error) => {
+ 			reject({ status: 500, message: 'Internal Sever Error' });
+ 		});
+ 	});
  }
 
 /**
@@ -621,25 +623,25 @@ const mailService = require('../services/mail.service');
  * @param {String} accessToken 
  */
  function facebookAuthentication(accessToken) {
-     return new Promise((resolve, reject) => {
-         let url = config.fbUrl + '?access_token=' + accessToken + '&debug=all&fields=id,name,birthday,first_name,last_name,locale,gender,email&format=json&method=get&pretty=1&suppress_http_code=1';
-         console.log('API Url For Facebook', url);
-         request.get(url, (err, response) => {
-             if (JSON.parse(response.body).error) {
-                 reject(err)
-             } else {
-                 const profile = JSON.parse(response.body)
-                 console.log("profile", profile);
-                 const newUser = {
-                     firstName: profile.first_name,
-                     lastName: profile.last_name,
-                     email: profile.email,
-                     socialId: profile.id,
-                 }
-                 resolve(newUser)
-             };
-         })
-     })
+ 	return new Promise((resolve, reject) => {
+ 		let url = config.fbUrl + '?access_token=' + accessToken + '&debug=all&fields=id,name,birthday,first_name,last_name,locale,gender,email&format=json&method=get&pretty=1&suppress_http_code=1';
+ 		console.log('API Url For Facebook', url);
+ 		request.get(url, (err, response) => {
+ 			if (JSON.parse(response.body).error) {
+ 				reject(err)
+ 			} else {
+ 				const profile = JSON.parse(response.body)
+ 				console.log("profile", profile);
+ 				const newUser = {
+ 					firstName: profile.first_name,
+ 					lastName: profile.last_name,
+ 					email: profile.email,
+ 					socialId: profile.id,
+ 				}
+ 				resolve(newUser)
+ 			};
+ 		})
+ 	})
  }
 
 /**
@@ -648,19 +650,19 @@ const mailService = require('../services/mail.service');
  * @param {Object} accountData 
  */
  const addBankAccountDetail = (userId, accountData) => {
-     return new Promise((resolve, reject) => {
-         console.log('UserId In Service', userId);
-         console.log('account Detail In Service', accountData);
-         UserModel.findOneAndUpdate({ _id: userId }, { $push: { bankAccount: accountData } }, { upsert: true, new: true }).exec((err, response) => {
-             if (err) {
-                 console.log('Error in account Details', err);
-                 reject({ status: 500, message: 'Internal Server Error', data: err });
-             } else {
-                 console.log('Success Response', response);
-                 resolve({ status: 200, message: 'Account Detail Added Successfully.' });
-             }
-         });
-     });
+ 	return new Promise((resolve, reject) => {
+ 		console.log('UserId In Service', userId);
+ 		console.log('account Detail In Service', accountData);
+ 		UserModel.findOneAndUpdate({ _id: userId }, { $push: { bankAccount: accountData } }, { upsert: true, new: true }).exec((err, response) => {
+ 			if (err) {
+ 				console.log('Error in account Details', err);
+ 				reject({ status: 500, message: 'Internal Server Error', data: err });
+ 			} else {
+ 				console.log('Success Response', response);
+ 				resolve({ status: 200, message: 'Account Detail Added Successfully.' });
+ 			}
+ 		});
+ 	});
  }
 
 /**
@@ -669,18 +671,18 @@ const mailService = require('../services/mail.service');
  * @returns {Promise} Deleted Account Details 
  */
  const removeBankAccount = (accountId) => {
-     return new Promise((resolve, reject) => {
-         console.log('account Id', accountId);
-         UserModel.findByIdAndUpdate({ 'bankAccount._id': accountId }, { $set: { isDeleted: true } }, { upsert: true }).exec((err, response) => {
-             if (err) {
-                 console.log('Error in Account Delete', err);
-                 reject({ status: 500, message: 'Internal Server Error' });
-             } else {
-                 console.log('Updated Response:', response);
-                 resolve({ status: 200, message: 'Account Detail Removed Successfully.' });
-             }
-         });
-     });
+ 	return new Promise((resolve, reject) => {
+ 		console.log('account Id', accountId);
+ 		UserModel.findByIdAndUpdate({ 'bankAccount._id': accountId }, { $set: { isDeleted: true } }, { upsert: true }).exec((err, response) => {
+ 			if (err) {
+ 				console.log('Error in Account Delete', err);
+ 				reject({ status: 500, message: 'Internal Server Error' });
+ 			} else {
+ 				console.log('Updated Response:', response);
+ 				resolve({ status: 200, message: 'Account Detail Removed Successfully.' });
+ 			}
+ 		});
+ 	});
  }
 
 /**
@@ -689,37 +691,37 @@ const mailService = require('../services/mail.service');
  * @param {Promise} AccountDetails 
  */
  const getAccountDetailList = (userId) => {
-     return new Promise((resolve, reject) => {
-         console.log('UserId', userId);
-         UserModel.aggregate([
-         {
-             $match: {
-                 $and: [
-                 { '_id': ObjectId(userId) },
-                 { 'isDeleted': false },
-                 ]
-             }
-         },
-         {
-             $project: {
-                 bankDetail: {
-                     $filter: {
-                         input: "$bankAccount",
-                         as: "bankDetail",
-                         cond: { $eq: ["$$bankDetail.isDeleted", false] }
-                     }
-                 }
-             }
-         }
-         ]).exec(function (accErr, accList) {
-             if (accErr) {
-                 reject({ status: 500, message: 'Internal Server Error' });
-             } else {
-                 console.log('accList:', accList);
-                 resolve({ status: 200, message: 'Successfully Get the Bank Detail List.', data: accList[0] });
-             }
-         });
-     });
+ 	return new Promise((resolve, reject) => {
+ 		console.log('UserId', userId);
+ 		UserModel.aggregate([
+ 		{
+ 			$match: {
+ 				$and: [
+ 				{ '_id': ObjectId(userId) },
+ 				{ 'isDeleted': false },
+ 				]
+ 			}
+ 		},
+ 		{
+ 			$project: {
+ 				bankDetail: {
+ 					$filter: {
+ 						input: "$bankAccount",
+ 						as: "bankDetail",
+ 						cond: { $eq: ["$$bankDetail.isDeleted", false] }
+ 					}
+ 				}
+ 			}
+ 		}
+ 		]).exec(function (accErr, accList) {
+ 			if (accErr) {
+ 				reject({ status: 500, message: 'Internal Server Error' });
+ 			} else {
+ 				console.log('accList:', accList);
+ 				resolve({ status: 200, message: 'Successfully Get the Bank Detail List.', data: accList[0] });
+ 			}
+ 		});
+ 	});
  }
 
 /**
@@ -728,24 +730,24 @@ const mailService = require('../services/mail.service');
  * @returns {Promise} - Register User or reason why failed
  */
  const resendVerification = (email) => {
-     return new Promise((resolve, reject) => {
-         console.log('Email To Verify:', email);
-         const emailVarification = Math.floor(100000 + Math.random() * 900000);
-         console.log("emailVarification code:", emailVarification);
-         UserModel.findOneAndUpdate({ email: email }, { $set: { emailVarification: emailVarification } }, { upsert: true }).exec((userErr, userData) => {
-             if (userErr) {
-                 console.log('usererror: ', userErr);
-                 reject({ status: 500, message: 'Internal Server Error' });
-             } else {
-                 emailService.sendWelcomeEmail(userData.email, userData.firstName, emailVarification).then((response) => {
-                     resolve({ status: 200, message: 'Email Verification Code Send to Your mail.', data: userres })
-                 }).catch((error) => {
-                     console.log('error:', error);
-                     reject({ status: 500, message: 'Internal Server Error' });
-                 });
-             }
-         });
-     });
+ 	return new Promise((resolve, reject) => {
+ 		console.log('Email To Verify:', email);
+ 		const emailVarification = Math.floor(100000 + Math.random() * 900000);
+ 		console.log("emailVarification code:", emailVarification);
+ 		UserModel.findOneAndUpdate({ email: email }, { $set: { emailVarification: emailVarification } }, { upsert: true }).exec((userErr, userData) => {
+ 			if (userErr) {
+ 				console.log('usererror: ', userErr);
+ 				reject({ status: 500, message: 'Internal Server Error' });
+ 			} else {
+ 				emailService.sendWelcomeEmail(userData.email, userData.firstName, emailVarification).then((response) => {
+ 					resolve({ status: 200, message: 'Email Verification Code Send to Your mail.', data: userres })
+ 				}).catch((error) => {
+ 					console.log('error:', error);
+ 					reject({ status: 500, message: 'Internal Server Error' });
+ 				});
+ 			}
+ 		});
+ 	});
  }
 
  module.exports.login = login;

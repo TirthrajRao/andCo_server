@@ -7,8 +7,10 @@ const logger = require("morgan");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const cron = require('node-cron');
-
+const fs = require('fs')
 const eventController = require('./controller/Event.controller');
+
+// const CYPHERKEY = 'asoebi'
 
 
 //This Cronjob For Guest Mail 
@@ -27,15 +29,15 @@ config.env = require("./config/env.config");
 const Database = require("./config/database");
 
 // Load dotenv config
-if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
-	// eslint-disable-next-line global-require
-	require("dotenv").load();
-	if (!process.env.PORT) {
-		console.error('Required environment variable not found. Are you sure you have a ".env" file in your application root?');
-		console.error('If not, you can just copy "example.env" and change the defaults as per your need.');
-		process.exit(1);
-	}
-}
+// if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
+// 	// eslint-disable-next-line global-require
+// 	require("dotenv").load();
+// 	if (!process.env.PORT) {
+// 		console.error('Required environment variable not found. Are you sure you have a ".env" file in your application root?');
+// 		console.error('If not, you can just copy "example.env" and change the defaults as per your need.');
+// 		process.exit(1);
+// 	}
+// }
 
 const app = express();
 // const server = http.createServer(app);
@@ -123,12 +125,13 @@ if (config.env.name === "production") {
 	// 	cert: fs.readFileSync("/var/www/html/conduct/ssl/fullchain1.pem")
 	// };
 	databaseConnectivity(config.env.name);
-	console.log(`Server started on port ${config.env.port}`);
+	// console.log(`Server started on port ${config.env.port}`);
 	var server = https.createServer(credentials, app);
-	server.listen(config.env.port);
-	server.on("error", onError);
-	server.on("listening", onListen);
+	// server.listen(config.env.port);
+	// server.on("error", onError);
+	// server.on("listening", onListen);
 } else if (config.env.name === "test") {
+console.log("=================test")
 	var server = https.createServer(
 		{
 			key: fs.readFileSync("/var/www/html/Aso-ebi/ssl/privkey1.pem"),
@@ -136,12 +139,14 @@ if (config.env.name === "production") {
 		},
 		app
 	);
+	// console.log("Server ", server);
 	// var server = http.createServer(app);
-	console.log(`Server started on port ${config.env.port}`);
+	console.log(`Server started on port no  ${config.env.port}`);
 	databaseConnectivity(config.env.name);
-	// server.listen(config.env.port);
-	// server.on("error", onError);
-	// server.on("listening", onListen);
+	 server.listen(config.env.port);
+	 // console.log("error su ave che", onError)
+	 // server.on("error", onError);
+	 // server.on("listening", onListen);
 	// Development and Testing mode
 } else {
 	if (config.env.name === "development" && config.env.https) {
@@ -182,6 +187,6 @@ if (config.env.name === "production") {
 
 
 
-server.listen(process.env.PORT);
-console.log(`Server started on port ${process.env.PORT}`);
+// server.listen(process.env.PORT);
+// console.log(`Server started on port ${process.env.PORT}`);
 module.exports = app;

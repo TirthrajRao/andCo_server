@@ -21,11 +21,12 @@ envs['development'] = {
 };
 envs['testing'] = {
     name: 'test',
-    url: '',
+    url: 'https://test.andcowith.me:3001/api',
     https: true,
-    port: 3001,
+    port: 9001,
     settings: settings.testing,
     common: settings.common,
+    // CYPHERKEY:asoebi
     // redirectTo: 'http://conduct-testing.raoinformationtechnology.com/#/'
 }
 // Set environment dynamically at runtime
