@@ -33,7 +33,7 @@ var env = process.env.NODE_ENV;
 // Default to development environment if NODE_ENV is undefined.
 if (!env || !envs[env]) {
     console.log('NODE_ENV is undefined or its value was not understood. Default to development mode. ');
-    env = 'testing';
+    env = 'development';
 }
 // console.log('Starting in', chalk.greenBright(env), 'mode...');
 module.exports = envs[env];

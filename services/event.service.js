@@ -152,6 +152,10 @@ function fnHashtagAvailableOnUpdate(eventId, hashTag) {
  * @returns {Promise} - New Activity or reason why failed
  */
 module.exports.newActivityInsideEvent = (activityData) => {
+    console.log("details of list of activities", activityData)
+    // activityData.forEach(singleDate, =>{
+    //     console.log
+    // })
     const eventId = activityData[0].eventId;
     return new Promise((resolve, reject) => {
         EventModel.findByIdAndUpdate({ _id: eventId }, { $push: { activities: activityData } }, { new: true }, (activityError, newActivity) => {
@@ -159,6 +163,7 @@ module.exports.newActivityInsideEvent = (activityData) => {
                 console.log('Activity Error: ', activityError);
                 reject({ status: 500, message: 'Internal Server Error' });
             } else {
+                console.log("activity added in event", newActivity)
                 resolve({ status: 200, message: 'New Activities Created', data: newActivity.activities });
             }
         });
@@ -170,16 +175,16 @@ module.exports.newActivityInsideEvent = (activityData) => {
  * @param {object} body - Group data to Create New Group Inside Activity
  * @returns {Promise} - New Group or reason why failed
  */
-module.exports.newGroupInsideActivity = (groupData) => {
+module.exports.newGroupInsideActivity = (groupData, eventId) => {
 
     console.log('New Group data', groupData);
 
     return new Promise((resolve, reject) => {
 
-        async.eachSeries(groupData.group, (singleGroup, callback) => {
-
+        async.eachSeries(groupData, (singleGroup, callback) => {
+            console.log("single activity with group details======", singleGroup)
             let newGroup = {
-                eventId: groupData.eventId,
+                eventId: eventId,
                 activityId: singleGroup.activityId,
                 groupName: singleGroup.groupName,
                 item: [],

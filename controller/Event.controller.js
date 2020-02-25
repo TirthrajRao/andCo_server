@@ -84,8 +84,9 @@ const paymentService = require("../services/payment.service");
  * @api {post} /api/newevent/activity
  */
  module.exports.newGroupInsideActivity = (req, res) => {
- 	console.log("New Group Request.body", JSON.stringify(req.body));
- 	eventService.newGroupInsideActivity(req.body).then((response) => {
+ 	console.log("New Group Request.body", req.query.eventId);
+
+ 	eventService.newGroupInsideActivity(req.body , req.query.eventId).then((response) => {
  		return res.status(200).json({ message: response.message, data: response.data });
  	}).catch((error) => {
  		console.log('error: ', error);
