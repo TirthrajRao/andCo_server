@@ -33,6 +33,7 @@ module.exports.createNewEvent = (eventData) => {
                     } else {
                         console.log("new event created", newEvent)
                         fnGenerateEventLink(newEvent).then((Response) => {
+                            console.log("link generate thai gai che", Response)
                             resolve({ status: 201, message: 'New Event Created Successfully.', data: Response.data });
                         }).catch((error) => {
                             reject({ status: 500, message: 'Internal Server Error' });
@@ -79,7 +80,7 @@ function fnGenerateEventLink(event) {
         const baseParam = Buffer.from(param).toString('base64');
         const link = config.baseUrl + config.welcomeGuest + baseParam;
         const eventLink = { eventLink: link }
-        EventModel.findByIdAndUpdate({ _id: event._id }, eventLink, { upsert: true }, (eventError, updatedEvent) => {
+        EventModel.findByIdAndUpdate({ _id: event._id }, eventLink, { upsert: true, new: true }, (eventError, updatedEvent) => {
             if (eventError) {
                 console.log('usererror: ', eventError);
                 reject({ status: 500, message: 'Internal Server Error' });
@@ -212,7 +213,7 @@ module.exports.newGroupInsideActivity = (groupData, eventId) => {
                 console.log('callbackError: ', callbackError);
                 reject({ status: 500, message: 'Internal Server Error' });
             } else {
-                resolve({ status: 200, message: 'New Event Created Successfully.' });
+                resolve({ status: 200, message: 'New Group Created Successfully.' });
             }
         });
     });
