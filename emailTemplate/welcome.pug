@@ -1,4 +1,96 @@
-h3 Hello #{firstName} #{lastName},
-p We received a request to set your Aso-Ebi email to #{ email }
-p If this is correct, please enter below verification code for verification.
-p Verification code:#{emailVarification}
+html
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    style.
+      @import url('https://fonts.googleapis.com/css?family=Advent+Pro|Manjari&display=swap');
+      p {
+      margin: 0;
+      }
+      .andco-email-template {
+      background-image: url("https://test.andcowith.me/join_enter.d3935dc0e5ccd82def8d.png");
+      background-repeat: no-repeat;
+      margin: auto;
+      font-family: 'Manjari', sans-serif !important;
+      padding: 80px 0;
+      }
+      .inner {
+      text-align: center;
+      margin: auto;
+      }
+      .email-img {
+      margin-bottom: 40px;
+      }
+      .inner-box {
+      background-color: #ebf1ec;
+      width: 500px;
+      border-radius: 10px;
+      text-align: center;
+      padding: 50px 40px 30px;
+      margin: 0px auto;
+      }
+      .inner-content p {
+      color: #565555;
+      font-size: 20px;
+      line-height: 33px;
+      font-weight: 600;
+      font-family: 'Manjari', sans-serif !important;
+      }
+      .varificaiton-code-box {
+      background-color: #d0e8da;
+      border-radius: 10px;
+      padding: 20px 15px 12px;
+      width: max-content;
+      margin: auto;
+      }
+      .varificaiton-code-box span {
+      font-weight: 600;
+      font-size: 30px;
+      color: #15574d;
+      font-family: 'Manjari', sans-serif !important;
+      }
+      .inner-box h4 {
+      line-height: 33px;
+      font-size: 20px;
+      color: #d1857d;
+      font-weight: normal;
+      font-family: 'Manjari', sans-serif !important;
+      }
+      @media(max-width:575px) {
+      .inner-box {
+      width: 250px;
+      padding: 20px;
+      }
+      .varificaiton-code-box {
+      padding: 12px;
+      }
+      .email-img img {
+      height: 40px;
+      }
+      .inner-content p {
+      font-size: 16px;
+      line-height: 30px;
+      font-weight: unset;
+      }
+      .varificaiton-code-box span {
+      font-size: 22px;
+      }
+      .inner-box h4 {
+      line-height: 26px;
+      font-size: 16px;
+      margin: 10px;
+      }
+      }
+  body.andco-email-template
+    .inner
+      .email-img
+        img(src='https://test.andcowith.me/assets/images/andco_logo.png', alt='andco-log')
+      .inner-box
+        .inner-content
+          p
+            | Thank you for joining Andco. We are glad to have you on board. To complete your email verification,
+            | please enter the below code.
+        .varificaiton-code-box
+          span #{emailVarification}
+        h4 If you did not create an account using this address, kindly ignore this email!

@@ -79,7 +79,7 @@ module.exports.createNewEvent = (eventData) => {
          const baseParam = Buffer.from(param).toString('base64');
          const link = config.baseUrl + config.welcomeGuest + baseParam;
          const eventLink = { eventLink: link }
-         EventModel.findByIdAndUpdate({ _id: event._id }, eventLink, { upsert: true }, (eventError, updatedEvent) => {
+         EventModel.findByIdAndUpdate({ _id: event._id }, eventLink, { upsert: true , new:true }, (eventError, updatedEvent) => {
              if (eventError) {
                  console.log('usererror: ', eventError);
                  reject({ status: 500, message: 'Internal Server Error' });
@@ -207,7 +207,7 @@ module.exports.createNewEvent = (eventData) => {
                  console.log('callbackError: ', callbackError);
                  reject({ status: 500, message: 'Internal Server Error' });
              } else {
-                 resolve({ status: 200, message: 'New Event Created Successfully.' });
+                 resolve({ status: 200, message: 'New Group Created Successfully.' });
              }
          });
      });

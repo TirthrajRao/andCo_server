@@ -98,11 +98,15 @@ const paymentService = require("../services/payment.service");
  * @api {get} /api/event:id
  */
  module.exports.eventDetail = (req, res) => {
+ 	console.log("==========", req.user)
  	const eventId = req.params.id;
-
-
-
- 	const userId = req.user.user._id;
+ 	if(req.user.user){
+ 		userId = req.user.user._id;	
+ 	}
+ 	if(req.user.userres){
+ 		userId = req.user.userres._id
+ 	}
+ 	
  	console.log('Req.user:', userId);
  	eventService.eventDetail(eventId, userId).then((response) => {
  		return res.status(200).json({ message: response.message, data: response.data });
