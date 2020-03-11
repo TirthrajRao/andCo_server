@@ -28,7 +28,7 @@ router.get('/event/search-hashtag', EventController.eventListUsingHashTag);
 router.get('/event/public-event', EventController.eventListForHomepage);
 
 // Routes For Cart Operations
-router.get('/event/cart-list/:id', ensureAuthenticated.validateToken, EventController.cartItemList);
+router.get('/event/cart-list/:hashTag', ensureAuthenticated.validateToken, EventController.cartItemList);
 router.get('/event/final-list/:id', ensureAuthenticated.validateToken, EventController.cartItemListWithTotal);
 router.post('/event/order-checkout/', ensureAuthenticated.validateToken, EventController.orderCheckout);
 router.put('/event/update-item', ensureAuthenticated.validateToken, EventController.updateItemFromCart);

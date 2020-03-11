@@ -1079,27 +1079,89 @@ const TransactionUsingEventId = (eventId) => {
 * @param {object} body - Event data to Create New Event
 * @returns {Promise} - New Item or reason why failed
 */
-module.exports.addItemToCart = (itemData) => {
-    console.log("Item Data", itemData);
+module.exports.addItemToCart = (itemData, hashTag, userId) => {
+    console.log("Item Data ========", hashTag);
     return new Promise((resolve, reject) => {
-        fncheckForItemInCart(itemData).then((response) => {
-            if (response) {
-                CartModel.create(itemData, (itemError, newItem) => {
-                    if (itemError) {
-                        console.log('Itemerror: ', itemError);
-                        reject({ status: 500, message: 'Internal Server Error' });
-                    } else {
-                        resolve({ status: 200, message: 'Item Added Successfully.', data: newItem });
-                    }
-                });
-            } else {
-                reject({ status: 200, message: 'Item Quantity Increased' });
-            }
+        findEventIdWithHashtag(hashTag.eventHashtag).then((response) => {
+            console.log("find event id of hashtag", response)
+            itemsAddedInCart(response._id, itemData, userId).then((response) => {
+                console.log("all items added", response)
+                resolve({ data: response.data })
+            }).catch((error) => {
+                reject({ status: 500, message: 'Error while get cart list' })
+                console.log("error while cart added", error)
+            })
         }).catch((error) => {
-            reject({ status: 500, message: 'Internal Server Error' });
+            reject({ status: 500, message: 'Error while get eventId' })
+            console.log("error while find event id", error)
         })
+        // fncheckForItemInCart(itemData).then((response) => {
+        //     if (response) {
+        //         CartModel.create(itemData, (itemError, newItem) => {
+        //             if (itemError) {
+        //                 console.log('Itemerror: ', itemError);
+        //                 reject({ status: 500, message: 'Internal Server Error' });
+        //             } else {
+        //                 resolve({ status: 200, message: 'Item Added Successfully.', data: newItem });
+        //             }
+        //         });
+        //     } else {
+        //         reject({ status: 200, message: 'Item Quantity Increased' });
+        //     }
+        // }).catch((error) => {
+        //     reject({ status: 500, message: 'Internal Server Error' });
+        // })
     });
 }
+
+
+const findEventIdWithHashtag = (hashTag) => {
+    return new Promise((resolve, reject) => {
+        EventModel.findOne({ 'hashTag': hashTag })
+            .exec((error, response) => {
+                if (error)
+                    //  console.log("error while find =========", error)
+                    reject({ status: 500, message: 'Error while get details of event' })
+                else {
+                    console.log("=================>>>>>>", response)
+                    resolve(response._id)
+                }
+            })
+    })
+}
+
+
+const itemsAddedInCart = (eventId, allCart, userId) => {
+    console.log("event id and all data", allCart)
+    return new Promise((resolve, reject) => {
+        allCart.forEach((singleCart) => {
+            console.log("single item with details", singleCart)
+            const itemData = {
+                userId: userId,
+                eventId: eventId,
+                quantity: singleCart.quantity,
+                itemId: singleCart.itemId,
+            }
+            console.log("finall cart item object to push", itemData)
+            CartModel.create(itemData, (itemError, newItem) => {
+                if (itemError) {
+                    console.log('Itemerror: ', itemError);
+                    reject({ status: 500, message: 'Internal Server Error' });
+                } else {
+                    cartItemList(eventId, userId).then((response) => {
+                        console.log("response of all items list", response)
+                        resolve({ status: 200, message: 'Item Added Successfully.', data: response });
+                    }).catch((error) => {
+                        console.log("error while get items list", error)
+                        reject({ status: 500, message: 'Error while get details of items' });
+                    })
+                    console.log("items added in data base", newItem)
+                }
+            });
+        })
+    })
+}
+
 
 
 /**
@@ -1196,7 +1258,7 @@ const cartItemList = (eventId, userId) => {
             },
             {
                 $project: {
-                    quantity: 1,
+                    quantity: '$quantity',
                     activityName: '$GroupDetail.item.activity.activities.activityName',
                     groupName: '$GroupDetail.groupName',
                     itemName: '$GroupDetail.item.itemName',
@@ -1210,6 +1272,8 @@ const cartItemList = (eventId, userId) => {
             if (cartListError) {
                 reject({ status: 500, message: 'Internal Server Error', data: cartListError });
             } else {
+                console.log("cart list response", cartList)
+                // resolve(cartList)
                 eventDetail(eventId).then((response) => {
                     const cartDetail = {};
                     cartDetail.eventDetail = response.data;
@@ -1229,11 +1293,15 @@ const cartItemList = (eventId, userId) => {
 * @returns {Promise} - Removed Item or reason why failed
 */
 module.exports.removeItemFromCart = (cartId) => {
+    console.log("cart id", cartId)
     return new Promise((resolve, reject) => {
-        CartModel.findByIdAndRemove({ _id: cartId }).exec((error, response) => {
+        CartModel.findOneAndRemove({ 'itemId': cartId }).exec((error, response) => {
             if (error) {
-                reject({ status: 500, message: 'Internal Server Error' });
+                console.log("error while remove cart items", error)
+                // reject({ status: 500, message: 'Internal Server Error' });
             } else {
+                console.log("response of removed items", response)
+                
                 resolve({ status: 200, message: 'Item Removed Suucessfully' });
             }
         });
@@ -3510,6 +3578,9 @@ const changeProfileOfevent = (eventId, eventDetails) => {
     })
 }
 
+
+
+module.exports.findEventIdWithHashtag = findEventIdWithHashtag
 module.exports.guestEventDetail = guestEventDetail
 module.exports.changeProfileOfevent = changeProfileOfevent
 module.exports.eventWithTransactionAndUserDetail = eventWithTransactionAndUserDetail;

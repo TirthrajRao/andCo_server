@@ -315,14 +315,18 @@ module.exports.MyEventList = (req, res) => {
  * @returns - Item Of Cart Or Reason To Fail
  */
 module.exports.addItemToCart = (req, res) => {
-
-	const itemData = {
-		userId: req.user.user._id,
-		eventId: req.body.eventId,
-		quantity: 1,
-		itemId: req.body.itemId,
+	console.log("all items list", req.body)
+	let loginUser = req.user
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
 	}
-	eventService.addItemToCart(itemData).then((response) => {
+	let itemData = []
+	itemData = req.body
+	let hashTag = itemData[0]
+	console.log("event hastag", hashTag.eventHashtag)
+	eventService.addItemToCart(itemData, hashTag, finalId).then((response) => {
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
 		console.error('error: ', error);
@@ -351,16 +355,29 @@ module.exports.updateItemToCart = (req, res) => {
  * @returns - Cart Item List Or Reason To Fail
  */
 module.exports.cartItemList = (req, res) => {
-	const eventId = req.params.id;
-	const userId = req.user.user._id;
-	console.log('Event Id', eventId);
-	console.log('User Id', userId);
-	eventService.cartItemList(eventId, userId).then((response) => {
-		return res.status(200).json({ message: response.message, data: response.data });
+	let loginUser = req.user
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
+	const hashTag = req.params.hashTag;
+	console.log("hashtag", hashTag)
+	eventService.findEventIdWithHashtag(hashTag).then((response) => {
+		console.log("response of eventId", response)
+		const eventId = response
+		eventService.cartItemList(eventId, finalId).then((response) => {
+			return res.status(200).json({ message: response.message, data: response.data });
+		}).catch((error) => {
+			console.error('error: ', error);
+			return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
+		});
 	}).catch((error) => {
-		console.error('error: ', error);
-		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
-	});
+		console.log("error while get event id", error)
+		return res.status(error.status).json({ message: error.message })
+	})
+
+
 }
 
 /**
