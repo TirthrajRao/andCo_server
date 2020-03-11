@@ -784,6 +784,38 @@ function getAddressDetails(userId) {
     })
 }
 
+
+function addAccountDetails(data, userId, finalFlage) {
+    console.log("details of account", data, finalFlage)
+    return new Promise((resolve, reject) => {
+        if (finalFlage == false) {
+            UserModel.findByIdAndUpdate({ _id: userId }, { $set: { bankAccount: data } }, { upsert: true, new: true })
+                .exec((error, accountAdded) => {
+                    if (error)
+                        //  console.log("error while add account", error)
+                        reject({ status: 500, message: 'Error while add bank details' })
+                    else {
+                        resolve({ message: 'Bank account added' })
+                        console.log("get details of account", accountAdded)
+                    }
+                })
+        }
+        if (finalFlage == true) {
+            UserModel.findByIdAndUpdate({ _id: userId }, { $set: { cardAccount: data } }, { upsert: true, new: true })
+                .exec((error, cardAdded) => {
+                    if (error)
+                        //  console.log("error while add account", error)
+                        reject({ status: 500, message: 'Error while add card details' })
+                    else {
+                        // console.log("get details of account", cardAdded)
+                        resolve({ message: 'Card Details added' })
+                    }
+                })
+        }
+    })
+}
+
+module.exports.addAccountDetails = addAccountDetails
 module.exports.getAddressDetails = getAddressDetails
 module.exports.enterDeliveryAddress = enterDeliveryAddress
 module.exports.login = login;

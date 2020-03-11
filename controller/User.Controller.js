@@ -371,4 +371,34 @@ module.exports.getAddressDetails = (req, res) => {
 	})
 }
 
+module.exports.addAccountDetails = (req, res) => {
+	console.log("req.body ======", req.body)
+	let loginUser = req.user
+	let finalFlage = req.body.flag
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
+	let finalData = {}
+	if (req.body.flag == false) {
+		if (req.body.bankName) finalData['bankName'] = req.body.bankName
+		if (req.body.accountNumber) finalData['accountNumber'] = req.body.accountNumber
+		console.log("final data of bank", finalData)
+	}
+	if (req.body.flag == true) {
+		if (req.body.flag) finalData['flag'] = req.body.flag
+		if (req.body.cardNumber) finalData['cardNumber'] = req.body.cardNumber
+		if (req.body.cvv) finalData['cvv'] = req.body.cvv
+		console.log("final data of card", finalData)
+	}
+	userService.addAccountDetails(finalData, finalId, finalFlage).then((response) => {
+		console.log("details added completed", response)
+		return res.status(200).json({ message: response.message })
+	}).catch((error) => {
+		console.log("error while add details ", error)
+		return res.status(error.status).json({ message: error.message })
+	})
+}
+
 

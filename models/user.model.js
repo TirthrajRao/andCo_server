@@ -39,21 +39,30 @@ const User = new mongoose.Schema({
 		default: 'user',
 		enum: ['user', 'admin', 'subadmin'],
 	},
-	bankAccount: [{
+	bankAccount: {
 		accountNumber: {
 			type: Number,
 		},
 		bankName: {
 			type: String,
 		},
-		IFSCCode: {
-			type: String,
+		isDeleted: {
+			type: Boolean,
+			default: false,
+		},
+	},
+	cardAccount: {
+		cardNumber: {
+			type: Number
+		},
+		cvv: {
+			type: Number
 		},
 		isDeleted: {
 			type: Boolean,
 			default: false,
 		},
-	}],
+	},
 	address: {
 		deliverName: {
 			type: String
