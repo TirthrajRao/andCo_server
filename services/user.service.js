@@ -749,6 +749,43 @@ const resendVerification = (email) => {
     });
 }
 
+
+function enterDeliveryAddress(details, userId) {
+    console.log("details of address", details, userId)
+    return new Promise((resolve, reject) => {
+        UserModel.findByIdAndUpdate({ _id: userId }, { $set: { address: details } }, { upsert: true, new: true })
+            .exec((error, addressAdded) => {
+                if (error)
+                    //  console.log("error while add address", error)
+                    reject({ status: 500, message: 'Error while enter address' })
+                else {
+                    resolve({ message: 'Address placed successfully' })
+                    console.log("address added completed", addressAdded)
+                }
+            })
+    })
+}
+
+function getAddressDetails(userId) {
+    console.log("userid", userId)
+    return new Promise((resolve, reject) => {
+        UserModel.findOne({ _id: ObjectId(userId) })
+            // .populate('address')
+            .exec((error, addressFind) => {
+                if (error)
+                    //  console.log("erorr while get address", error)
+                    reject({ status: 500, message: 'Error while get details of address' })
+                else {
+                    let sendData = addressFind.address
+                    resolve({ sendData })
+                    console.log("details of address", addressFind)
+                }
+            })
+    })
+}
+
+module.exports.getAddressDetails = getAddressDetails
+module.exports.enterDeliveryAddress = enterDeliveryAddress
 module.exports.login = login;
 module.exports.signUp = signUp;
 module.exports.mailSendToUser = mailSendToUser

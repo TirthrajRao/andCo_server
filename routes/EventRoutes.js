@@ -61,6 +61,11 @@ router.route('/cart')
 router.get('/event/myevent-list', ensureAuthenticated.validateToken, EventController.MyEventList);
 router.get('/event/event-list', EventController.eventList);
 router.get('/event/:id', [ensureAuthenticated.validateToken], EventController.eventDetail);
+router.get('/event/guestEvent/:hashTag', [ensureAuthenticated.validateToken], EventController.guestEventDetails)
+
+//Routes For Event Profile Change
+
+router.post('/event/changeProfile', cpUpload, EventController.changeProfile)
 
 // Routes For Message Operations
 router.post('/message/add-message', ensureAuthenticated.validateToken, Fileupload.upload('attachment'), eventValidation.thanksMessageDetail, EventController.thanksMessageDetail);

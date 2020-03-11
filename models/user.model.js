@@ -54,6 +54,30 @@ const User = new mongoose.Schema({
 			default: false,
 		},
 	}],
+	address: {
+		deliverName: {
+			type: String
+		},
+		phoneNo: {
+			type: Number
+		},
+		email: {
+			type: String
+		},
+		address: {
+			type: String
+		},
+		deliverDays: {
+			type: String
+		},
+		timePeriod: {
+			type: String
+		},
+		eventId: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'event'
+		}
+	},
 	createdAt: {
 		type: Date,
 		default: new Date(),

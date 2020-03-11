@@ -3,6 +3,8 @@ const async = require("async");
 const ObjectId = require('mongodb').ObjectId;
 const moment = require('moment');
 const _ = require("lodash");
+const CryptoJS = require("crypto-js");
+const key = 'andCo@testing'
 
 // Database models 
 const EventModel = require('../models/event.model');
@@ -23,6 +25,7 @@ const mailService = require('../services/mail.service');
 * @returns {Promise} - New Event or reason why failed
 */
 module.exports.createNewEvent = (eventData) => {
+    console.log("event data ", eventData)
     return new Promise((resolve, reject) => {
         fnHashtagAvailable(eventData.hashTag).then((response) => {
             if (response) {
@@ -36,6 +39,7 @@ module.exports.createNewEvent = (eventData) => {
                             console.log("link generate thai gai che", Response)
                             resolve({ status: 201, message: 'New Event Created Successfully.', data: Response.data });
                         }).catch((error) => {
+                            console.log("error while generate link", error)
                             reject({ status: 500, message: 'Internal Server Error' });
                         });
                     }
@@ -44,6 +48,7 @@ module.exports.createNewEvent = (eventData) => {
                 reject({ status: 500, message: 'Hashtag Already Exists.' })
             }
         }).catch((error) => {
+            console.log("final error", error)
             reject({ status: 500, message: 'Internal Server Error' })
         });
     });
@@ -75,10 +80,14 @@ function fnHashtagAvailable(hashTag) {
  * @param {object} event 
  */
 function fnGenerateEventLink(event) {
+    console.log("call thay che ke nai", event)
     return new Promise((resolve, reject) => {
-        const param = String(event._id);
-        const baseParam = Buffer.from(param).toString('base64');
-        const link = config.baseUrl + config.welcomeGuest + baseParam;
+        // const param = String(event._id);
+        // const baseParam = CryptoJS.AES.encrypt(JSON.stringify(param), key).toString();
+        // console.log("base param", baseParam)
+        // const baseParam = Buffer.from(param).toString('base64');
+        const link = config.baseUrl + config.welcomeGuest + event.hashTag;
+        console.log("new link with crypto js", link)
         const eventLink = { eventLink: link }
         EventModel.findByIdAndUpdate({ _id: event._id }, eventLink, { upsert: true, new: true }, (eventError, updatedEvent) => {
             if (eventError) {
@@ -547,6 +556,136 @@ function fnCheckForGuestJoined(eventId, userId) {
         });
     });
 }
+
+/**
+ * @param {EventHashTag} hashTag 
+ * @param {Login userId} userId 
+ * Get event details when click on link with use of hashtag
+ */
+function guestEventDetail(hashTag, userId) {
+    console.log("event hash tag for guest", hashTag)
+    return new Promise((resolve, reject) => {
+        EventModel.aggregate([
+            {
+                $match: {
+                    'hashTag': hashTag
+                }
+            },
+
+            //Reduce To Limited Data Using Project
+            {
+                $project: {
+                    hashTag: '$hashTag',
+                    eventType: '$eventType',
+                    eventTitle: '$eventTitle',
+                    isPublic: '$isPublic',
+                    userId: '$userId',
+                    startDate: '$startDate',
+                    endDate: '$endDate',
+                    hashTag: '$hashTag',
+                    profilePhoto: '$profilePhoto',
+                    eventLink: '$eventLink',
+                    eventTheme: '$eventTheme',
+                    defaultImage: '$defaultImage',
+                    paymentDeadlineDate: '$paymentDeadlineDate',
+                    activities: '$activities',
+                }
+            },
+            {
+                $unwind: {
+                    path: '$activities',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: 'group',
+                    let: { activityId: '$activities._id' },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ['$$activityId', '$activityId'] },
+                                        { $eq: ['$isDeleted', false] }
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    as: 'activities.group'
+                }
+            },
+            // Make Group Of Final Multiple Data to Single Object
+            {
+                $group: {
+                    _id: '$_id',
+                    hashTag: {
+                        $first: '$hashTag',
+                    },
+                    eventType: {
+                        $first: '$eventType',
+                    },
+                    eventTitle: {
+                        $first: '$eventTitle',
+                    },
+                    isPublic: {
+                        $first: '$isPublic',
+                    },
+                    userId: {
+                        $first: '$userId',
+                    },
+                    startDate: {
+                        $first: '$startDate',
+                    },
+                    endDate: {
+                        $first: '$endDate',
+                    },
+                    profilePhoto: {
+                        $first: '$profilePhoto'
+                    },
+                    paymentDeadlineDate: {
+                        $first: '$paymentDeadlineDate',
+                    },
+                    eventLink: {
+                        $first: '$eventLink',
+                    },
+                    eventTheme: {
+                        $first: '$eventTheme',
+                    },
+                    defaultImage: {
+                        $first: '$defaultImage'
+                    },
+                    activity: {
+                        $push: '$activities',
+                    },
+                }
+            },
+        ]).exec((error, guestEvent) => {
+            if (error)
+                console.log("error while get details of guest", error)
+            else {
+                console.log("guest event details use of hashtag", guestEvent)
+                fnCheckForCelebrant(guestEvent[0]._id, userId).then((response) => {
+                    guestEvent[0].isCelebrant = response;
+                    fnCheckForGuestJoined(guestEvent[0]._id, userId).then((response) => {
+                        guestEvent[0].isJoined = response;
+                        resolve({ status: 200, message: 'Event Detail fetch Successfully!', data: guestEvent[0] });
+                    }).catch((error) => {
+                        console.log("error while where guest is join the event or not", error)
+                        // reject({ status: 500, message: 'Internal Server Error', data: eventDetailError });
+                    });
+                }).catch((error) => {
+                    console.log("error while check is celebrant", error)
+                    // reject({ status: 500, message: 'Internal Server Error' });
+                });
+            }
+        })
+    })
+}
+
+
+
 
 /**
  * Function For Remove Group From Activity Using GroupId
@@ -3348,7 +3487,31 @@ const eventWithTransactionAndUserDetail = (eventId) => {
 }
 
 
+const changeProfileOfevent = (eventId, eventDetails) => {
+    console.log("details of photo============", eventDetails, eventId)
+    return new Promise((resolve, reject) => {
+        EventModel.findOneAndUpdate({ _id: eventId },
+            { $set: { profilePhoto: eventDetails.profilePhoto } },
+            { upsert: true, new: true })
+            // )
+            .exec((error, photoUpdate) => {
+                if (error)
+                    //  console.log("error while update profile photo", error)
+                    reject({ status: 500, message: 'Error while update profile photo of event' })
+                else {
+                    console.log("profile photo update", photoUpdate)
+                    let updatePhoto = {
+                        eventTitle: photoUpdate.eventTitle,
+                        profile: photoUpdate.profilePhoto
+                    }
+                    resolve({ data: updatePhoto, message: photoUpdate.eventTitle + +"Profile update successfully" })
+                }
+            })
+    })
+}
 
+module.exports.guestEventDetail = guestEventDetail
+module.exports.changeProfileOfevent = changeProfileOfevent
 module.exports.eventWithTransactionAndUserDetail = eventWithTransactionAndUserDetail;
 module.exports.activityCollection = activityCollection;
 module.exports.deleteItemFromGroup = deleteItemFromGroup;
