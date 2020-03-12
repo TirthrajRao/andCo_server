@@ -95,6 +95,15 @@ const User = new mongoose.Schema({
 		type: Date,
 		default: new Date(),
 	},
+	donationOfEvent: [{
+		eventId: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'event'
+		},
+		donation: {
+			type: Number
+		}
+	}]
 });
 
 module.exports = mongoose.model("User", User);

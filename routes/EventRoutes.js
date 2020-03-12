@@ -32,6 +32,8 @@ router.get('/event/cart-list/:hashTag', ensureAuthenticated.validateToken, Event
 router.get('/event/final-list/:id', ensureAuthenticated.validateToken, EventController.cartItemListWithTotal);
 router.post('/event/order-checkout/', ensureAuthenticated.validateToken, EventController.orderCheckout);
 router.put('/event/update-item', ensureAuthenticated.validateToken, EventController.updateItemFromCart);
+router.post('/event/add-donation', ensureAuthenticated.validateToken, EventController.addDonation)
+router.get('/event/getDonation/:hashTag', ensureAuthenticated.validateToken, EventController.getDonation)
 
 // Routes For Event Operations
 router.route('/event')

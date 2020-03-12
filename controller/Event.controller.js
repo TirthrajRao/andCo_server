@@ -412,6 +412,53 @@ module.exports.updateItemFromCart = (req, res) => {
 }
 
 /**
+ * Add Donation of guest user in event
+ */
+module.exports.addDonation = (req, res) => {
+	let loginUser = req.user
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
+	let donationObj = {
+		eventId: req.body.eventId,
+		donation: req.body.donation,
+		// userId: finalId
+	}
+	console.log("req of body", req.body)
+	eventService.addDonation(donationObj, finalId).then((response) => {
+		console.log("donation added in data base", response)
+		return res.status(200).json({ message: response.message })
+	}).catch((error) => {
+		console.log("error while add donation", error)
+		return res.status(error.status).json({ message: error.message })
+	})
+}
+
+
+module.exports.getDonation = (req, res) => {
+	console.log("event id", req.params.hashTag)
+	const hashTag = req.params.hashTag
+	let loginUser = req.user
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
+	eventService.getDonation(finalId, hashTag).then((response) => {
+		console.log("response of donation", response)
+		return res.status(200).json({ data: response.data })
+	}).catch((error) => {
+		return res.status(error.status).json({ message: error.message })
+		console.log("error while get donation details", error)
+	})
+}
+
+
+
+
+/**
  * Event Joining Thru Event Link
  * @param {req.body} - EventID and UserID
  * @returns - Join Successfully Or Reason To Fail
@@ -455,11 +502,19 @@ module.exports.cartItemListWithTotal = (req, res) => {
  * @returns - Cart Item List Or Reason To Fail
  */
 module.exports.orderCheckout = (req, res) => {
-	const userId = req.user.user._id;
 
-	console.log('User Id', userId);
+	console.log("body of cart with total", req.body)
 
-	eventService.orderCheckout(userId, req.body).then((response) => {
+	let loginUser = req.user
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
+
+	// console.log('User Id', userId);
+
+	eventService.orderCheckout(finalId, req.body).then((response) => {
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
 		console.error('error: ', error);

@@ -1114,7 +1114,10 @@ module.exports.addItemToCart = (itemData, hashTag, userId) => {
     });
 }
 
-
+/**
+ * @param {EventHashtag} hashTag 
+ * Find eventId using of hashtag
+ */
 const findEventIdWithHashtag = (hashTag) => {
     return new Promise((resolve, reject) => {
         EventModel.findOne({ 'hashTag': hashTag })
@@ -1130,7 +1133,13 @@ const findEventIdWithHashtag = (hashTag) => {
     })
 }
 
-
+/**
+ * 
+ * @param {EventId} eventId 
+ * @param {All cart items} allCart 
+ * @param {guest userId} userId 
+ * Items added into cart
+ */
 const itemsAddedInCart = (eventId, allCart, userId) => {
     console.log("event id and all data", allCart)
     return new Promise((resolve, reject) => {
@@ -1143,21 +1152,48 @@ const itemsAddedInCart = (eventId, allCart, userId) => {
                 itemId: singleCart.itemId,
             }
             console.log("finall cart item object to push", itemData)
-            CartModel.create(itemData, (itemError, newItem) => {
-                if (itemError) {
-                    console.log('Itemerror: ', itemError);
-                    reject({ status: 500, message: 'Internal Server Error' });
+            fncheckForItemInCart(itemData).then((response) => {
+                console.log("response of item in cart or not", response)
+                if (response == false) {
+                    console.log("enter in this")
+                    CartModel.findOneAndUpdate({ userId: itemData.userId, itemId: itemData.itemId }, { $set: { quantity: itemData.quantity } }, { upsert: true, new: true })
+                        .exec((error, quantityUpdate) => {
+                            if (error)
+                                //  console.log("error while update quantity")
+                                reject({ status: 500, message: 'Error while update quantity' })
+                            else {
+                                console.log("quantity has been changed", quantityUpdate)
+                                cartItemList(eventId, userId).then((response) => {
+                                    console.log("response of all items list", response)
+                                    resolve({ status: 200, message: 'Item Added Successfully.', data: response });
+                                }).catch((error) => {
+                                    console.log("error while get items list", error)
+                                    reject({ status: 500, message: 'Error while get details of items' });
+                                })
+                            }
+                        })
                 } else {
-                    cartItemList(eventId, userId).then((response) => {
-                        console.log("response of all items list", response)
-                        resolve({ status: 200, message: 'Item Added Successfully.', data: response });
-                    }).catch((error) => {
-                        console.log("error while get items list", error)
-                        reject({ status: 500, message: 'Error while get details of items' });
-                    })
-                    console.log("items added in data base", newItem)
+                    console.log("enter in final else part")
+                    CartModel.create(itemData, (itemError, newItem) => {
+                        if (itemError) {
+                            console.log('Itemerror: ', itemError);
+                            reject({ status: 500, message: 'Internal Server Error' });
+                        } else {
+                            cartItemList(eventId, userId).then((response) => {
+                                console.log("response of all items list", response)
+                                resolve({ status: 200, message: 'Item Added Successfully.', data: response });
+                            }).catch((error) => {
+                                console.log("error while get items list", error)
+                                reject({ status: 500, message: 'Error while get details of items' });
+                            })
+                            console.log("items added in data base", newItem)
+                        }
+                    });
                 }
-            });
+            }).catch((error) => {
+                console.log("error while check item in cart", error)
+                reject({ status: 500, message: 'Error while find item in cart' })
+            })
         })
     })
 }
@@ -1170,14 +1206,18 @@ const itemsAddedInCart = (eventId, allCart, userId) => {
  * @returns {Promise} return Boolen or reason why failed
  */
 function fncheckForItemInCart(itemData) {
+    console.log("data to check item in cart", itemData)
     return new Promise((resolve, reject) => {
-        CartModel.findOneAndUpdate({ userId: itemData.userId, itemId: itemData.itemId }, { $inc: { quantity: 1 } }, (error, Item) => {
+        CartModel.findOne({ userId: itemData.userId, itemId: itemData.itemId }, (error, Item) => {
+            console.log("item ===========", Item)
             if (!Item) {
+                console.log("first if call")
                 resolve(true)
             } else if (error) {
                 console.log("Internal Server Error", error);
                 reject({ status: 500, message: 'Internal Server Error' });
             } else {
+                console.log("final  call")
                 resolve(false);
             }
         });
@@ -1301,7 +1341,7 @@ module.exports.removeItemFromCart = (cartId) => {
                 // reject({ status: 500, message: 'Internal Server Error' });
             } else {
                 console.log("response of removed items", response)
-                
+
                 resolve({ status: 200, message: 'Item Removed Suucessfully' });
             }
         });
@@ -1387,6 +1427,79 @@ module.exports.updateItemFromCart = (cartItem) => {
         });
     });
 }
+
+
+/**
+ * 
+ * @param {donationDetails} donation 
+ * Add donation in event of guest user
+ */
+function addDonation(donation, userId) {
+    console.log("donation details", donation)
+    return new Promise((resolve, reject) => {
+        findEventIdWithHashtag(donation.eventId).then((response) => {
+            console.log("response of eventid", response)
+            donation['eventId'] = response
+            UserModel.findByIdAndUpdate({ _id: userId }, { $push: { donationOfEvent: donation } }, { upsert: true, new: true })
+                .exec((error, donationAdded) => {
+                    if (error)
+                        //  console.log("eror while add donation", error)
+                        reject({ status: 500, message: 'Error while add donation' })
+                    else {
+                        console.log("donatio added in databasse", donationAdded)
+                        resolve({ message: 'Donation add in event cart' })
+                    }
+                })
+        }).catch((error) => {
+            console.log("error while add donation", error)
+            reject({ status: 500, message: 'Error while get event id' })
+        })
+    })
+}
+
+
+function getDonation(userId, hashTag) {
+    return new Promise((resolve, reject) => {
+        findEventIdWithHashtag(hashTag).then((response) => {
+            console.log("event id", response)
+            const eventId = response
+            UserModel.aggregate([
+                {
+                    $match: {
+                        '_id': ObjectId(userId)
+                    }
+                },
+                {
+                    $project: {
+                        _id: '$_id',
+                        donation: {
+                            $filter: {
+                                input: '$donationOfEvent',
+                                as: "eventId",
+                                cond: {
+                                    $eq: ['$$eventId.eventId', ObjectId(eventId)]
+                                }
+                            },
+                        }
+                    }
+                },
+            ]).exec((error, donationGet) => {
+                if (error)
+                    //  console.log("error while get donation", error)
+                    reject({ status: 500, message: 'Error while get donation details' })
+                else {
+                    console.log("donation details", donationGet)
+                    resolve({ data: donationGet[0].donation })
+                }
+            })
+        }).catch((error) => {
+            console.log("error while get event id", error)
+            reject({ status: 500, message: 'Error while get event id' })
+        })
+    })
+}
+
+
 
 /**
  *Cart list of all cartItem Using UserId and EventId with Total 
@@ -3578,8 +3691,8 @@ const changeProfileOfevent = (eventId, eventDetails) => {
     })
 }
 
-
-
+module.exports.getDonation = getDonation
+module.exports.addDonation = addDonation
 module.exports.findEventIdWithHashtag = findEventIdWithHashtag
 module.exports.guestEventDetail = guestEventDetail
 module.exports.changeProfileOfevent = changeProfileOfevent
