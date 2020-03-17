@@ -67,7 +67,22 @@ module.exports.createNewEvent = (req, res) => {
 
 
 
+module.exports.getAfterEventMessage = (req, res) => {
+	console.log("eventId", req.params.id)
+	const eventId = req.params.id
+	eventService.getAfterEventMessage(eventId).then((response) => {
+		console.log("response of after event message", response)
+		return res.status(200).json(response)
+	}).catch((error) => {
+		console.log("error while get thank you message details", error)
+		return res.status(error.status).json({ message: error.message })
+	})
+}
 
+
+/**
+ * Change profile photo of event
+ */
 module.exports.changeProfile = (req, res) => {
 	console.log("when profile is update", req.body, req.files)
 	let newEvent = {}
@@ -84,6 +99,21 @@ module.exports.changeProfile = (req, res) => {
 		return res.status(error.status).json({ message: error.message })
 	})
 	console.log("only photo update", newEvent)
+}
+
+/**
+ * Set price of event 
+ */
+module.exports.setPriceOfEvent = (req, res) => {
+	console.log("details of set price", req.body)
+	let setDetails = req.body
+	eventService.setPriceOfEvent(setDetails).then((response) => {
+		console.log("response of set price", response)
+		return res.status(200).json({ message: response.message })
+	}).catch((error) => {
+		console.log("error while set price", error)
+		return res.status(error.status).json({ message: error.message })
+	})
 }
 
 /**
@@ -436,7 +466,9 @@ module.exports.addDonation = (req, res) => {
 	})
 }
 
-
+/**
+ * Get total donation of guest user of single event
+ */
 module.exports.getDonation = (req, res) => {
 	console.log("event id", req.params.hashTag)
 	const hashTag = req.params.hashTag
@@ -450,12 +482,92 @@ module.exports.getDonation = (req, res) => {
 		console.log("response of donation", response)
 		return res.status(200).json({ data: response.data })
 	}).catch((error) => {
-		return res.status(error.status).json({ message: error.message })
 		console.log("error while get donation details", error)
+		return res.status(error.status).json({ message: error.message })
 	})
 }
 
+/**
+ * Get total of Cart items
+ */
+module.exports.getTotalOfCart = (req, res) => {
+	console.log("req ========", req.params.hashTag)
+	const hashTag = req.params.hashTag
+	let loginUser = req.user
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
+	eventService.getTotalOfCart(finalId, hashTag).then((response) => {
+		console.log("response of total", response)
+		return res.status(200).json({ data: response })
+	}).catch((error) => {
+		console.log("error while get total of cart", error)
+		return res.status(error.status).json({ message: error.message })
+	})
+}
 
+/**
+ * Add Account details of guest user
+ */
+module.exports.addPaymentDetails = (req, res) => {
+	console.log("req.body ======", req.body)
+	let cartList = req.body.cartItems
+	let loginUser = req.user
+	let finalFlage = req.body.flag
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
+	let finalData = {}
+	if (req.body.flag == false) {
+		if (req.body.bankName) finalData['bankName'] = req.body.bankName
+		if (req.body.accountNumber) finalData['accountNumber'] = req.body.accountNumber
+		console.log("final data of bank", finalData)
+	}
+	if (req.body.flag == true) {
+		if (req.body.flag) finalData['flag'] = req.body.flag
+		if (req.body.cardNumber) finalData['cardNumber'] = req.body.cardNumber
+		if (req.body.cvv) finalData['cvv'] = req.body.cvv
+		console.log("final data of card", finalData)
+	}
+	eventService.addAccountDetails(finalData, finalId, finalFlage).then((response) => {
+		console.log("details added completed", response)
+		eventService.orderCheckout(finalId, cartList).then((paymentDone) => {
+			console.log("payment compledted", paymentDone)
+			return res.status(200).json({ data: paymentDone.data, message: response.message })
+		}).catch((error) => {
+			console.log("error while payment", error)
+			return res.status(error.status).json({ message: error.message })
+		})
+	}).catch((error) => {
+		console.log("error while add details ", error)
+		return res.status(error.status).json({ message: error.message })
+	})
+}
+
+/**
+ * Get guest bank account details
+ */
+module.exports.getAccountDetails = (req, res) => {
+	console.log("re================", req.query)
+	const accountType = req.query.type
+	let loginUser = req.user
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
+	eventService.getAccountDetails(finalId, accountType).then((response) => {
+		console.log("response of account", response)
+		return res.status(200).json({ data: response.data })
+	}).catch((error) => {
+		console.log("error while get details", error)
+		return res.status(error.status).json({ message: error.message })
+	})
+}
 
 
 /**
@@ -615,9 +727,11 @@ module.exports.addEventType = (req, res) => {
 }
 
 module.exports.activityWiseCollection = (req, res) => {
+	console.log("event id", req.query)
 	const eventId = req.query.eventId;
 	console.log('EventId', eventId);
 	eventService.activityWiseCollection(eventId).then((response) => {
+		console.log("response of data", response)
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
 		console.error('error: ', error);

@@ -1095,22 +1095,6 @@ module.exports.addItemToCart = (itemData, hashTag, userId) => {
             reject({ status: 500, message: 'Error while get eventId' })
             console.log("error while find event id", error)
         })
-        // fncheckForItemInCart(itemData).then((response) => {
-        //     if (response) {
-        //         CartModel.create(itemData, (itemError, newItem) => {
-        //             if (itemError) {
-        //                 console.log('Itemerror: ', itemError);
-        //                 reject({ status: 500, message: 'Internal Server Error' });
-        //             } else {
-        //                 resolve({ status: 200, message: 'Item Added Successfully.', data: newItem });
-        //             }
-        //         });
-        //     } else {
-        //         reject({ status: 200, message: 'Item Quantity Increased' });
-        //     }
-        // }).catch((error) => {
-        //     reject({ status: 500, message: 'Internal Server Error' });
-        // })
     });
 }
 
@@ -1440,14 +1424,53 @@ function addDonation(donation, userId) {
         findEventIdWithHashtag(donation.eventId).then((response) => {
             console.log("response of eventid", response)
             donation['eventId'] = response
-            UserModel.findByIdAndUpdate({ _id: userId }, { $push: { donationOfEvent: donation } }, { upsert: true, new: true })
-                .exec((error, donationAdded) => {
-                    if (error)
-                        //  console.log("eror while add donation", error)
-                        reject({ status: 500, message: 'Error while add donation' })
+            UserModel.findOne({
+                _id: userId,
+                'donationOfEvent.eventId': response,
+                donationOfEvent: {
+                    $elemMatch: {
+                        eventId: response
+                    }
+                }
+            },
+                {
+                    donationOfEvent: {
+                        $elemMatch: {
+                            eventId: response
+                        }
+                    }
+                })
+                .exec((error, response) => {
+                    if (error) console.log("error while get donation of event", error)
                     else {
-                        console.log("donatio added in databasse", donationAdded)
-                        resolve({ message: 'Donation add in event cart' })
+                        console.log("get donation details", response)
+                        if (response != null) {
+                            const donationId = response.donationOfEvent[0]._id
+                            console.log("call this for second time")
+                            UserModel.findByIdAndUpdate({ _id: userId },
+                                { $set: { 'donationOfEvent.$[donationOfEvent].donation': donation.donation } },
+                                { arrayFilters: [{ 'donationOfEvent._id': donationId }] }
+                            ).exec((error, donationUpdate) => {
+                                if (error)
+                                    //  console.log("error while update donation", error)
+                                    reject({ status: 500, message: 'Error while update donation' })
+                                else {
+                                    console.log("donation update", donationUpdate)
+                                    resolve({ message: 'Donation update' })
+                                }
+                            })
+                        } else {
+                            UserModel.findByIdAndUpdate({ _id: userId }, { $push: { donationOfEvent: donation } }, { upsert: true, new: true })
+                                .exec((error, donationAdded) => {
+                                    if (error)
+                                        //  console.log("eror while add donation", error)
+                                        reject({ status: 500, message: 'Error while add donation' })
+                                    else {
+                                        console.log("donatio added in databasse", donationAdded)
+                                        resolve({ message: 'Donation add in event cart' })
+                                    }
+                                })
+                        }
                     }
                 })
         }).catch((error) => {
@@ -1457,7 +1480,11 @@ function addDonation(donation, userId) {
     })
 }
 
-
+/**
+ * @param {LoginId} userId 
+ * @param {eventHashtag} hashTag 
+ * Get donation of login user of single event
+ */
 function getDonation(userId, hashTag) {
     return new Promise((resolve, reject) => {
         findEventIdWithHashtag(hashTag).then((response) => {
@@ -1483,13 +1510,22 @@ function getDonation(userId, hashTag) {
                         }
                     }
                 },
+                {
+                    $unwind: {
+                        path: '$donation'
+                    }
+                }
             ]).exec((error, donationGet) => {
                 if (error)
                     //  console.log("error while get donation", error)
                     reject({ status: 500, message: 'Error while get donation details' })
                 else {
                     console.log("donation details", donationGet)
-                    resolve({ data: donationGet[0].donation })
+                    if (donationGet.length) {
+                        resolve({ data: donationGet[0].donation })
+                    } else {
+                        resolve({ message: 'There is no donation' })
+                    }
                 }
             })
         }).catch((error) => {
@@ -1499,6 +1535,118 @@ function getDonation(userId, hashTag) {
     })
 }
 
+
+/**
+ * 
+ * @param {Guest User} userId 
+ * @param {EventHashTag} hashTag 
+ */
+function getTotalOfCart(userId, hashTag) {
+    return new Promise((resolve, reject) => {
+        findEventIdWithHashtag(hashTag).then((eventId) => {
+            cartItemList(eventId, userId).then((itemList) => {
+                grandTotal = 0
+                let cartList = itemList.data.cartList
+                console.log("total item of cart", cartList)
+                cartList.forEach((singleCartItem) => {
+                    subTotal = singleCartItem.itemPrice * singleCartItem.quantity
+                    grandTotal = grandTotal + subTotal
+                    finalGrandTotal = grandTotal
+                })
+                console.log("final total of all items", finalGrandTotal)
+                UserModel.findOne({
+                    _id: userId,
+                    'donationOfEvent.eventId': eventId,
+                    donationOfEvent: {
+                        $elemMatch: {
+                            eventId: eventId
+                        }
+                    }
+                },
+                    {
+                        donationOfEvent: {
+                            $elemMatch: {
+                                eventId: eventId
+                            }
+                        }
+                    }).exec((error, donationDetails) => {
+                        if (error)
+                            // console.log("error while get donation", error)
+                            reject({ status: 500, message: 'Error while get donation' })
+                        else {
+                            // console.log("donation details", donationDetails)
+                            let finalDonation = donationDetails.donationOfEvent[0].donation
+                            finalGrandTotal = finalGrandTotal + finalDonation
+                            // console.log("hve sav final mdvu joye", finalGrandTotal)
+                            resolve({ total: finalGrandTotal, donation: donationDetails.donationOfEvent[0].donation })
+                        }
+                    })
+            }).catch((error) => {
+                reject({ status: 500, message: 'error while get items of cart' })
+                console.log("error while get items of cart", error)
+            })
+        }).catch((error) => {
+            reject({ status: 500, message: 'error while get event id' })
+            console.log("error while get event id", error)
+        })
+    })
+}
+
+/**
+ * 
+ * @param {AccountDetails} data 
+ * @param {loginUser} userId 
+ * @param {AccountType} finalFlage 
+ */
+function addAccountDetails(data, userId, finalFlage) {
+    return new Promise((resolve, reject) => {
+        if (finalFlage == false) {
+            UserModel.findByIdAndUpdate({ _id: userId }, { $set: { bankAccount: data } }, { upsert: true, new: true })
+                .exec((error, accountAdded) => {
+                    if (error)
+                        //  console.log("error while add account", error)
+                        reject({ status: 500, message: 'Error while add bank details' })
+                    else {
+                        resolve({ message: 'Bank account added' })
+                        console.log("get details of account", accountAdded)
+                    }
+                })
+        }
+        if (finalFlage == true) {
+            UserModel.findByIdAndUpdate({ _id: userId }, { $set: { cardAccount: data } }, { upsert: true, new: true })
+                .exec((error, cardAdded) => {
+                    if (error)
+                        //  console.log("error while add account", error)
+                        reject({ status: 500, message: 'Error while add card details' })
+                    else {
+                        // console.log("get details of account", cardAdded)
+                        resolve({ message: 'Card Details added' })
+                    }
+                })
+        }
+    })
+}
+
+
+function getAccountDetails(userId, accountType) {
+    return new Promise((resolve, reject) => {
+        UserModel.findById({ _id: userId })
+            // .populate('bankAccount cardAccount')
+            .exec((error, details) => {
+                if (error)
+                    //  console.log("error while get details", error)
+                    reject({ status: 500, message: 'Error while get details of account' })
+                else {
+                    console.log("details of guest account", details)
+                    if (accountType == 'account') {
+                        resolve({ data: details.bankAccount })
+                    } else if (accountType == 'card') {
+                        resolve({ data: details.cardAccount })
+                    }
+                }
+            })
+    })
+}
 
 
 /**
@@ -1608,10 +1756,12 @@ module.exports.orderCheckout = (userId, cartData) => {
                 console.log('Transaction Error:', transactionError);
                 reject({ status: 500, message: 'Internal Server Error' });
             } else {
+                console.log("trancation is completed", transaction)
                 clearCartAfterCheckout(userId, cartData.eventId).then((response) => {
                     findEmailUsingUserId(userId).then((response) => {
                         const email = response.data.email;
                         findMessageUsingEventId(cartData.eventId).then((response) => {
+                            console.log("response of final when trancation is created", response)
                             const messageData = {};
 
                             if (response.data.thanksMessage.message == '') {
@@ -1634,13 +1784,24 @@ module.exports.orderCheckout = (userId, cartData) => {
                                 template: 'thanks-message'
                             };
 
-                            mailService.mail(defaultPasswordEmailoptions, messageData, null, function (err, mailResult) {
-                                console.log('Mail Result:', mailResult);
-                                if (err) {
-                                    resolve({ status: 200, message: 'Order Placed successfully but mail not sent for some reason' });
-                                } else {
-                                    resolve({ status: 200, message: 'Order Placed successfully' })
+                            // mailService.mail(defaultPasswordEmailoptions, messageData, null, function (err, mailResult) {
+                            //     console.log('Mail Result:', mailResult);
+                            //     if (err) {
+                            //         resolve({ status: 200, message: 'Order Placed successfully but mail not sent for some reason' });
+                            //     } else {
+                            //         resolve({ status: 200, message: 'Order Placed successfully' })
+                            //     }
+                            // })
+                            paymentThankYouDetails(transaction.eventId).then((response) => {
+                                console.log("response of created event with name", response)
+                                let thankYouDetails = {
+                                    finalTotal: transaction.finalTotal + transaction.donation,
+                                    createrName: response.data
                                 }
+                                resolve({ data: thankYouDetails, message: 'Payment Successfully Done' })
+                            }).catch((error) => {
+                                console.log("error while get name of creater", error)
+                                reject({ status: 500, message: 'Error while get details of user' })
                             })
                         }).catch((error) => {
                             reject({ status: 500, message: 'Internal Server Error', data: error });
@@ -1655,6 +1816,68 @@ module.exports.orderCheckout = (userId, cartData) => {
         })
     })
 }
+
+/**
+ * @param {EventId} eventId 
+ * Get creater details of event
+ */
+const paymentThankYouDetails = (eventId) => {
+    return new Promise((resolve, reject) => {
+        EventModel.aggregate([
+            {
+                $match: {
+                    _id: ObjectId(eventId)
+                }
+            },
+            {
+                $project: {
+                    userId: '$userId'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    let: {
+                        userId: '$userId'
+                    },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $eq: ["$_id", "$$userId"]
+                                }
+                            }
+                        },
+                        {
+                            $project: {
+                                _id: 1,
+                                firstName: 1,
+                                lastName: 1
+                            }
+                        }
+                    ],
+                    as: 'userId'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$userId',
+                    preserveNullAndEmptyArrays: true
+                }
+            }
+        ]).exec((error, createrDetails) => {
+            if (error)
+                // console.log("error while get details of creater event", error)
+                reject({ status: 500, message: 'Error while get details of creater details' })
+            else {
+                console.log("details of event creataer", createrDetails)
+                resolve({ data: createrDetails[0].userId })
+            }
+        })
+    })
+}
+
+
 
 /**
  * Function To Find User Detail Using UserId
@@ -2320,6 +2543,77 @@ const eventListForHomepage = (keyword) => {
     });
 }
 
+
+/**
+ * Total collection of event with activity
+ */
+const totalCollectionActivityWise = (eventId) => {
+    return new Promise((resolve, reject) => {
+        TransactionModel.aggregate([
+            {
+                $match: {
+                    $and: [
+                        { 'eventId': ObjectId(eventId) },
+                        { 'isDeleted': false },
+                    ]
+                }
+            },
+            {
+                $project: {
+                    trancationId: '$_id',
+                    items: '$item'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$items'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'group',
+                    let: { itemId: '$items.itemId' },
+                    pipeline: [{
+                        $unwind: '$item'
+                    }, {
+                        $match: { $expr: { $eq: ['$item._id', '$$itemId'] } }
+                    },],
+                    as: 'items'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$items'
+                }
+            },
+            {
+                $group: {
+                    _id: '$items.activityId',
+                    item: {
+                        $push: '$items'
+                    }
+                }
+            },
+            // {
+            //     $project: {
+            //         _id: '$_id',
+            //         groupName: '$item.groupName',
+            //         groupItem: '$item.item'
+            //     }
+            // },
+        ]).exec((error, finalData) => {
+            if (error) console.log("error while get total", error)
+            else {
+
+                console.log("get total activity wise", finalData)
+                resolve({ data: finalData })
+            }
+        })
+    })
+}
+
+
+
 /**
  * Transaction Model approach For Collection Details
  * @param {String} eventId 
@@ -2338,14 +2632,18 @@ const activityWiseCollection = (eventId) => {
                     ]
                 }
             },
+
             // $unwind Item Array For Lookup
+
             {
                 $unwind: {
                     path: '$item',
                     preserveNullAndEmptyArrays: true
                 }
             },
+
             // $lookup In Group Model For GroupDetail
+
             {
                 $lookup: {
                     from: 'group',
@@ -2358,14 +2656,18 @@ const activityWiseCollection = (eventId) => {
                     as: 'GroupDetail'
                 }
             },
+
             // $unwind GroupDetail Array For Lookup Operation
+
             {
                 $unwind: {
                     path: '$GroupDetail',
                     preserveNullAndEmptyArrays: true
                 }
             },
+
             // $lookup In Event Model For Activity Detail
+
             {
                 $lookup: {
                     from: 'event',
@@ -2378,14 +2680,19 @@ const activityWiseCollection = (eventId) => {
                     as: 'GroupDetail.item.activity'
                 }
             },
+
             // $unwind Array Of Activity Inside Item Inside GroupDetail
+
             {
                 $unwind: {
                     path: '$GroupDetail.item.activity',
                     preserveNullAndEmptyArrays: true
                 }
             },
+
+            { $sort: { 'GroupDetail.item.activity.activities.createdAt': 1 } },
             // $project for Limit The Data
+
             {
                 $project: {
                     itemQuantity: '$item.quantity',
@@ -2393,14 +2700,16 @@ const activityWiseCollection = (eventId) => {
                     activityId: '$GroupDetail.item.activity.activities._id',
                     groupName: '$GroupDetail.groupName',
                     groupId: '$GroupDetail._id',
-                    itemName: '$GroupDetail.item.itemName',
+                    // itemName: '$GroupDetail.item.itemName',
                     itemPrice: '$GroupDetail.item.itemPrice',
-                    itemType: '$GroupDetail.item.itemType',
+                    // itemType: '$GroupDetail.item.itemType',
                     itemGender: '$GroupDetail.item.itemGender',
                     itemId: '$GroupDetail.item._id',
                 }
             },
+
             // $project for Limit The Data Using Project And Make Object Of Item
+
             {
                 $project:
                 {
@@ -2408,18 +2717,20 @@ const activityWiseCollection = (eventId) => {
                     activityName: 1,
                     item: {
                         itemId: '$itemId',
-                        itemName: '$itemName',
+                        // itemName: '$itemName',
                         groupId: '$groupId',
                         groupName: '$groupName',
                         itemPrice: '$itemPrice',
                         itemQuantity: '$itemQuantity',
-                        itemType: '$itemQuantity',
+                        // itemType: '$itemQuantity',
                         itemGender: '$itemGender',
                         total: { $multiply: ["$itemPrice", "$itemQuantity"] },
                     },
                 }
             },
+
             // $group Using ActivityName and GroupName
+
             {
                 $group: {
                     _id: { activityName: '$activityName', groupName: '$item.groupName' },
@@ -2428,31 +2739,75 @@ const activityWiseCollection = (eventId) => {
                     }
                 }
             },
-            // $group Using Nested ActivityName
+
+            // $project Using Nested ActivityName
             {
-                $group: {
+                $project: {
                     _id: "$_id.activityName",
-                    group: {
-                        $push: {
-                            groupName: "$_id.groupName",
-                            item: "$item",
+                    groupName: '$_id.groupName',
+                    maleTotal: {
+                        $sum: {
+                            $map: {
+                                input: {
+                                    $filter: {
+                                        input: '$item',
+                                        as: 'maleTotal',
+                                        cond: {
+                                            $eq: ['$$maleTotal.itemGender', 'male']
+                                        }
+                                    },
+                                },
+                                as: 'maleitem',
+                                in: '$$maleitem.total'
+                            }
+                        }
+                    },
+                    femaleTotal: {
+                        $sum: {
+                            $map: {
+                                input: {
+                                    $filter: {
+                                        input: '$item',
+                                        as: 'femaleTotal',
+                                        cond: {
+                                            $eq: ['$$femaleTotal.itemGender', 'female']
+                                        }
+                                    },
+                                },
+                                as: 'femaleitem',
+                                in: '$$femaleitem.total'
+                            }
                         }
                     }
                 }
             },
-        ]).exec(function (eventListError, eventList) {
+            {
+                $group: {
+                    _id: '$_id',
+                    finalGroup: {
+                        $push: {
+                            groupName: '$groupName',
+                            maleTotal: '$maleTotal',
+                            femaleTotal: '$femaleTotal'
+                        }
+                    }
+                }
+            }
+        ]).exec((eventListError, eventList) => {
             if (eventListError) {
                 reject({ status: 500, message: 'Internal Server Error', data: eventListError });
             } else {
-                activityCollection(eventId).then((response) => {
-                    console.log('Response:', response.data);
-                    const data = {};
-                    data.groupWise = eventList;
-                    data.activityWise = response.data;
-                    resolve({ status: 200, message: 'Collected Amount Detail!', data: data });
-                }).catch((error) => {
-                    reject({ status: 500, message: 'Internal Server Error' });
-                })
+                console.log("eventList", eventList)
+                resolve({ data: eventList })
+                // activityCollection(eventId).then((response) => {
+                //     console.log('Response:', response);
+                //     const data = {};
+                //     data.groupWise = eventList;
+                //     data.activityWise = response.data;
+                //     resolve({ status: 200, message: 'Collected Amount Detail!', data: data });
+                // }).catch((error) => {
+                //     reject({ status: 500, message: 'Internal Server Error' });
+                // })
             }
         });
     })
@@ -3667,7 +4022,11 @@ const eventWithTransactionAndUserDetail = (eventId) => {
     })
 }
 
-
+/**
+ * @param {EventId} eventId 
+ * @param {EventDetails} eventDetails 
+ * Change profile photo of event
+ */
 const changeProfileOfevent = (eventId, eventDetails) => {
     console.log("details of photo============", eventDetails, eventId)
     return new Promise((resolve, reject) => {
@@ -3691,6 +4050,51 @@ const changeProfileOfevent = (eventId, eventDetails) => {
     })
 }
 
+
+/**
+ * @param {Details of set price of event} details 
+ * Set deadlineDate, account etc in this details
+ */
+function setPriceOfEvent(details) {
+    return new Promise((resolve, reject) => {
+        console.log("details of set price", details)
+        EventModel.findByIdAndUpdate({ _id: details.eventId }, { $set: details }, { upsert: true, new: true })
+            .exec((error, setPriceInEvent) => {
+                if (error)
+                    //  console.log("error while set price", error)
+                    reject({ status: 500, message: 'Error while set price in event' })
+                else {
+                    console.log("set price in single event completed", setPriceInEvent)
+                    resolve({ message: 'Set price stored in event' })
+                }
+            })
+    })
+}
+
+
+function getAfterEventMessage(eventId) {
+    return new Promise((resolve, reject) => {
+        EventModel.findOne({ _id: eventId })
+            // .populate('afterEventMessage')
+            .exec((error, message) => {
+                if (error)
+                    //  console.log("error while get message", error)
+                    reject({ status: 500, message: 'Error while get afterEventMessage' })
+                else {
+                    console.log("after event message", message)
+                    resolve(message.afterEventMessage)
+                }
+            })
+    })
+}
+
+
+module.exports.totalCollectionActivityWise = totalCollectionActivityWise
+module.exports.getAfterEventMessage = getAfterEventMessage
+module.exports.setPriceOfEvent = setPriceOfEvent
+module.exports.getAccountDetails = getAccountDetails
+module.exports.addAccountDetails = addAccountDetails
+module.exports.getTotalOfCart = getTotalOfCart
 module.exports.getDonation = getDonation
 module.exports.addDonation = addDonation
 module.exports.findEventIdWithHashtag = findEventIdWithHashtag

@@ -20,6 +20,12 @@ const event = new Schema({
 	paymentDeadlineDate: {
 		type: Date
 	},
+	payMentTransferDate: {
+		type: String
+	},
+	paymentDeadlineTime: {
+		type: String
+	},
 	hashTag: {
 		type: String
 	},
@@ -74,12 +80,15 @@ const event = new Schema({
 			type: String,
 		},
 	},
-	bankAccount: {
-		accountId: {
+	bankDetails: {
+		bankName: {
 			type: String,
 		},
-		paymentType: {
-			type: String,
+		accountNumber: {
+			type: Number,
+		},
+		cardNumber: {
+			type: Number
 		}
 	},
 	afterEventMessage: {
@@ -92,6 +101,9 @@ const event = new Schema({
 		messagePreference: {
 			type: String
 		},
+	},
+	hearAbout: {
+		type: String
 	},
 	createdAt: {
 		type: Date,

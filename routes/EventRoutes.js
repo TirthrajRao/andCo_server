@@ -34,6 +34,12 @@ router.post('/event/order-checkout/', ensureAuthenticated.validateToken, EventCo
 router.put('/event/update-item', ensureAuthenticated.validateToken, EventController.updateItemFromCart);
 router.post('/event/add-donation', ensureAuthenticated.validateToken, EventController.addDonation)
 router.get('/event/getDonation/:hashTag', ensureAuthenticated.validateToken, EventController.getDonation)
+router.get('/event/getTotalOfCart/:hashTag', ensureAuthenticated.validateToken, EventController.getTotalOfCart)
+// router.post('/guestAccount', ensureAuthenticated.validateToken, EventController.addPaymentDetails)
+
+router.route('/guestAccount')
+    .post([ensureAuthenticated.validateToken, EventController.addPaymentDetails])
+    .get(ensureAuthenticated.validateToken, EventController.getAccountDetails)
 
 // Routes For Event Operations
 router.route('/event')
@@ -65,13 +71,15 @@ router.get('/event/event-list', EventController.eventList);
 router.get('/event/:id', [ensureAuthenticated.validateToken], EventController.eventDetail);
 router.get('/event/guestEvent/:hashTag', [ensureAuthenticated.validateToken], EventController.guestEventDetails)
 
-//Routes For Event Profile Change
+//Routes For Event Profile Change and Set price of event
 
 router.post('/event/changeProfile', cpUpload, EventController.changeProfile)
+router.post('/event/set-price', ensureAuthenticated.validateToken, EventController.setPriceOfEvent)
 
 // Routes For Message Operations
 router.post('/message/add-message', ensureAuthenticated.validateToken, Fileupload.upload('attachment'), eventValidation.thanksMessageDetail, EventController.thanksMessageDetail);
 router.get('/messagelist/:id', EventController.thanksMessageList);
+router.get('/event/afterEventMessage/:id', ensureAuthenticated.validateToken, EventController.getAfterEventMessage)
 
 // Routes For Adminside Functions
 router.get('/event/event-detail/:id', EventController.eventDetailWithActivity);
