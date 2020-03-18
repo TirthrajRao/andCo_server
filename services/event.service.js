@@ -2674,8 +2674,19 @@ const activityWiseCollection = (eventId) => {
                     let: { 'activityId': '$GroupDetail.activityId' },
                     pipeline: [{
                         $unwind: '$activities'
-                    }, {
-                        $match: { $expr: { $eq: ['$activities._id', '$$activityId'] } }
+                    },
+                    // { $sort: { "activities.createdAt": 1 } },
+                    {
+                        $match: {
+                            $expr:
+                            {
+                                $and: [
+                                    // { $sort: { "activities.createdAt": -1 } },
+                                    { $eq: ['$activities._id', '$$activityId'] },
+                                ]
+                                // $eq: ['$activities._id', '$$activityId']
+                            }
+                        }
                     },],
                     as: 'GroupDetail.item.activity'
                 }
@@ -2690,7 +2701,6 @@ const activityWiseCollection = (eventId) => {
                 }
             },
 
-            { $sort: { 'GroupDetail.item.activity.activities.createdAt': 1 } },
             // $project for Limit The Data
 
             {
@@ -2792,26 +2802,93 @@ const activityWiseCollection = (eventId) => {
                         }
                     }
                 }
+            },
+            {
+                $sort: { _id: 1 }
             }
         ]).exec((eventListError, eventList) => {
             if (eventListError) {
                 reject({ status: 500, message: 'Internal Server Error', data: eventListError });
             } else {
                 console.log("eventList", eventList)
-                resolve({ data: eventList })
-                // activityCollection(eventId).then((response) => {
-                //     console.log('Response:', response);
-                //     const data = {};
-                //     data.groupWise = eventList;
-                //     data.activityWise = response.data;
-                //     resolve({ status: 200, message: 'Collected Amount Detail!', data: data });
-                // }).catch((error) => {
-                //     reject({ status: 500, message: 'Internal Server Error' });
-                // })
+                activityCollection(eventId).then((response) => {
+                    console.log('Response:', response);
+                    let activityTotal = response.data
+                    let grandTotal = 0
+                    activityTotal.forEach((byActivity) => {
+                        subTotal = byActivity.total
+                        grandTotal = grandTotal + subTotal
+                        finalGrandTotal = grandTotal
+                        console.log("single activity details", finalGrandTotal)
+                        eventList.forEach((singleAct) => {
+                            if (byActivity.activityName == singleAct._id) {
+                                singleAct['total'] = byActivity.total
+                            }
+                        })
+                    })
+                    eventTotalCollection(eventId).then((eventTotal) => {
+                        const data = {};
+                        data.groupWise = eventList;
+                        data.eventTotal = eventTotal
+                        console.log("total of event ", eventTotal)
+                        resolve({ status: 200, message: 'Collected Amount Detail!', data: data });
+                        // resolve({ data: eventTotal })
+                    }).catch((error) => {
+                        console.log("error while get total of event", error)
+                        reject({ status: error.status, message: error.message })
+                    })
+                }).catch((error) => {
+                    reject({ status: 500, message: 'Internal Server Error' });
+                })
             }
         });
     })
 }
+
+
+/**
+ * @param {EventId} eventId 
+ * Get total of event and total donation of event
+ */
+const eventTotalCollection = (eventId) => {
+    return new Promise((resolve, reject) => {
+        TransactionModel.find({ 'eventId': eventId })
+            .exec((error, totalOfEvent) => {
+                if (error)
+                    //  console.log("error while get total of event", error)
+                    reject({ status: 500, message: 'Error while get total of event and donation' })
+                else {
+                    console.log("total of event", totalOfEvent)
+                    grandTotal = 0
+                    grandDonation = 0
+                    totalOfEvent.forEach((singleEvent) => {
+                        console.log("total of single event", singleEvent.finalTotal)
+                        // Total Of Event
+
+                        subTotal = singleEvent.finalTotal
+                        grandTotal = grandTotal + subTotal
+                        finalTotalOfEvent = grandTotal
+
+                        // Total Of Donation
+                        subDonation = singleEvent.donation
+                        grandDonation = grandDonation + subDonation
+                        finalDonationTotal = grandDonation
+                    })
+                    if (finalDonationTotal && finalTotalOfEvent) {
+                        finalGrandTotal = finalDonationTotal + finalTotalOfEvent
+                    }
+                    let totalCost = {}
+                    totalCost.eventTotal = finalTotalOfEvent
+                    totalCost.donationTotal = finalDonationTotal
+                    totalCost.finalTotal = finalGrandTotal
+                    resolve(totalCost)
+                }
+            })
+    })
+}
+
+
+
 
 /**
  * Guest List With Purcahsed Amount Of Transaction Using EventId
@@ -2869,19 +2946,35 @@ const eventGuestListWithAmount = (eventId) => {
                         userId: '$guestDetail._id',
                         firstName: '$guestDetail.firstName',
                         lastName: '$guestDetail.lastName',
-                        mobile: '$guestDetail.mobile',
-                        email: '$guestDetail.email'
+                        mobile: '$guestDetail.address.phoneNo',
+                        email: '$guestDetail.address.email',
+                        address: '$guestDetail.address.address'
                     },
 
                 },
             },
-            // $lookup In Transaction Model For User Transaction Detail
             {
                 $lookup: {
                     from: 'transaction',
-                    localField: 'guestDetail.userId',
-                    foreignField: 'userId',
-                    as: 'transactionDetail'
+                    let: {
+                        userId: '$guestDetail.userId'
+                    },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $eq: ["$userId", "$$userId"]
+                                }
+                            }
+                        },
+                        {
+                            $project: {
+                                item: 1,
+                                eventId: 1
+                            }
+                        }
+                    ],
+                    as: 'cartItems'
                 }
             },
             {
@@ -2891,7 +2984,7 @@ const eventGuestListWithAmount = (eventId) => {
                     guestDetail: 1,
                     transactionDetails: {
                         $filter: {
-                            input: "$transactionDetail",
+                            input: "$cartItems",
                             as: "transaction",
                             cond: { $and: [{ $eq: ["$$transaction.eventId", ObjectId(eventId)] }] }
                         }
@@ -2905,79 +2998,177 @@ const eventGuestListWithAmount = (eventId) => {
                     preserveNullAndEmptyArrays: true
                 }
             },
-            // // $group Using Guest UserId For Transaction Total
+            {
+                $unwind: {
+                    path: '$transactionDetails.item',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
             {
                 $group: {
                     _id: '$guestDetail.userId',
-                    totalCollection: {
-                        $sum: '$transactionDetails.finalTotal'
-                    },
-                    totalDonation: {
-                        $sum: '$transactionDetails.donation'
-                    },
-                    guestDetail: {
-                        $first: '$guestDetail'
-                    },
-                    eventId: {
-                        $first: '$eventId',
-                    },
-                    hashTag: {
-                        $first: '$hashTag',
+                    guestDetails: {
+                        $push: {
+                            firstName: '$guestDetail.firstName',
+                            lastName: '$guestDetail.lastName',
+                            phoneNo: '$guestDetail.mobile',
+                            email: '$guestDetail.email',
+                            address: '$guestDetail.address',
+                            itemId: '$transactionDetails.item.itemId',
+                            quantity: '$transactionDetails.item.quantity'
+                        }
                     }
                 }
             },
-            // // $project For Modifie Result
             {
-                $project: {
-                    eventId: 1,
-                    hashTag: 1,
-                    totalCollection: 1,
-                    totalDonation: 1,
-                    finalTotal: { $sum: ["$totalCollection", "$totalDonation"] },
-                    userId: '$guestDetail.userId',
-                    firstName: '$guestDetail.firstName',
-                    lastName: '$guestDetail.lastName',
-                    email: '$guestDetail.email',
-                    mobile: '$guestDetail.mobile',
+                $unwind: {
+                    path: '$guestDetails',
+                    preserveNullAndEmptyArrays: true
                 }
             },
-            // // $project For Modifie Result
+            {
+                $lookup: {
+                    from: 'group',
+                    let: {
+                        items: '$guestDetails'
+                    },
+                    pipeline: [
+                        {
+                            $unwind: '$item'
+                        },
+                        {
+                            $match: {
+                                $expr: {
+                                    $eq: ["$item._id", "$$items.itemId"]
+                                }
+                            }
+                        },
+                        {
+                            $project: {
+                                _id: 1,
+                                activityId: 1,
+                                itemName: '$item.itemName',
+                                itemPrice: '$item.itemPrice'
+                            }
+                        }
+                    ],
+                    as: 'guestDetails.itemId'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$guestDetails.itemId'
+                }
+            },
             {
                 $project: {
-                    eventId: 1,
-                    hashTag: 1,
-                    guestDetail: {
-                        userId: '$userId',
-                        firstName: '$firstName',
-                        lastName: '$lastName',
-                        email: '$email',
-                        mobile: '$mobile',
-                        totalCollection: '$totalCollection',
-                        totalDonation: '$totalDonation',
-                        finalTotal: '$finalTotal'
+                    _id: '$_id',
+                    guestDetails: {
+                        firstName: '$guestDetails.firstName',
+                        lastName: '$guestDetails.lastName',
+                        phoneNo: '$guestDetails.phoneNo',
+                        email: '$guestDetails.email',
+                        address: '$guestDetails.address',
+                        itemId: '$guestDetails.itemId',
+                        quantity: '$guestDetails.quantity'
                     }
                 }
             },
-            // // $group Using EventId
             {
                 $group: {
-                    _id: '$eventId',
-                    hashTag: {
-                        $first: '$hashTag'
+                    _id: '$_id',
+                    firstName: {
+                        $first: '$guestDetails.firstName',
                     },
-                    eventId: {
-                        $first: '$eventId'
+                    lastName: {
+                        $first: '$guestDetails.lastName'
                     },
-                    guestDetail: {
-                        $push: '$guestDetail'
-                    }
+                    phoneNo: {
+                        $first: '$guestDetails.phoneNo'
+                    },
+                    email: {
+                        $first: '$guestDetails.email'
+                    },
+                    address: {
+                        $first: '$guestDetails.address'
+                    },
+                    items: {
+                        $push: {
+                            itemId: '$guestDetails.itemId',
+                            quantity: '$guestDetails.quantity'
+                        }
+                    },
                 }
-            }
+            },
+            {
+                $unwind: {
+                    path: '$items',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: 'event',
+                    let: {
+                        activityName: '$items.itemId'
+                    },
+                    pipeline: [
+                        {
+                            $unwind: {
+                                path: '$activities'
+                            }
+                        },
+                        {
+                            $match: {
+                                $expr: {
+                                    $eq: ["$activities._id", "$$activityName.activityId"]
+                                }
+                            }
+                        },
+                        {
+                            $project: {
+                                activityName: '$activities.activityName'
+                            }
+                        }
+                    ],
+                    as: 'items.itemId.activityId'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$items.itemId.activityId',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    firstName: {
+                        $first: '$firstName',
+                    },
+                    lastName: {
+                        $first: '$lastName'
+                    },
+                    phoneNo: {
+                        $first: '$phoneNo'
+                    },
+                    email: {
+                        $first: '$email'
+                    },
+                    address: {
+                        $first: '$address'
+                    },
+                    items: {
+                        $push: '$items'
+                    },
+                }
+            },
         ]).exec(function (guestListErr, guestListRes) {
             if (guestListErr) {
                 console.log("Guest List Error:", guestListErr);
                 reject(guestListErr);
             } else {
+                resolve({ data: guestListRes })
                 resolve({ status: 200, message: 'Event Guest List!', data: guestListRes[0] });
             }
         });
