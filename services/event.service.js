@@ -109,7 +109,7 @@ module.exports.updateExistingEvent = (eventId, eventData) => {
     return new Promise((resolve, reject) => {
         fnHashtagAvailableOnUpdate(eventId, eventData.hashTag).then((response) => {
             if (response) {
-                EventModel.findByIdAndUpdate({ _id: eventId }, eventData, { upsert: true }, (eventError, updatedEvent) => {
+                EventModel.findByIdAndUpdate({ _id: eventId }, eventData, { upsert: true, new: true }, (eventError, updatedEvent) => {
                     if (eventError) {
                         console.log('usererror: ', eventError);
                         reject({ status: 500, message: 'Internal Server Error' });
@@ -234,24 +234,27 @@ module.exports.newGroupInsideActivity = (groupData, eventId) => {
  * @returns {Promise} - updated group or reason why failed
  */
 module.exports.updateGroupInsideActivity = (groupData) => {
+    console.log("group data", groupData)
     return new Promise((resolve, reject) => {
-
-        async.eachSeries(groupData.group, (singleGroup, parentcb) => {
-
+        async.eachSeries(groupData, (singleGroup, parentcb) => {
+            console.log("single group details", singleGroup)
             if (singleGroup.groupId) {
-
+                console.log("call first if condition or not")
                 async.parallel({
                     group: function (cb) {
                         GroupModel.findByIdAndUpdate({ _id: singleGroup.groupId }, { $set: { groupName: singleGroup.groupName } }).exec((error, updateGroup) => {
                             if (error) {
                                 console.log('Internal Server Error');
                             } else {
+                                console.log("call this or not", updateGroup)
                                 cb();
                             }
                         });
                     },
                     male: function (cb) {
+                        console.log("cb =========", cb)
                         async.eachSeries(singleGroup.male, (maleData, callback) => {
+                            console.log("male data", maleData)
                             if (maleData.itemId) {
                                 const newValues = { $set: { 'item.$.itemName': maleData.itemName, 'item.$.itemPrice': maleData.itemPrice, 'item.$.itemGender': 'male' } }
                                 GroupModel.updateOne({ _id: singleGroup.groupId, 'item._id': ObjectId(maleData.itemId) }, newValues)
@@ -259,10 +262,12 @@ module.exports.updateGroupInsideActivity = (groupData) => {
                                         if (error) {
                                             console.log('Internal Server Error');
                                         } else {
+                                            console.log("response of new male items", response)
                                             callback();
                                         }
                                     });
                             } else {
+                                console.log("first male check")
                                 const maleItem = { itemName: maleData.itemName, itemPrice: maleData.itemPrice, itemGender: 'male', }
                                 GroupModel.updateOne({ _id: singleGroup.groupId }, { $push: { item: maleItem } }, { new: true, upsert: true }).exec((error, response) => {
                                     if (error) {
@@ -322,7 +327,7 @@ module.exports.updateGroupInsideActivity = (groupData) => {
                 });
             }
             else {
-
+                console.log("call this else part")
                 const newGroup = {
                     eventId: groupData.eventId,
                     activityId: singleGroup.activityId,
@@ -517,6 +522,33 @@ const onlyEventDetail = (eventId) => {
     });
 }
 
+
+
+/**
+ * @param {eventId} - EventId for activity details
+ * get activity details
+ */
+function activityDetailsOfEvent(eventId, userId) {
+    return new Promise((resolve, reject) => {
+        EventModel.findById({ _id: eventId })
+            // .populate('activities')
+            .exec((error, activityDetails) => {
+                if (error)
+                    // console.log("error while get activity details", error)
+                    reject({ status: 500, message: 'Error while get details of activity' })
+                else {
+                    console.log("details of activity", activityDetails.activities)
+                    let data = activityDetails.activities
+                    if (data.length > 0) {
+                        resolve(data)
+                    } else {
+                        resolve({ message: 'This is create new event' })
+                    }
+                }
+            })
+    })
+}
+
 /**
  * Function For checking User Is Creator Of Particular event
  * @param {string} eventId 
@@ -589,6 +621,7 @@ function guestEventDetail(hashTag, userId) {
                     defaultImage: '$defaultImage',
                     paymentDeadlineDate: '$paymentDeadlineDate',
                     activities: '$activities',
+                    thanksMessage: '$thanksMessage'
                 }
             },
             {
@@ -655,6 +688,9 @@ function guestEventDetail(hashTag, userId) {
                     },
                     defaultImage: {
                         $first: '$defaultImage'
+                    },
+                    thanksMessage: {
+                        $first: '$thanksMessage'
                     },
                     activity: {
                         $push: '$activities',
@@ -2859,29 +2895,40 @@ const eventTotalCollection = (eventId) => {
                     reject({ status: 500, message: 'Error while get total of event and donation' })
                 else {
                     console.log("total of event", totalOfEvent)
-                    grandTotal = 0
-                    grandDonation = 0
-                    totalOfEvent.forEach((singleEvent) => {
-                        console.log("total of single event", singleEvent.finalTotal)
-                        // Total Of Event
+                    if (totalOfEvent && totalOfEvent.length) {
+                        grandTotal = 0
+                        grandDonation = 0
+                        totalOfEvent.forEach((singleEvent) => {
 
-                        subTotal = singleEvent.finalTotal
-                        grandTotal = grandTotal + subTotal
-                        finalTotalOfEvent = grandTotal
+                            console.log("total of single event", singleEvent.finalTotal)
+                            // Total Of Event
 
-                        // Total Of Donation
-                        subDonation = singleEvent.donation
-                        grandDonation = grandDonation + subDonation
-                        finalDonationTotal = grandDonation
-                    })
-                    if (finalDonationTotal && finalTotalOfEvent) {
+                            subTotal = singleEvent.finalTotal
+                            grandTotal = grandTotal + subTotal
+                            finalTotalOfEvent = grandTotal
+
+                            // Total Of Donation
+                            if (singleEvent.donation) {
+                                subDonation = singleEvent.donation
+                                grandDonation = grandDonation + subDonation
+                                finalDonationTotal = grandDonation
+                            } else {
+                                finalDonationTotal = 0
+                            }
+
+                        })
+                        // console.log("donation", finalDonationTotal)
+                        // if (finalDonationTotal && finalTotalOfEvent) {
                         finalGrandTotal = finalDonationTotal + finalTotalOfEvent
+                        // }
+                        let totalCost = {}
+                        totalCost.eventTotal = finalTotalOfEvent
+                        totalCost.donationTotal = finalDonationTotal
+                        totalCost.finalTotal = finalGrandTotal
+                        resolve(totalCost)
+                    } else {
+                        resolve({ message: 'There is not item purchase in this event' })
                     }
-                    let totalCost = {}
-                    totalCost.eventTotal = finalTotalOfEvent
-                    totalCost.donationTotal = finalDonationTotal
-                    totalCost.finalTotal = finalGrandTotal
-                    resolve(totalCost)
                 }
             })
     })
@@ -4263,6 +4310,23 @@ function setPriceOfEvent(details) {
 }
 
 
+function getPriceOfEvent(eventId) {
+    return new Promise((resolve, reject) => {
+        console.log("event id", eventId)
+        EventModel.findById({ _id: eventId })
+            .exec((error, priceDetails) => {
+                if (error)
+                    // console.log("error while get event details", error)
+                    reject({ status: 500, message: 'Error while get price of event' })
+                else {
+                    console.log("event details", priceDetails)
+                    resolve(priceDetails)
+                }
+            })
+    })
+}
+
+
 function getAfterEventMessage(eventId) {
     return new Promise((resolve, reject) => {
         EventModel.findOne({ _id: eventId })
@@ -4279,7 +4343,8 @@ function getAfterEventMessage(eventId) {
     })
 }
 
-
+module.exports.getPriceOfEvent = getPriceOfEvent
+module.exports.activityDetailsOfEvent = activityDetailsOfEvent
 module.exports.totalCollectionActivityWise = totalCollectionActivityWise
 module.exports.getAfterEventMessage = getAfterEventMessage
 module.exports.setPriceOfEvent = setPriceOfEvent

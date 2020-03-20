@@ -69,12 +69,14 @@ router.route('/cart')
 router.get('/event/myevent-list', ensureAuthenticated.validateToken, EventController.MyEventList);
 router.get('/event/event-list', EventController.eventList);
 router.get('/event/:id', [ensureAuthenticated.validateToken], EventController.eventDetail);
+router.get('/event/activity/:id', [ensureAuthenticated.validateToken], EventController.activityDetailsOfEvent)
 router.get('/event/guestEvent/:hashTag', [ensureAuthenticated.validateToken], EventController.guestEventDetails)
 
 //Routes For Event Profile Change and Set price of event
 
 router.post('/event/changeProfile', cpUpload, EventController.changeProfile)
 router.post('/event/set-price', ensureAuthenticated.validateToken, EventController.setPriceOfEvent)
+router.get('/event/set-price/:id', ensureAuthenticated.validateToken, EventController.getPriceOfEvent)
 
 // Routes For Message Operations
 router.post('/message/add-message', ensureAuthenticated.validateToken, Fileupload.upload('attachment'), eventValidation.thanksMessageDetail, EventController.thanksMessageDetail);

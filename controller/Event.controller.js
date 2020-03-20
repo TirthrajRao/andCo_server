@@ -117,6 +117,22 @@ module.exports.setPriceOfEvent = (req, res) => {
 }
 
 /**
+ * Get set price of single event
+ */
+module.exports.getPriceOfEvent = (req, res) => {
+	let eventId = req.params.id
+	console.log("event id ==========", eventId)
+	eventService.getPriceOfEvent(eventId).then((response) => {
+		console.log("response of event", response)
+		return res.status(200).json(response)
+	}).catch((error) => {
+		console.log("error while get price", error)
+		return res.status(error.status).json({ message: error.message })
+	})
+}
+
+
+/**
  * Create New Activity Inside Event API
  * @api {post} /api/newevent/activity
  */
@@ -161,6 +177,27 @@ module.exports.eventDetail = (req, res) => {
 		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
 	});
 }
+
+
+module.exports.activityDetailsOfEvent = (req, res) => {
+	let loginUser = req.user
+	let finalId
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
+	const eventId = req.params.id;
+	eventService.activityDetailsOfEvent(eventId, finalId).then((response) => {
+		console.log("response of activity", response)
+		return res.status(200).json({ data: response, message: response.message })
+	}).catch((error) => {
+		console.log("error while get activity", error)
+		return res.status(error.status).json({ message: error.message })
+	})
+
+}
+
 
 module.exports.guestEventDetails = (req, res) => {
 	console.log("guest event hashtag", req.params)
@@ -253,26 +290,35 @@ module.exports.updateExistingEvent = (req, res) => {
 
 	console.log('Req.body', req.body);
 
+	let loginUser = req.user
+	let finalId
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
 	const eventId = req.body.eventId;
 	let hashTag = req.body.hashTag.split(' ').join('_');
 
 	let eventData = {};
 
-	if (req.user.user._id) eventData['userId'] = req.user.user._id;
+	if (req.user) eventData['userId'] = finalId;
 	if (req.body.eventType) eventData['eventType'] = req.body.eventType;
 	if (req.body.eventTitle) eventData['eventTitle'] = req.body.eventTitle;
 	if (req.body.hashTag) eventData['hashTag'] = hashTag;
-	if (req.body.isPublic) eventData['isPublic'] = req.body.isPublic;
-	if (req.body.deadlineDate) eventData['paymentDeadlineDate'] = req.body.deadlineDate;
-	if (req.body.isLogistics) eventData['isLogistics'] = req.body.isLogistics;
+	if (req.body.eventTheme) eventData['eventTheme'] = req.body.eventTheme
+	// if (req.body.isPublic) eventData['isPublic'] = req.body.isPublic;
+	// if (req.body.deadlineDate) eventData['paymentDeadlineDate'] = req.body.deadlineDate;
+	// if (req.body.isLogistics) eventData['isLogistics'] = req.body.isLogistics;
 
 	if (req.files.profile) {
 		eventData.profilePhoto = req.files.profile[0].path;
 	}
+	console.log("event update data", eventData)
 
-	if (req.files.background) {
-		eventData.eventTheme = req.files.background[0].path;
-	}
+	// if (req.files.background) {
+	// 	eventData.eventTheme = req.files.background[0].path;
+	// }
 
 	eventService.updateExistingEvent(eventId, eventData).then((response) => {
 		return res.status(200).json({ message: response.message, data: response.data });
@@ -301,6 +347,7 @@ module.exports.eventList = (req, res) => {
  * @returns - Updated Activity Or Reason To Fail
  */
 module.exports.updateActivityInsideEvent = (req, res) => {
+	console.log("activity details", req.body)
 	eventService.updateActivityInsideEvent(req.body.activity).then((response) => {
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
@@ -317,6 +364,7 @@ module.exports.updateActivityInsideEvent = (req, res) => {
 module.exports.updateGroupInsideActivity = (req, res) => {
 	// console.log("req.body", JSON.stringify(req.body));
 	eventService.updateGroupInsideActivity(req.body).then((response) => {
+		console.log("update group", response)
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
 		console.log('error: ', error);
