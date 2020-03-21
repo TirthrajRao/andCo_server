@@ -1,6 +1,7 @@
 /** Events Mongo DB model	*/
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+platFormOf = ['WP', 'GM', 'FB', 'TX']
 
 const event = new Schema({
 	userId: {
@@ -10,10 +11,19 @@ const event = new Schema({
 	eventTitle: {
 		type: String,
 	},
-	guest: [{
-		type: mongoose.Schema.Types.ObjectId,
-		ref: 'User'
-	}],
+	guest: [
+		{
+			// _id: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'User',
+			// },
+			// platForm: {
+			// 	type: {
+			// 		enum: platFormOf
+			// 	}
+			// }
+		},
+	],
 	eventType: {
 		type: String,
 	},

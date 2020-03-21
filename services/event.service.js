@@ -473,6 +473,7 @@ const eventDetail = (eventId, userId) => {
                 fnCheckForCelebrant(eventId, userId).then((response) => {
                     eventDetail[0].isCelebrant = response;
                     fnCheckForGuestJoined(eventId, userId).then((response) => {
+                        console.log("response of check event", response)
                         eventDetail[0].isJoined = response;
                         resolve({ status: 200, message: 'Event Detail fetch Successfully!', data: eventDetail[0] });
                     }).catch((error) => {
@@ -577,6 +578,7 @@ function fnCheckForCelebrant(eventId, userId) {
 function fnCheckForGuestJoined(eventId, userId) {
     return new Promise((resolve, reject) => {
         EventModel.findOne({ _id: eventId, guest: userId }, (eventError, event) => {
+            console.log("event is false or not", event)
             if (eventError) {
                 console.log('Event Error:', eventError);
                 reject({ status: 500, message: 'Internal Server Error' });
@@ -705,6 +707,7 @@ function guestEventDetail(hashTag, userId) {
                 fnCheckForCelebrant(guestEvent[0]._id, userId).then((response) => {
                     guestEvent[0].isCelebrant = response;
                     fnCheckForGuestJoined(guestEvent[0]._id, userId).then((response) => {
+                        // console
                         guestEvent[0].isJoined = response;
                         resolve({ status: 200, message: 'Event Detail fetch Successfully!', data: guestEvent[0] });
                     }).catch((error) => {
@@ -1373,17 +1376,24 @@ module.exports.removeItemFromCart = (cartId) => {
 * @param {Json} - EventId and UserId
 * @returns {Promise} - Event Join Successfully or reason why failed
 */
-module.exports.eventJoining = (userId, eventId) => {
+module.exports.eventJoining = (userId, details) => {
+    console.log("platform", details)
     return new Promise((resolve, reject) => {
-        console.log('EventId', eventId);
+        // console.log('EventId', eventId);
         console.log('UserId', userId);
-        fnIsGuestJoined(eventId, userId, function (IfUserNotJoined) {
+        // let obj = {
+        //     _id: userId,
+        //     platForm: details.platForm
+        // }
+        console.log("obj", obj)
+        fnIsGuestJoined(details.eventId, userId, function (IfUserNotJoined) {
             if (IfUserNotJoined) {
-                EventModel.findByIdAndUpdate({ _id: eventId }, { $push: { guest: userId } }, { new: true }, (error, eventDetail) => {
+                EventModel.findByIdAndUpdate({ _id: details.eventId }, { $push: { guest: userId } }, { new: true }, (error, eventDetail) => {
                     if (error) {
                         console.log('Event Not Found:', error);
                         reject({ status: 500, message: 'Internal Server Error' });
                     } else {
+                        console.log("event join response", eventDetail)
                         resolve({ status: 200, message: 'Event Join Successfully.', data: eventDetail });
                     }
                 });
@@ -1405,7 +1415,7 @@ module.exports.eventJoining = (userId, eventId) => {
 
 function fnIsGuestJoined(eventId, userId, next) {
     console.log('EventId,userId', eventId, userId);
-    EventModel.findOne({ _id: eventId, guest: userId }, (eventError, event) => {
+    EventModel.findOne({ _id: eventId, 'guest._id': userId }, (eventError, event) => {
         if (eventError) {
             console.log("Error:", eventError);
             next(false)
@@ -4310,6 +4320,16 @@ function setPriceOfEvent(details) {
 }
 
 
+function updateSetPrice(details) {
+    return new Promise((resolve, reject) => {
+        EventModel.findByIdAndUpdate({ _id: details.eventId }, { $set: details }, { upsert: true, new: true })
+            .exec((error, updateDetails) => {
+                console.log("details update completed", updateDetails)
+            })
+    })
+}
+
+
 function getPriceOfEvent(eventId) {
     return new Promise((resolve, reject) => {
         console.log("event id", eventId)
@@ -4343,6 +4363,7 @@ function getAfterEventMessage(eventId) {
     })
 }
 
+module.exports.updateSetPrice = updateSetPrice
 module.exports.getPriceOfEvent = getPriceOfEvent
 module.exports.activityDetailsOfEvent = activityDetailsOfEvent
 module.exports.totalCollectionActivityWise = totalCollectionActivityWise

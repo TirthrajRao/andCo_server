@@ -116,6 +116,31 @@ module.exports.setPriceOfEvent = (req, res) => {
 	})
 }
 
+
+module.exports.updateSetPriceOfEvent = (req, res) => {
+	console.log("details of update set price", req.body)
+	let loginUser = req.user
+	let finalId
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
+	let updateDetails = {}
+	if (req.body.thanksMessage) updateDetails['thanksMessage'] = req.body.thanksMessage
+	if (req.body.afterEventMessage) updateDetails['afterEventMessage'] = req.body.afterEventMessage
+	if (req.body.paymentDeadlineDate) updateDetails['paymentDeadlineDate'] = req.body.paymentDeadlineDate
+	if (req.body.paymentDeadlineTime) updateDetails['paymentDeadlineTime'] = req.body.paymentDeadlineTime
+	if (req.body.bankDetails) updateDetails['bankDetails'] = req.body.bankDetails
+	if (req.body.eventId) updateDetails['eventId'] = req.body.eventId
+	console.log("update", updateDetails)
+	eventService.updateSetPrice(updateDetails).then((updated) => {
+		console.log("update completed", updated)
+	}).catch((error) => {
+		console.log("error while update", error)
+	})
+}
+
 /**
  * Get set price of single event
  */
@@ -625,12 +650,15 @@ module.exports.getAccountDetails = (req, res) => {
  */
 module.exports.eventJoining = (req, res) => {
 	// var eventId = Buffer.from(hashedData, 'base64').toString('ascii');
-	const eventId = req.body.eventId;
+	const data = {}
+	data.eventId = req.body.eventId
+	// data.platForm = req.body.platForm
+	// const eventId = req.body.eventId;
 	console.log("Request.body in controller", req.body);
 	const userId = req.user.user._id;
 	console.log("REQUEST.USER", userId);
-	console.log("EVENT ID", eventId);
-	eventService.eventJoining(userId, eventId).then((response) => {
+	// console.log("EVENT ID", eventId);
+	eventService.eventJoining(userId, data).then((response) => {
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
 		console.error('error: ', error);

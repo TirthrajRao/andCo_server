@@ -75,7 +75,13 @@ router.get('/event/guestEvent/:hashTag', [ensureAuthenticated.validateToken], Ev
 //Routes For Event Profile Change and Set price of event
 
 router.post('/event/changeProfile', cpUpload, EventController.changeProfile)
-router.post('/event/set-price', ensureAuthenticated.validateToken, EventController.setPriceOfEvent)
+
+
+router.route('/event/set-price')
+    .post([ensureAuthenticated.validateToken], EventController.setPriceOfEvent)
+    .put([ensureAuthenticated.validateToken], EventController.updateSetPriceOfEvent)
+
+// router.post('/event/set-price', ensureAuthenticated.validateToken, EventController.setPriceOfEvent)
 router.get('/event/set-price/:id', ensureAuthenticated.validateToken, EventController.getPriceOfEvent)
 
 // Routes For Message Operations
