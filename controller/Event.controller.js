@@ -41,10 +41,10 @@ module.exports.createNewEvent = (req, res) => {
 		// paymentDeadlineDate: req.body.deadlineDate,
 		// isLogistics: req.body.isLogistics,
 		// defaultImage: req.body.defaultImage,
-		thanksMessage: {
-			attachment: '',
-			message: ''
-		}
+		// thanksMessage: {
+		// 	attachment: '',
+		// 	message: ''
+		// }
 	}
 
 	// if (req.files.background) {

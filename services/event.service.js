@@ -1385,7 +1385,7 @@ module.exports.eventJoining = (userId, details) => {
         //     _id: userId,
         //     platForm: details.platForm
         // }
-        console.log("obj", obj)
+        // console.log("obj", obj)
         fnIsGuestJoined(details.eventId, userId, function (IfUserNotJoined) {
             if (IfUserNotJoined) {
                 EventModel.findByIdAndUpdate({ _id: details.eventId }, { $push: { guest: userId } }, { new: true }, (error, eventDetail) => {
