@@ -161,15 +161,15 @@ module.exports.getPriceOfEvent = (req, res) => {
  * Create New Activity Inside Event API
  * @api {post} /api/newevent/activity
  */
- module.exports.newActivityInsideEvent = (req, res) => {
- 	console.log("Activity Data", req.body);
- 	eventService.newActivityInsideEvent(req.body).then((response) => {
- 		return res.status(200).json({ message: response.message, data: response.data });
- 	}).catch((error) => {
- 		console.log('error: ', error);
- 		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
- 	});
- }
+module.exports.newActivityInsideEvent = (req, res) => {
+	console.log("Activity Data", req.body);
+	eventService.newActivityInsideEvent(req.body).then((response) => {
+		return res.status(200).json({ message: response.message, data: response.data });
+	}).catch((error) => {
+		console.log('error: ', error);
+		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
+	});
+}
 
 /**
  * Create New Group Of People Inside Activity API
@@ -193,9 +193,15 @@ module.exports.newGroupInsideActivity = (req, res) => {
 module.exports.eventDetail = (req, res) => {
 	console.log("first of all su ave che", req.params)
 	const eventId = req.params.id;
-	const userId = req.user.user._id;
+	// const userId = req.user.user._id;
+	let finalId
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
 	console.log('Req.user:', userId);
-	eventService.eventDetail(eventId, userId).then((response) => {
+	eventService.eventDetail(eventId, finalId).then((response) => {
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
 		console.log('error: ', error);
@@ -243,77 +249,77 @@ module.exports.guestEventDetails = (req, res) => {
  * Remove Event From Using EventId
  * @api {delete} /api/event
  */
- module.exports.deleteEvent = (req, res) => {
- 	const eventId = req.params.id;
- 	console.log('EventId:', eventId);
- 	eventService.deleteEvent(eventId).then((response) => {
- 		return res.status(200).json({ message: response.message, data: response.data });
- 	}).catch((error) => {
- 		console.log('error: ', error);
- 		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
- 	});
- }
+module.exports.deleteEvent = (req, res) => {
+	const eventId = req.params.id;
+	console.log('EventId:', eventId);
+	eventService.deleteEvent(eventId).then((response) => {
+		return res.status(200).json({ message: response.message, data: response.data });
+	}).catch((error) => {
+		console.log('error: ', error);
+		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
+	});
+}
 
 /**
  * Remove Activity From Event Using ActivityId
  * 
  */
- module.exports.deleteActivityFromEvent = (req, res) => {
- 	const activityId = req.body.activityId;
- 	const eventId = req.body.eventId;
- 	console.log('EventID and ActivityId:', req.body);
- 	eventService.deleteActivityFromEvent(eventId, activityId).then((response) => {
- 		return res.status(200).json({ message: response.message, data: response.data });
- 	}).catch((error) => {
- 		console.log('error: ', error);
- 		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
- 	});
- }
+module.exports.deleteActivityFromEvent = (req, res) => {
+	const activityId = req.body.activityId;
+	const eventId = req.body.eventId;
+	console.log('EventID and ActivityId:', req.body);
+	eventService.deleteActivityFromEvent(eventId, activityId).then((response) => {
+		return res.status(200).json({ message: response.message, data: response.data });
+	}).catch((error) => {
+		console.log('error: ', error);
+		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
+	});
+}
 
 /**
  * Remove Group From Event Using GroupId
  * @api {delete} /api/event/group/:groupId
  */
- module.exports.deleteGroupFromActivity = (req, res) => {
- 	const groupId = req.body.groupId;
- 	eventService.deleteGroupFromActivity(groupId).then((response) => {
- 		return res.status(200).json({ message: response.message, data: response.data });
- 	}).catch((error) => {
- 		console.log('error: ', error);
- 		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
- 	});
- }
+module.exports.deleteGroupFromActivity = (req, res) => {
+	const groupId = req.body.groupId;
+	eventService.deleteGroupFromActivity(groupId).then((response) => {
+		return res.status(200).json({ message: response.message, data: response.data });
+	}).catch((error) => {
+		console.log('error: ', error);
+		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
+	});
+}
 
 /**
  * Add ThankYou Message To Particular Event
  * @param {req.body} - Message Data
  * @returns - Thanks Message Or Reason To Fail
  */
- module.exports.thanksMessageDetail = (req, res) => {
+module.exports.thanksMessageDetail = (req, res) => {
 
- 	console.log('Req.files:', req.files);
+	console.log('Req.files:', req.files);
 
- 	const attachment = req.files[0].path;
+	const attachment = req.files[0].path;
 
- 	console.log('files path array:', attachment);
+	console.log('files path array:', attachment);
 
- 	const messageData = { eventId: req.body.eventId, message: req.body.message, attachment: attachment }
+	const messageData = { eventId: req.body.eventId, message: req.body.message, attachment: attachment }
 
- 	eventService.thanksMessageDetail(messageData).then((response) => {
- 		return res.status(200).json({ message: response.message, data: response.data });
- 	}).catch((error) => {
- 		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
- 	});
- }
+	eventService.thanksMessageDetail(messageData).then((response) => {
+		return res.status(200).json({ message: response.message, data: response.data });
+	}).catch((error) => {
+		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
+	});
+}
 
 /**
  * Update Existing Event Using EventId
  * @param {req.body} - Message Data
  * @returns - Thanks Message Or Reason To Fail
  */
- module.exports.updateExistingEvent = (req, res) => {
+module.exports.updateExistingEvent = (req, res) => {
 
- 	console.log('Req.body', req.body);
+	console.log('Req.body', req.body);
 
 	let loginUser = req.user
 	let finalId
@@ -325,7 +331,7 @@ module.exports.guestEventDetails = (req, res) => {
 	const eventId = req.body.eventId;
 	let hashTag = req.body.hashTag.split(' ').join('_');
 
- 	let eventData = {};
+	let eventData = {};
 
 	if (req.user) eventData['userId'] = finalId;
 	if (req.body.eventType) eventData['eventType'] = req.body.eventType;
@@ -345,26 +351,26 @@ module.exports.guestEventDetails = (req, res) => {
 	// 	eventData.eventTheme = req.files.background[0].path;
 	// }
 
- 	eventService.updateExistingEvent(eventId, eventData).then((response) => {
- 		return res.status(200).json({ message: response.message, data: response.data });
- 	}).catch((error) => {
- 		console.log('error: ', error);
- 		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
- 	});
- }
+	eventService.updateExistingEvent(eventId, eventData).then((response) => {
+		return res.status(200).json({ message: response.message, data: response.data });
+	}).catch((error) => {
+		console.log('error: ', error);
+		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
+	});
+}
 
 /**
  * List Of All Public Event 
  * @returns - List Of Public Event Or Reason To Fail
  */
- module.exports.eventList = (req, res) => {
- 	eventService.eventList().then((response) => {
- 		return res.status(200).json({ message: response.message, data: response.data });
- 	}).catch((error) => {
- 		console.log('error: ', error);
- 		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
- 	});
- }
+module.exports.eventList = (req, res) => {
+	eventService.eventList().then((response) => {
+		return res.status(200).json({ message: response.message, data: response.data });
+	}).catch((error) => {
+		console.log('error: ', error);
+		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
+	});
+}
 
 /**
  * Update Activity Inside Event
@@ -386,7 +392,7 @@ module.exports.updateActivityInsideEvent = (req, res) => {
  * @param {req.body} - Group Data To Update
  * @returns - Updated Group Or Reason To Fail
  */
- module.exports.updateGroupInsideActivity = (req, res) => {
+module.exports.updateGroupInsideActivity = (req, res) => {
 	// console.log("req.body", JSON.stringify(req.body));
 	eventService.updateGroupInsideActivity(req.body).then((response) => {
 		console.log("update group", response)
@@ -402,15 +408,15 @@ module.exports.updateActivityInsideEvent = (req, res) => {
  * @param {UserId} - UserID Of User
  * @returns - MyEventList Or Reason To Fail
  */
- module.exports.MyEventList = (req, res) => {
- 	const userId = req.user.user._id;
- 	eventService.MyEventList(userId).then((response) => {
- 		return res.status(200).json({ message: response.message, data: response.data });
- 	}).catch((error) => {
- 		console.error('error: ', error);
- 		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
- 	});
- }
+module.exports.MyEventList = (req, res) => {
+	const userId = req.user.user._id;
+	eventService.MyEventList(userId).then((response) => {
+		return res.status(200).json({ message: response.message, data: response.data });
+	}).catch((error) => {
+		console.error('error: ', error);
+		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
+	});
+}
 
 /**
  * Add Item To Cart
@@ -442,15 +448,15 @@ module.exports.addItemToCart = (req, res) => {
  * @param {req.body} - Cart Data To Updated
  * @returns - Updated Item Or Reason To Fail
  */
- module.exports.updateItemToCart = (req, res) => {
- 	console.log('updateItemToCart', req.body);
- 	eventService.updateItemToCart(req.body).then((response) => {
- 		return res.status(200).json({ message: response.message, data: response.data });
- 	}).catch((error) => {
- 		console.error('error: ', error);
- 		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
- 	});
- }
+module.exports.updateItemToCart = (req, res) => {
+	console.log('updateItemToCart', req.body);
+	eventService.updateItemToCart(req.body).then((response) => {
+		return res.status(200).json({ message: response.message, data: response.data });
+	}).catch((error) => {
+		console.error('error: ', error);
+		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
+	});
+}
 
 /**
  * Cart Item List Using UserID or EventID
@@ -488,31 +494,31 @@ module.exports.cartItemList = (req, res) => {
  * @param {req.body} - CartId TO remove From Cart	
  * @returns - Deleted Item Or Reason To Fail
  */
- module.exports.removeItemFromCart = (req, res) => {
- 	const cartId = req.query.itemId;
- 	console.log("CART_ITEM_ID", cartId);
- 	eventService.removeItemFromCart(cartId).then((response) => {
- 		return res.status(200).json({ message: response.message, data: response.data });
- 	}).catch((error) => {
- 		console.error('error: ', error);
- 		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
- 	});
- }
+module.exports.removeItemFromCart = (req, res) => {
+	const cartId = req.query.itemId;
+	console.log("CART_ITEM_ID", cartId);
+	eventService.removeItemFromCart(cartId).then((response) => {
+		return res.status(200).json({ message: response.message, data: response.data });
+	}).catch((error) => {
+		console.error('error: ', error);
+		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
+	});
+}
 
 /**
  * Update Item From Cart Using CartId
  * @param {req.body} - CartId TO remove From Cart	
  * @returns - Deleted Item Or Reason To Fail
  */
- module.exports.updateItemFromCart = (req, res) => {
- 	console.log("Final Json Object In Update", req.body);
- 	eventService.updateItemFromCart(req.body).then((response) => {
- 		return res.status(200).json({ message: response.message, data: response.data });
- 	}).catch((error) => {
- 		console.error('error: ', error);
- 		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
- 	});
- }
+module.exports.updateItemFromCart = (req, res) => {
+	console.log("Final Json Object In Update", req.body);
+	eventService.updateItemFromCart(req.body).then((response) => {
+		return res.status(200).json({ message: response.message, data: response.data });
+	}).catch((error) => {
+		console.error('error: ', error);
+		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
+	});
+}
 
 /**
  * Add Donation of guest user in event
@@ -648,7 +654,7 @@ module.exports.getAccountDetails = (req, res) => {
  * @param {req.body} - EventID and UserID
  * @returns - Join Successfully Or Reason To Fail
  */
- module.exports.eventJoining = (req, res) => {
+module.exports.eventJoining = (req, res) => {
 	// var eventId = Buffer.from(hashedData, 'base64').toString('ascii');
 	const data = {}
 	data.eventId = req.body.eventId
@@ -671,18 +677,18 @@ module.exports.getAccountDetails = (req, res) => {
  * @param {req.body} - UserID Or EventID
  * @returns - Cart Item List Or Reason To Fail
  */
- module.exports.cartItemListWithTotal = (req, res) => {
- 	const eventId = req.params.id;
- 	const userId = req.user.user._id;
- 	console.log('Event Id', eventId);
- 	console.log('User Id', userId);
- 	eventService.cartItemListWithTotal(eventId, userId).then((response) => {
- 		return res.status(200).json({ message: response.message, data: response.data });
- 	}).catch((error) => {
- 		console.error('error: ', error);
- 		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
- 	});
- }
+module.exports.cartItemListWithTotal = (req, res) => {
+	const eventId = req.params.id;
+	const userId = req.user.user._id;
+	console.log('Event Id', eventId);
+	console.log('User Id', userId);
+	eventService.cartItemListWithTotal(eventId, userId).then((response) => {
+		return res.status(200).json({ message: response.message, data: response.data });
+	}).catch((error) => {
+		console.error('error: ', error);
+		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
+	});
+}
 
 /**
  * Cart Item List Using UserID or EventID
@@ -715,62 +721,62 @@ module.exports.orderCheckout = (req, res) => {
  * @param {req.body} - UserID Or EventID
  * @returns - Cart Item List Or Reason To Fail
  */
- module.exports.eventDetailWithActivity = (req, res) => {
- 	const eventId = req.params.id;
- 	console.log("Event Id in controller", eventId);
- 	eventService.eventDetailWithActivity(eventId).then((response) => {
- 		return res.status(200).json({ message: response.message, data: response.data });
- 	}).catch((error) => {
- 		console.error('error: ', error);
- 		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
- 	});
- }
+module.exports.eventDetailWithActivity = (req, res) => {
+	const eventId = req.params.id;
+	console.log("Event Id in controller", eventId);
+	eventService.eventDetailWithActivity(eventId).then((response) => {
+		return res.status(200).json({ message: response.message, data: response.data });
+	}).catch((error) => {
+		console.error('error: ', error);
+		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
+	});
+}
 
 /**
  * Total Counts For AdminDashboard
  * @param {req.body} - UserID Or EventID
  * @returns - Cart Item List Or Reason To Fail
  */
- module.exports.getCountForAdminDashboard = (req, res) => {
- 	eventService.getCountForAdminDashboard().then((response) => {
- 		return res.status(200).json({ message: response.message, data: response.data });
- 	}).catch((error) => {
- 		console.error('error: ', error);
- 		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
- 	});
- }
+module.exports.getCountForAdminDashboard = (req, res) => {
+	eventService.getCountForAdminDashboard().then((response) => {
+		return res.status(200).json({ message: response.message, data: response.data });
+	}).catch((error) => {
+		console.error('error: ', error);
+		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
+	});
+}
 
 /**
  * GroupWise Sold Item Collections
  * @param {req.body} - EventID
  * @returns - GroupWise Item List Or Reason To Fail
  */
- module.exports.groupWiseItemCollection = (req, res) => {
- 	const eventId = req.params.id;
- 	console.log('EventId:', eventId);
- 	eventService.groupWiseItemCollection(eventId).then((response) => {
- 		return res.status(200).json({ message: response.message, data: response.data });
- 	}).catch((error) => {
- 		console.error('error: ', error);
- 		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
- 	});
- }
+module.exports.groupWiseItemCollection = (req, res) => {
+	const eventId = req.params.id;
+	console.log('EventId:', eventId);
+	eventService.groupWiseItemCollection(eventId).then((response) => {
+		return res.status(200).json({ message: response.message, data: response.data });
+	}).catch((error) => {
+		console.error('error: ', error);
+		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
+	});
+}
 
 /**
  * Searching Event Using Hashtags
  * @param {req.body} - Search Text
  * @returns - Event List Or Reason To Fail
  */
- module.exports.eventListUsingHashTag = (req, res) => {
- 	const keyword = req.query.keyword;
- 	console.log('Search Keyword:', keyword);
- 	eventService.eventListUsingHashTag(keyword).then((response) => {
- 		return res.status(200).json({ message: response.message, data: response.data });
- 	}).catch((error) => {
- 		console.error('error: ', error);
- 		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
- 	});
- }
+module.exports.eventListUsingHashTag = (req, res) => {
+	const keyword = req.query.keyword;
+	console.log('Search Keyword:', keyword);
+	eventService.eventListUsingHashTag(keyword).then((response) => {
+		return res.status(200).json({ message: response.message, data: response.data });
+	}).catch((error) => {
+		console.error('error: ', error);
+		return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
+	});
+}
 
 /**
  * Event List For HomePage(Only Public Event)
