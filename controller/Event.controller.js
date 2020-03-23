@@ -194,6 +194,7 @@ module.exports.eventDetail = (req, res) => {
 	console.log("first of all su ave che", req.params)
 	const eventId = req.params.id;
 	// const userId = req.user.user._id;
+	let loginUser = req.user
 	let finalId
 	if (loginUser.user) {
 		finalId = loginUser.user._id
@@ -409,8 +410,15 @@ module.exports.updateGroupInsideActivity = (req, res) => {
  * @returns - MyEventList Or Reason To Fail
  */
 module.exports.MyEventList = (req, res) => {
-	const userId = req.user.user._id;
-	eventService.MyEventList(userId).then((response) => {
+	// const userId = req.user.user._id;
+	let loginUser = req.user
+	let finalId
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
+	eventService.MyEventList(finalId).then((response) => {
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
 		console.error('error: ', error);
@@ -661,10 +669,16 @@ module.exports.eventJoining = (req, res) => {
 	// data.platForm = req.body.platForm
 	// const eventId = req.body.eventId;
 	console.log("Request.body in controller", req.body);
-	const userId = req.user.user._id;
+	// const userId = req.user.user._id;
+	let loginUser = req.user
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
 	console.log("REQUEST.USER", userId);
 	// console.log("EVENT ID", eventId);
-	eventService.eventJoining(userId, data).then((response) => {
+	eventService.eventJoining(finalId, data).then((response) => {
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
 		console.error('error: ', error);
@@ -679,10 +693,16 @@ module.exports.eventJoining = (req, res) => {
  */
 module.exports.cartItemListWithTotal = (req, res) => {
 	const eventId = req.params.id;
-	const userId = req.user.user._id;
+	// const userId = req.user.user._id;
+	let loginUser = req.user
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
 	console.log('Event Id', eventId);
 	console.log('User Id', userId);
-	eventService.cartItemListWithTotal(eventId, userId).then((response) => {
+	eventService.cartItemListWithTotal(eventId, finalId).then((response) => {
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
 		console.error('error: ', error);
@@ -925,8 +945,14 @@ module.exports.deleteItemFromGroup = (req, res) => {
 }
 
 module.exports.MyEventListTotalTransaction = (req, res) => {
-	const userId = req.user.user._id;
-	eventService.MyEventListTotalTransaction(userId).then((response) => {
+	// const userId = req.user.user._id;
+	let loginUser = req.user
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
+	eventService.MyEventListTotalTransaction(finalId).then((response) => {
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
 		console.log('error:', error);
