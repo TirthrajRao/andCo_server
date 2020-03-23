@@ -35,9 +35,16 @@ router.post('/login/yahoo', UserController.yahooLogin);
 
 // Bank Account Related API
 
-router.put('/account', ensureAuthenticated.validateToken, userValidation.addBankAccountDetail, UserController.addBankAccountDetail);
+// router.put('/account', ensureAuthenticated.validateToken, userValidation.addBankAccountDetail, UserController.addBankAccountDetail);
 router.get('/accountList', ensureAuthenticated.validateToken, UserController.getAccountDetailList);
 
+router.post('/account', ensureAuthenticated.validateToken, UserController.addAccountDetails)
+
+
+//Deliver Address API
+
+router.post('/address', ensureAuthenticated.validateToken, UserController.enterAddress)
+router.get('/address', ensureAuthenticated.validateToken, UserController.getAddressDetails)
 // Adminside Related API
 
 router.get('/user/user-list', ensureAuthenticated.validateToken, UserController.totalUserList);

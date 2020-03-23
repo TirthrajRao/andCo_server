@@ -133,10 +133,10 @@ if (config.env.name === "production") {
 } else if (config.env.name === "test") {
 console.log("=================test")
 	var server = https.createServer(
-		{
-			key: fs.readFileSync("/var/www/html/Aso-ebi/ssl/privkey1.pem"),
-			cert: fs.readFileSync("/var/www/html/Aso-ebi/ssl/fullchain1.pem")
-		},
+		// {
+		// 	key: fs.readFileSync("/var/www/html/Aso-ebi/ssl/privkey1.pem"),
+		// 	cert: fs.readFileSync("/var/www/html/Aso-ebi/ssl/fullchain1.pem")
+		// },
 		app
 	);
 	// console.log("Server ", server);
@@ -162,7 +162,7 @@ console.log("=================test")
 		databaseConnectivity(config.env.name);
 		var server = http.createServer(app);
 	}
-	// server.listen(config.env.port);
+	server.listen(config.env.port);
 	console.log("runnint port number======", config.env.port)
 	// server.on("error", onError);
 	// server.on("listening", onListen);

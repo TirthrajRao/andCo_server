@@ -1,6 +1,7 @@
 /** Events Mongo DB model	*/
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+platFormOf = ['WP', 'GM', 'FB', 'TX']
 
 const event = new Schema({
 	userId: {
@@ -10,15 +11,30 @@ const event = new Schema({
 	eventTitle: {
 		type: String,
 	},
-	guest: [{
-		type: mongoose.Schema.Types.ObjectId,
-		ref: 'User'
-	}],
+	guest: [
+		{
+			// _id: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'User',
+			// },
+			// platForm: {
+			// 	type: {
+			// 		enum: platFormOf
+			// 	}
+			// }
+		},
+	],
 	eventType: {
 		type: String,
 	},
 	paymentDeadlineDate: {
 		type: Date
+	},
+	payMentTransferDate: {
+		type: String
+	},
+	paymentDeadlineTime: {
+		type: String
 	},
 	hashTag: {
 		type: String
@@ -74,12 +90,15 @@ const event = new Schema({
 			type: String,
 		},
 	},
-	bankAccount: {
-		accountId: {
+	bankDetails: {
+		bankName: {
 			type: String,
 		},
-		paymentType: {
-			type: String,
+		accountNumber: {
+			type: Number,
+		},
+		cardNumber: {
+			type: Number
 		}
 	},
 	afterEventMessage: {
@@ -92,6 +111,9 @@ const event = new Schema({
 		messagePreference: {
 			type: String
 		},
+	},
+	hearAbout: {
+		type: String
 	},
 	createdAt: {
 		type: Date,

@@ -14,6 +14,7 @@ const transaction = new Schema({
     item: [{
         itemId: {
             type: mongoose.Schema.Types.ObjectId,
+            // ref:''
         },
         quantity: {
             type: Number
