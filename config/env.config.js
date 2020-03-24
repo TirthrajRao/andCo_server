@@ -6,7 +6,7 @@ envs['production'] = {
     name: 'production',
     url: 'https://admin.triviapost.in:5000/api/',
     https: true,
-    port: 3000,
+    port: 8001,
     settings: settings.production,
     common: settings.common
 };
@@ -23,7 +23,7 @@ envs['testing'] = {
     name: 'test',
     url: '',
     https: true,
-    port: 3001,
+    port: 9001,
     settings: settings.testing,
     common: settings.common,
     // redirectTo: 'http://conduct-testing.raoinformationtechnology.com/#/'

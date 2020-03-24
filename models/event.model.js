@@ -13,15 +13,15 @@ const event = new Schema({
 	},
 	guest: [
 		{
-			// _id: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: 'User',
-			// },
-			// platForm: {
-			// 	type: {
-			// 		enum: platFormOf
-			// 	}
-			// }
+			_id: {
+				type: mongoose.Schema.Types.ObjectId,
+				ref: 'User',
+			},
+			platForm: {
+				type: {
+					enum: platFormOf
+				}
+			}
 		},
 	],
 	eventType: {
