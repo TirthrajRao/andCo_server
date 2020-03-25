@@ -1,7 +1,7 @@
 /** Events Mongo DB model	*/
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-platFormOf = ['WP', 'GM', 'FB', 'TX']
+platFormOf = ['WP', 'GM', 'FB', 'TX', 'GN']
 
 const event = new Schema({
 	userId: {
@@ -111,6 +111,23 @@ const event = new Schema({
 		messagePreference: {
 			type: String
 		},
+	},
+	invitationMessage: {
+		type: String
+	},
+	reminderDetails: {
+		reminderMessage: {
+			type: String
+		},
+		reminderStartDate: {
+			type: String
+		},
+		reminderStartTime: {
+			type: String
+		},
+		guestList: {
+			type: String
+		}
 	},
 	hearAbout: {
 		type: String

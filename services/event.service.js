@@ -400,7 +400,9 @@ const eventDetail = (eventId, userId) => {
                     defaultImage: '$defaultImage',
                     paymentDeadlineDate: '$paymentDeadlineDate',
                     activities: '$activities',
-                    afterEventMessage: '$afterEventMessage'
+                    afterEventMessage: '$afterEventMessage',
+                    invitationMessage: '$invitationMessage',
+                    reminderDetails: '$reminderDetails'
                 }
             },
             {
@@ -470,6 +472,12 @@ const eventDetail = (eventId, userId) => {
                     },
                     afterEventMessage: {
                         $first: '$afterEventMessage'
+                    },
+                    invitationMessage: {
+                        $first: '$invitationMessage'
+                    },
+                    reminderDetails: {
+                        $first: '$reminderDetails'
                     },
                     activity: {
                         $push: '$activities',
@@ -4348,6 +4356,39 @@ function getAfterEventMessage(eventId) {
     })
 }
 
+
+function addInvitationMessage(data) {
+    return new Promise((resolve, reject) => {
+        console.log("details of message")
+        EventModel.findByIdAndUpdate({ _id: data.eventId }, { invitationMessage: data.invitationMessage }, { upsert: true, new: true })
+            .exec((error, messageAdded) => {
+                if (error)
+                    // console.log("error ============", error)
+                    reject({ status: 500, message: 'Error while set invitation message' })
+                else
+                    // console.log("message added", messageAdded)
+                    resolve(messageAdded)
+            })
+    })
+}
+
+function setReminderMessage(data) {
+    return new Promise((resolve, reject) => {
+        EventModel.findByIdAndUpdate({ _id: data.eventId }, { reminderDetails: data }, { upsert: true, new: true })
+            .exec((error, reminderSet) => {
+                if (error)
+                    reject({ status: 500, message: 'Error while set reminder message' })
+                // console.log("errror while set reminder", error)
+                else
+                    // console.log("reminder detalils set", reminderSet)
+                    resolve({ message: 'Reminder set' })
+            })
+    })
+}
+
+
+module.exports.setReminderMessage = setReminderMessage
+module.exports.addInvitationMessage = addInvitationMessage
 module.exports.updateSetPrice = updateSetPrice
 module.exports.getPriceOfEvent = getPriceOfEvent
 module.exports.activityDetailsOfEvent = activityDetailsOfEvent

@@ -941,7 +941,27 @@ module.exports.eventWithTransactionAndUserDetail = (req, res) => {
 	})
 }
 
+module.exports.addInvitationMessage = (req, res) => {
+	console.log("body of message", req.body)
+	let data = req.body
+	eventService.addInvitationMessage(data).then((response) => {
+		return res.status(200).json({ data: response })
+	}).catch((error) => {
+		return res.status(error.status).json({ message: error.message })
+	})
+}
 
+module.exports.setReminderMessage = (req, res) => {
+	console.log("details of reminder", req.body)
+	let data = req.body
+	eventService.setReminderMessage(data).then((response) => {
+		console.log("reminder set", response)
+		return res.status(200).json({ message: response.message })
+	}).catch((error) => {
+		console.log("error while set reminder", error)
+		return res.status(error.status).json({ message: error.message })
+	})
+}
 
 
 
