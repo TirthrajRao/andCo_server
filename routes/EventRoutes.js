@@ -21,7 +21,8 @@ router.get('/event/admin-dashboard-count', EventController.getCountForAdminDashb
 
 // Routes For Add Detail Of Auto-Message Detail
 router.put('/after-eventmsg', eventValidation.afterEventMessageDetail, EventController.afterEventMessageDetail);
-
+router.post('/event/invitation', ensureAuthenticated.validateToken, EventController.addInvitationMessage)
+router.post('/event/setReminder', ensureAuthenticated.validateToken, EventController.setReminderMessage)
 // Routes For Event Joining Operations
 router.post('/event/join-event', ensureAuthenticated.validateToken, EventController.eventJoining);
 router.get('/event/search-hashtag', EventController.eventListUsingHashTag);

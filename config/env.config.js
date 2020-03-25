@@ -6,7 +6,7 @@ envs['production'] = {
     name: 'production',
     url: 'https://admin.triviapost.in:5000/api/',
     https: true,
-    port: 3000,
+    port: 8001,
     settings: settings.production,
     common: settings.common
 };

@@ -113,7 +113,13 @@ module.exports.updateExistingEvent = (eventId, eventData) => {
                         console.log('usererror: ', eventError);
                         reject({ status: 500, message: 'Internal Server Error' });
                     } else {
-                        resolve({ status: 200, message: 'Event Updated Successfully.', data: updatedEvent });
+                        fnGenerateEventLink(updatedEvent).then((linkUpdate) => {
+                            console.log("link update completed", linkUpdate)
+                            resolve({ status: 200, message: 'Event Updated Successfully.', data: updatedEvent });
+                        }).catch((error) => {
+                            reject({ status: 500, message: 'Error while update event link' })
+                            console.log("error while update link", error)
+                        })
                     }
                 });
             } else {
@@ -393,6 +399,9 @@ const eventDetail = (eventId, userId) => {
                     defaultImage: '$defaultImage',
                     paymentDeadlineDate: '$paymentDeadlineDate',
                     activities: '$activities',
+                    afterEventMessage: '$afterEventMessage',
+                    invitationMessage: '$invitationMessage',
+                    reminderDetails: '$reminderDetails'
                 }
             },
             {
@@ -459,6 +468,15 @@ const eventDetail = (eventId, userId) => {
                     },
                     defaultImage: {
                         $first: '$defaultImage'
+                    },
+                    afterEventMessage: {
+                        $first: '$afterEventMessage'
+                    },
+                    invitationMessage: {
+                        $first: '$invitationMessage'
+                    },
+                    reminderDetails: {
+                        $first: '$reminderDetails'
                     },
                     activity: {
                         $push: '$activities',
@@ -576,7 +594,7 @@ function fnCheckForCelebrant(eventId, userId) {
  */
 function fnCheckForGuestJoined(eventId, userId) {
     return new Promise((resolve, reject) => {
-        EventModel.findOne({ _id: eventId, guest: userId }, (eventError, event) => {
+        EventModel.findOne({ _id: eventId, 'guest._id': userId }, (eventError, event) => {
             console.log("event is false or not", event)
             if (eventError) {
                 console.log('Event Error:', eventError);
@@ -1380,14 +1398,14 @@ module.exports.eventJoining = (userId, details) => {
     return new Promise((resolve, reject) => {
         // console.log('EventId', eventId);
         console.log('UserId', userId);
-        // let obj = {
-        //     _id: userId,
-        //     platForm: details.platForm
-        // }
+        let obj = {
+            _id: userId,
+            platForm: details.platForm
+        }
         // console.log("obj", obj)
         fnIsGuestJoined(details.eventId, userId, function (IfUserNotJoined) {
             if (IfUserNotJoined) {
-                EventModel.findByIdAndUpdate({ _id: details.eventId }, { $push: { guest: userId } }, { new: true }, (error, eventDetail) => {
+                EventModel.findByIdAndUpdate({ _id: details.eventId }, { $push: { guest: obj } }, { new: true }, (error, eventDetail) => {
                     if (error) {
                         console.log('Event Not Found:', error);
                         reject({ status: 500, message: 'Internal Server Error' });
@@ -2892,7 +2910,7 @@ const eventTotalCollection = (eventId) => {
                         totalCost.finalTotal = finalGrandTotal
                         resolve(totalCost)
                     } else {
-                        resolve({ message: 'There is not item purchase in this event' })
+                        resolve({ message: 'There is no item purchase in this event' })
                     }
                 }
             })
@@ -2935,7 +2953,7 @@ const eventGuestListWithAmount = (eventId) => {
             {
                 $lookup: {
                     from: 'users',
-                    localField: 'guest',
+                    localField: 'guest._id',
                     foreignField: '_id',
                     as: 'guestDetail'
                 }
@@ -3203,147 +3221,122 @@ const eventGuestList = (eventId) => {
             // Reduce To Limited Data Using Project
             {
                 $project: {
-                    hashTag: '$hashTag',
-                    eventType: '$eventType',
-                    eventTitle: '$eventTitle',
-                    isPublic: '$isPublic',
-                    userId: '$userId',
-                    startDate: '$startDate',
                     guest: '$guest',
-                    endDate: '$endDate',
-                    hashTag: '$hashTag',
-                    profilePhoto: '$profilePhoto',
-                    eventLink: '$eventLink',
-                    eventTheme: '$eventTheme',
-                    paymentDeadlineDate: '$paymentDeadlineDate',
-                    activities: '$activities'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$guest'
+                }
+            },
+            {
+                $project: {
+                    userId: '$guest._id',
+                    platForm: '$guest.platForm'
                 }
             },
             {
                 $lookup: {
                     from: 'users',
-                    localField: 'userId',
-                    foreignField: '_id',
-                    as: 'eventCreator'
+                    let: {
+                        userName: '$userId'
+                    },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $eq: ["$_id", "$$userName"]
+                                }
+                            }
+                        },
+                        {
+                            $project: {
+                                firstName: 1,
+                                lastName: 1,
+                                // platForm: '$guest.platForm'
+                            }
+                        }
+                    ],
+                    as: 'userId'
                 }
             },
             {
                 $unwind: {
-                    path: '$eventCreator',
-                    preserveNullAndEmptyArrays: true
+                    path: '$userId'
                 }
             },
-            {
-                $project: {
-                    eventCreator: {
-                        userId: '$eventCreator._id',
-                        firstName: '$eventCreator.firstName',
-                        lastName: '$eventCreator.lastName',
-                        mobile: '$eventCreator.mobile'
-                    },
-                    hashTag: 1,
-                    eventType: 1,
-                    eventTitle: 1,
-                    isPublic: 1,
-                    userId: 1,
-                    startDate: 1,
-                    guest: 1,
-                    endDate: 1,
-                    hashTag: 1,
-                    profilePhoto: 1,
-                    eventLink: 1,
-                    eventTheme: 1,
-                    paymentDeadlineDate: 1,
-                    activities: 1,
-                }
-            },
-            // Lookup For Guest Detail From User Model
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'guest',
-                    foreignField: '_id',
-                    as: 'guestDetail'
-                }
-            },
-            // Unwind GuestDetail Array For Project Operation
-            {
-                $unwind: {
-                    path: '$guestDetail',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            // Project For Limited The Data Collection
-            {
-                $project: {
-                    guestDetail: {
-                        userId: '$guestDetail._id',
-                        firstName: '$guestDetail.firstName',
-                        lastName: '$guestDetail.lastName',
-                        mobile: '$guestDetail.mobile'
-                    },
-                    hashTag: 1,
-                    eventType: 1,
-                    eventTitle: 1,
-                    isPublic: 1,
-                    userId: 1,
-                    startDate: 1,
-                    guest: 1,
-                    endDate: 1,
-                    hashTag: 1,
-                    profilePhoto: 1,
-                    eventLink: 1,
-                    eventTheme: 1,
-                    paymentDeadlineDate: 1,
-                    eventCreator: 1,
-                    activity: 1,
-                },
-            },
-            // Final Group For Merging Documents and Generate Respective Arrays  
             {
                 $group: {
                     _id: '$_id',
-                    hashTag: {
-                        $first: '$hashTag',
-                    },
-                    eventType: {
-                        $first: '$eventType',
-                    },
-                    eventTitle: {
-                        $first: '$eventTitle',
-                    },
-                    isPublic: {
-                        $first: '$isPublic',
-                    },
-                    userId: {
-                        $first: '$userId',
-                    },
-                    startDate: {
-                        $first: '$startDate',
-                    },
-                    endDate: {
-                        $first: '$endDate',
-                    },
-                    profilePhoto: {
-                        $first: '$profilePhoto'
-                    },
-                    paymentDeadlineDate: {
-                        $first: '$paymentDeadlineDate',
-                    },
-                    eventLink: {
-                        $first: '$eventLink',
-                    },
-                    eventTheme: {
-                        $first: '$eventTheme',
-                    },
-                    eventCreator: {
-                        $first: '$eventCreator',
-                    },
-                    guestList: {
-                        $push: '$guestDetail'
-                    },
+                    user: {
+                        $push: {
+                            userName: '$userId',
+                            platForm: '$platForm'
+                        }
+                    }
                 }
             },
+            {
+                $project: {
+                    totalGuest: '$user',
+                    whatsUpList: {
+                        $filter: {
+                            input: '$user',
+                            as: 'whatsUp',
+                            cond: {
+                                $eq: ["$$whatsUp.platForm", "WP"]
+                            }
+                        }
+                    },
+                    googleList: {
+                        $filter: {
+                            input: '$user',
+                            as: 'google',
+                            cond: {
+                                $eq: ["$$google.platForm", "GM"]
+                            }
+                        }
+                    },
+                    faceBookList: {
+                        $filter: {
+                            input: '$user',
+                            as: 'facebook',
+                            cond: {
+                                $eq: ["$$facebook.platForm", "GM"]
+                            }
+                        }
+                    },
+                    textMessageList: {
+                        $filter: {
+                            input: '$user',
+                            as: 'text',
+                            cond: {
+                                $eq: ["$$text.platForm", "TX"]
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    totalGuest: {
+                        $push: '$totalGuest'
+                    },
+                    whatsUpList: {
+                        $push: '$whatsUpList'
+                    },
+                    googleList: {
+                        $push: '$googleList'
+                    },
+                    faceBookList: {
+                        $push: '$faceBookList'
+                    },
+                    textMessageList: {
+                        $push: '$textMessageList'
+                    }
+                }
+            }
         ]).exec(function (eventDetailError, eventDetail) {
             if (eventDetailError) {
                 console.log("Guest List Error:", eventDetailError);
@@ -4318,6 +4311,39 @@ function getAfterEventMessage(eventId) {
     })
 }
 
+
+function addInvitationMessage(data) {
+    return new Promise((resolve, reject) => {
+        console.log("details of message")
+        EventModel.findByIdAndUpdate({ _id: data.eventId }, { invitationMessage: data.invitationMessage }, { upsert: true, new: true })
+            .exec((error, messageAdded) => {
+                if (error)
+                    // console.log("error ============", error)
+                    reject({ status: 500, message: 'Error while set invitation message' })
+                else
+                    // console.log("message added", messageAdded)
+                    resolve(messageAdded)
+            })
+    })
+}
+
+function setReminderMessage(data) {
+    return new Promise((resolve, reject) => {
+        EventModel.findByIdAndUpdate({ _id: data.eventId }, { reminderDetails: data }, { upsert: true, new: true })
+            .exec((error, reminderSet) => {
+                if (error)
+                    reject({ status: 500, message: 'Error while set reminder message' })
+                // console.log("errror while set reminder", error)
+                else
+                    // console.log("reminder detalils set", reminderSet)
+                    resolve({ message: 'Reminder set' })
+            })
+    })
+}
+
+
+module.exports.setReminderMessage = setReminderMessage
+module.exports.addInvitationMessage = addInvitationMessage
 module.exports.updateSetPrice = updateSetPrice
 module.exports.getPriceOfEvent = getPriceOfEvent
 module.exports.activityDetailsOfEvent = activityDetailsOfEvent
