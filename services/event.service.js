@@ -114,6 +114,7 @@ module.exports.updateExistingEvent = (eventId, eventData) => {
                         console.log('usererror: ', eventError);
                         reject({ status: 500, message: 'Internal Server Error' });
                     } else {
+                        console.log("update event details", updatedEvent)
                         fnGenerateEventLink(updatedEvent).then((linkUpdate) => {
                             console.log("link update completed", linkUpdate)
                             resolve({ status: 200, message: 'Event Updated Successfully.', data: updatedEvent });
@@ -402,7 +403,8 @@ const eventDetail = (eventId, userId) => {
                     activities: '$activities',
                     afterEventMessage: '$afterEventMessage',
                     invitationMessage: '$invitationMessage',
-                    reminderDetails: '$reminderDetails'
+                    reminderDetails: '$reminderDetails',
+                    welcomeMessage: '$welcomeMessage'
                 }
             },
             {
@@ -478,6 +480,9 @@ const eventDetail = (eventId, userId) => {
                     },
                     reminderDetails: {
                         $first: '$reminderDetails'
+                    },
+                    welcomeMessage: {
+                        $first: '$welcomeMessage'
                     },
                     activity: {
                         $push: '$activities',
