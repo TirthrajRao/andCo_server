@@ -656,7 +656,6 @@ module.exports.eventJoining = (req, res) => {
 	// const eventId = req.body.eventId;
 	console.log("Request.body in controller", req.body);
 	const userId = req.user.user._id;
-	console.log("REQUEST.USER", userId);
 	// console.log("EVENT ID", eventId);
 	eventService.eventJoining(userId, data).then((response) => {
 		return res.status(200).json({ message: response.message, data: response.data });
