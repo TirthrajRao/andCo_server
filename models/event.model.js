@@ -90,6 +90,11 @@ const event = new Schema({
 			type: String,
 		},
 	},
+	welcomeMessage: {
+		message: {
+			type: String
+		}
+	},
 	bankDetails: {
 		bankName: {
 			type: String,

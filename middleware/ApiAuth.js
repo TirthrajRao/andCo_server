@@ -18,7 +18,7 @@ module.exports.validateToken = async (req, res, next) => {
 				}
 			});
 		} else {
-			reject({ status: false, message: "You Need To Login First", });
+			reject({ status: false, message: "You need to login first", });
 		}
 	}).then(({ status, message, user }) => {
 		req.user = (status) ? user : null;

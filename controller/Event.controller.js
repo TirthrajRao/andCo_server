@@ -338,7 +338,7 @@ module.exports.updateExistingEvent = (req, res) => {
 	if (req.body.eventType) eventData['eventType'] = req.body.eventType;
 	if (req.body.eventTitle) eventData['eventTitle'] = req.body.eventTitle;
 	if (req.body.hashTag) eventData['hashTag'] = hashTag;
-	if (req.body.eventTheme) eventData['eventTheme'] = req.body.eventTheme
+	if (req.body.background) eventData['eventTheme'] = req.body.background
 	// if (req.body.isPublic) eventData['isPublic'] = req.body.isPublic;
 	// if (req.body.deadlineDate) eventData['paymentDeadlineDate'] = req.body.deadlineDate;
 	// if (req.body.isLogistics) eventData['isLogistics'] = req.body.isLogistics;
@@ -676,7 +676,6 @@ module.exports.eventJoining = (req, res) => {
 	} else if (loginUser.userres) {
 		finalId = loginUser.userres._id
 	}
-	console.log("REQUEST.USER", userId);
 	// console.log("EVENT ID", eventId);
 	eventService.eventJoining(finalId, data).then((response) => {
 		return res.status(200).json({ message: response.message, data: response.data });
