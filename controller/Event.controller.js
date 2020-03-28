@@ -136,8 +136,10 @@ module.exports.updateSetPriceOfEvent = (req, res) => {
 	console.log("update", updateDetails)
 	eventService.updateSetPrice(updateDetails).then((updated) => {
 		console.log("update completed", updated)
+		return res.status(200).json({ message: updated.message })
 	}).catch((error) => {
 		console.log("error while update", error)
+		return res.status(error.status).json({ message: error.message })
 	})
 }
 
