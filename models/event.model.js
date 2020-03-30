@@ -82,10 +82,7 @@ const event = new Schema({
 			default: false
 		}
 	}],
-	thanksMessage: {
-		attachment: {
-			type: String,
-		},
+	thankyouMessage: {
 		message: {
 			type: String,
 		},
