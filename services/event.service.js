@@ -1031,7 +1031,7 @@ module.exports.MyEventList = (userId) => {
                         },
                         {
                             $and: [
-                                { 'guest': ObjectId(userId) },
+                                { 'guest._id': ObjectId(userId) },
                                 { 'isDeleted': false },
                             ]
                         },
