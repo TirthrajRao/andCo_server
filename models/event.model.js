@@ -135,7 +135,12 @@ const event = new Schema({
 		}
 	},
 	hearAbout: {
-		type: String
+		aboutType: {
+			type: String
+		},
+		message: {
+			type: String
+		}
 	},
 	createdAt: {
 		type: Date,

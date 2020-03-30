@@ -136,8 +136,10 @@ module.exports.updateSetPriceOfEvent = (req, res) => {
 	console.log("update", updateDetails)
 	eventService.updateSetPrice(updateDetails).then((updated) => {
 		console.log("update completed", updated)
+		return res.status(200).json({ message: updated.message })
 	}).catch((error) => {
 		console.log("error while update", error)
+		return res.status(error.status).json({ message: error.message })
 	})
 }
 
@@ -234,8 +236,15 @@ module.exports.activityDetailsOfEvent = (req, res) => {
 module.exports.guestEventDetails = (req, res) => {
 	console.log("guest event hashtag", req.params)
 	const eventhashTag = req.params.hashTag
-	const userId = req.user.user._id;
-	eventService.guestEventDetail(eventhashTag, userId).then((response) => {
+	let loginUser = req.user
+	let finalId
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
+	// const userId = req.user.user._id;
+	eventService.guestEventDetail(eventhashTag, finalId).then((response) => {
 		console.log("response of guest link event", response)
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {

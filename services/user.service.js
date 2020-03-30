@@ -179,8 +179,13 @@ const login = (body) => {
                         var token = jwt.sign(payload, config.jwtSecret);
                         loginUserEvent(user._id).then((userEvents) => {
                             console.log("user have event or not", userEvents)
-                            const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName, eventId: userEvents.status }
-                            resolve({ status: 200, message: 'Login Successfully', data: tokenData });
+                            checkTotalEvent(user._id).then((totalEventList) => {
+                                console.log("total events of user", totalEventList)
+                                const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName, eventId: userEvents.status, totalEvent: totalEventList }
+                                resolve({ status: 200, message: 'Login Successfully', data: tokenData });
+                            }).catch((error) => {
+                                console.log("error while get total events", error)
+                            })
                         }).catch((error) => {
                             console.log("find to user event", error)
                         })
@@ -197,6 +202,41 @@ const login = (body) => {
         });
     });
 }
+
+
+
+const checkTotalEvent = (userId) => {
+    return new Promise((resolve, reject) => {
+        eventModel.aggregate([
+            {
+                $match: {
+                    $or: [
+                        {
+                            $and: [
+                                { 'userId': ObjectId(userId) },
+                                { 'isDeleted': false },
+                            ]
+                        },
+                        {
+                            $and: [
+                                { 'guest._id': ObjectId(userId) },
+                                { 'isDeleted': false },
+                            ]
+                        },
+                    ]
+                }
+            },
+        ]).exec((error, totalEvents) => {
+            if (error)
+                //  console.log("error while get details of login user", error)
+                reject({ status: 500, message: 'Error while no event found' })
+            else
+                //  console.log("total list of event", totalEvents.length)
+                resolve(totalEvents.length)
+        })
+    })
+}
+
 
 const loginUserEvent = (userId) => {
     console.log("login user id", userId)

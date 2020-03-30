@@ -1030,7 +1030,7 @@ module.exports.MyEventList = (userId) => {
                         },
                         {
                             $and: [
-                                { 'guest': ObjectId(userId) },
+                                { 'guest._id': ObjectId(userId) },
                                 { 'isDeleted': false },
                             ]
                         },
@@ -4277,6 +4277,9 @@ function updateSetPrice(details) {
     return new Promise((resolve, reject) => {
         EventModel.findByIdAndUpdate({ _id: details.eventId }, { $set: details }, { upsert: true, new: true })
             .exec((error, updateDetails) => {
+
+                if (error) reject({ status: 500, message: 'Error while update set price details' })
+                else resolve({ message: 'Set price details updated' })
                 console.log("details update completed", updateDetails)
             })
     })
