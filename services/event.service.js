@@ -1833,17 +1833,17 @@ module.exports.orderCheckout = (userId, cartData) => {
                             console.log("response of final when trancation is created", response)
                             const messageData = {};
 
-                            if (response.data.thanksMessage.message == '') {
+                            if (response.data.thankyouMessage == '') {
                                 messageData.message = '';
                             } else {
-                                messageData.message = response.data.thanksMessage.message;
+                                messageData.message = response.data.thankyouMessage;
                             }
 
-                            if (response.data.thanksMessage.attachment == '') {
-                                messageData.image = '';
-                            } else {
-                                messageData.image = config.ngrockUrl + response.data.thanksMessage.attachment;
-                            }
+                            // if (response.data.thanksMessage.attachment == '') {
+                            //     messageData.image = '';
+                            // } else {
+                            //     messageData.image = config.ngrockUrl + response.data.thanksMessage.attachment;
+                            // }
 
                             console.log('Message Data:', messageData);
 
