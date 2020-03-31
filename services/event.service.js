@@ -3340,7 +3340,7 @@ const eventGuestList = (eventId) => {
                             input: '$user',
                             as: 'facebook',
                             cond: {
-                                $eq: ["$$facebook.platForm", "GM"]
+                                $eq: ["$$facebook.platForm", "FB"]
                             }
                         }
                     },
