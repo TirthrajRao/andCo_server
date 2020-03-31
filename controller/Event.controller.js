@@ -195,9 +195,14 @@ module.exports.newGroupInsideActivity = (req, res) => {
 module.exports.eventDetail = (req, res) => {
 	console.log("first of all su ave che", req.params)
 	const eventId = req.params.id;
-	const userId = req.user.user._id;
-	console.log('Req.user:', userId);
-	eventService.eventDetail(eventId, userId).then((response) => {
+	let loginUser = req.user
+	let finalId
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
+	eventService.eventDetail(eventId, finalId).then((response) => {
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
 		console.log('error: ', error);
@@ -664,9 +669,15 @@ module.exports.eventJoining = (req, res) => {
 	data.platForm = req.body.platForm
 	// const eventId = req.body.eventId;
 	console.log("Request.body in controller", req.body);
-	const userId = req.user.user._id;
+	// const userId = req.user.user._id;
+	let loginUser = req.user
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
 	// console.log("EVENT ID", eventId);
-	eventService.eventJoining(userId, data).then((response) => {
+	eventService.eventJoining(finalId, data).then((response) => {
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
 		console.error('error: ', error);
