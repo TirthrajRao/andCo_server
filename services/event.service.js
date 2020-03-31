@@ -726,11 +726,22 @@ function guestEventDetail(hashTag, userId) {
             if (error)
                 console.log("error while get details of guest", error)
             else {
-                console.log("guest event details use of hashtag", guestEvent)
+                // console.log("guest event details use of hashtag", guestEvent)
                 fnCheckForCelebrant(guestEvent[0]._id, userId).then((response) => {
                     guestEvent[0].isCelebrant = response;
                     fnCheckForGuestJoined(guestEvent[0]._id, userId).then((response) => {
-                        // console
+                        let todayDate = new Date
+                        let paymentDeadlineDate = Date.parse(guestEvent[0].paymentDeadlineDate)
+                        console.log("today date is sure or not", guestEvent[0])
+                        if (todayDate > paymentDeadlineDate) {
+                            console.log("payment is closed")
+                            guestEvent[0].isClosed = true
+                        } else {
+                            console.log("payment is open")
+                            guestEvent[0].isClosed = false
+                        }
+
+
                         guestEvent[0].isJoined = response;
                         resolve({ status: 200, message: 'Event Detail fetch Successfully!', data: guestEvent[0] });
                     }).catch((error) => {
