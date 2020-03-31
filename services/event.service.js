@@ -496,6 +496,16 @@ const eventDetail = (eventId, userId) => {
                     eventDetail[0].isCelebrant = response;
                     fnCheckForGuestJoined(eventId, userId).then((response) => {
                         console.log("response of check event", response)
+                        let todayDate = new Date
+                        let paymentDeadlineDate = Date.parse(eventDetail[0].paymentDeadlineDate)
+                        // console.log("today date is sure or not", guestEvent[0])
+                        if (todayDate > paymentDeadlineDate) {
+                            console.log("payment is closed")
+                            eventDetail[0].isClosed = true
+                        } else {
+                            console.log("payment is open")
+                            eventDetail[0].isClosed = false
+                        }
                         eventDetail[0].isJoined = response;
                         resolve({ status: 200, message: 'Event Detail fetch Successfully!', data: eventDetail[0] });
                     }).catch((error) => {
@@ -725,11 +735,20 @@ function guestEventDetail(hashTag, userId) {
             if (error)
                 console.log("error while get details of guest", error)
             else {
-                console.log("guest event details use of hashtag", guestEvent)
+                // console.log("guest event details use of hashtag", guestEvent)
                 fnCheckForCelebrant(guestEvent[0]._id, userId).then((response) => {
                     guestEvent[0].isCelebrant = response;
                     fnCheckForGuestJoined(guestEvent[0]._id, userId).then((response) => {
-                        // console
+                        let todayDate = new Date
+                        let paymentDeadlineDate = Date.parse(guestEvent[0].paymentDeadlineDate)
+                        console.log("today date is sure or not", guestEvent[0])
+                        if (todayDate > paymentDeadlineDate) {
+                            console.log("payment is closed")
+                            guestEvent[0].isClosed = true
+                        } else {
+                            console.log("payment is open")
+                            guestEvent[0].isClosed = false
+                        }
                         guestEvent[0].isJoined = response;
                         resolve({ status: 200, message: 'Event Detail fetch Successfully!', data: guestEvent[0] });
                     }).catch((error) => {
@@ -1407,23 +1426,37 @@ module.exports.eventJoining = (userId, details) => {
             _id: userId,
             platForm: details.platForm
         }
-        // console.log("obj", obj)
-        fnIsGuestJoined(details.eventId, userId, function (IfUserNotJoined) {
-            if (IfUserNotJoined) {
-                EventModel.findByIdAndUpdate({ _id: details.eventId }, { $push: { guest: obj } }, { new: true }, (error, eventDetail) => {
-                    if (error) {
-                        console.log('Event Not Found:', error);
-                        reject({ status: 500, message: 'Internal Server Error' });
+        fnCheckForCelebrant(details.eventId, userId).then((response) => {
+            console.log("response of that it is celebrant or not", response)
+            if (response == false) {
+                console.log("this is not celebrant")
+                fnIsGuestJoined(details.eventId, userId, function (IfUserNotJoined) {
+                    console.log("what is the response of event join", IfUserNotJoined)
+                    if (IfUserNotJoined) {
+                        EventModel.findByIdAndUpdate({ _id: details.eventId }, { $push: { guest: obj } }, { new: true }, (error, eventDetail) => {
+                            if (error) {
+                                console.log('Event Not Found:', error);
+                                reject({ status: 500, message: 'Internal Server Error' });
+                            } else {
+                                console.log("event join response", eventDetail)
+                                resolve({ status: 200, message: 'Event Join Successfully.', data: eventDetail });
+                            }
+                        });
                     } else {
-                        console.log("event join response", eventDetail)
-                        resolve({ status: 200, message: 'Event Join Successfully.', data: eventDetail });
+                        console.log("User Already Join This Event");
+                        reject({ status: 400, message: 'User Already Join This Event', data: eventDetail });
                     }
                 });
             } else {
-                console.log("User Already Join This Event");
-                reject({ status: 400, message: 'User Already Join This Event', data: eventDetail });
+                console.log("celebrant try to join his event")
+                reject({ status: 500, message: 'You are not authorized to join this event' })
             }
-        });
+        }).catch((error) => {
+            console.log("error while check", error)
+            reject({ status: 500, message: 'Error while find login user details' })
+        })
+
+
     });
 }
 

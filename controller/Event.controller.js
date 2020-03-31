@@ -195,7 +195,6 @@ module.exports.newGroupInsideActivity = (req, res) => {
 module.exports.eventDetail = (req, res) => {
 	console.log("first of all su ave che", req.params)
 	const eventId = req.params.id;
-	// const userId = req.user.user._id;
 	let loginUser = req.user
 	let finalId
 	if (loginUser.user) {
@@ -203,7 +202,6 @@ module.exports.eventDetail = (req, res) => {
 	} else if (loginUser.userres) {
 		finalId = loginUser.userres._id
 	}
-	// console.log('Req.user:', userId);
 	eventService.eventDetail(eventId, finalId).then((response) => {
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
