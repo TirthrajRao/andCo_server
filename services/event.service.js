@@ -655,7 +655,7 @@ function guestEventDetail(hashTag, userId) {
                     defaultImage: '$defaultImage',
                     paymentDeadlineDate: '$paymentDeadlineDate',
                     activities: '$activities',
-                    thanksMessage: '$thanksMessage'
+                    welcomeMessage: '$welcomeMessage'
                 }
             },
             {
@@ -723,8 +723,8 @@ function guestEventDetail(hashTag, userId) {
                     defaultImage: {
                         $first: '$defaultImage'
                     },
-                    thanksMessage: {
-                        $first: '$thanksMessage'
+                    welcomeMessage: {
+                        $first: '$welcomeMessage'
                     },
                     activity: {
                         $push: '$activities',
@@ -1166,6 +1166,11 @@ module.exports.addItemToCart = (itemData, hashTag, userId) => {
             console.log("find event id of hashtag", response)
             itemsAddedInCart(response._id, itemData, userId).then((response) => {
                 console.log("all items added", response)
+                // cartItemList(response.data.eventDetail._id, userId).then((cartTotalItem) => {
+                //     console.log("total items of cart after added", cartTotalItem)
+                // }).catch((error) => {
+                //     console.log("error while get cart item", error)
+                // })
                 resolve({ data: response.data })
             }).catch((error) => {
                 reject({ status: 500, message: 'Error while get cart list' })
@@ -4383,6 +4388,23 @@ function setReminderMessage(data) {
 }
 
 
+function updateReminderDetails(reminderDetails) {
+    console.log("reminderDetails", reminderDetails)
+    return new Promise((resolve, reject) => {
+        EventModel.findOneAndUpdate({ _id: reminderDetails.eventId }, { reminderDetails: reminderDetails }, { upsert: true, new: true })
+            .exec((error, updateReminder) => {
+                if (error)
+                    // console.log("error while update", error)
+                    reject({ status: 500, message: 'Error while update reminder deatils' })
+                else
+                    // console.log("reminder details update", updateReminder)
+                    resolve({ message: 'Update reminder details' })
+            })
+    })
+}
+
+
+module.exports.updateReminderDetails = updateReminderDetails
 module.exports.setReminderMessage = setReminderMessage
 module.exports.addInvitationMessage = addInvitationMessage
 module.exports.updateSetPrice = updateSetPrice

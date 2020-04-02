@@ -23,6 +23,7 @@ router.get('/event/admin-dashboard-count', EventController.getCountForAdminDashb
 router.put('/after-eventmsg', eventValidation.afterEventMessageDetail, EventController.afterEventMessageDetail);
 router.post('/event/invitation', ensureAuthenticated.validateToken, EventController.addInvitationMessage)
 router.post('/event/setReminder', ensureAuthenticated.validateToken, EventController.setReminderMessage)
+router.put('/event/setReminder', ensureAuthenticated.validateToken, EventController.updateReminderDetails)
 // Routes For Event Joining Operations
 router.post('/event/join-event', ensureAuthenticated.validateToken, EventController.eventJoining);
 router.get('/event/search-hashtag', EventController.eventListUsingHashTag);
