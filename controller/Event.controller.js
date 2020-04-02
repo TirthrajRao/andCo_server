@@ -973,6 +973,12 @@ module.exports.addInvitationMessage = (req, res) => {
 module.exports.setReminderMessage = (req, res) => {
 	console.log("details of reminder", req.body)
 	let data = req.body
+
+	// const eventId = req.body.eventId;
+	// let hashTag = req.body.hashTag.split(' ').join('_');
+
+
+
 	eventService.setReminderMessage(data).then((response) => {
 		console.log("reminder set", response)
 		return res.status(200).json({ message: response.message })
@@ -981,7 +987,24 @@ module.exports.setReminderMessage = (req, res) => {
 		return res.status(error.status).json({ message: error.message })
 	})
 }
+module.exports.updateReminderDetails = (req, res) => {
+	console.log("details of update reminder ", req.body)
+	let eventData = {};
 
+	if (req.body.reminderMessage) eventData['reminderMessage'] = req.body.reminderMessage;
+	if (req.body.reminderStartDate) eventData['reminderStartDate'] = req.body.reminderStartDate;
+	if (req.body.reminderStartTime) eventData['reminderStartTime'] = req.body.reminderStartTime;
+	if (req.body.eventId) eventData['eventId'] = req.body.eventId
+	if (req.body.guestList) eventData['guestList'] = req.body.guestList
+	console.log("update data is ready", eventData)
+	eventService.updateReminderDetails(eventData).then((updateReminder) => {
+		console.log("details update", updateReminder)
+		return res.status(200).json({ message: updateReminder.message })
+	}).catch((error) => {
+		console.log("error while update", error)
+		return res.status(error.status).json({ message: error.message })
+	})
+}
 
 
 
