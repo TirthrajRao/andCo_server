@@ -656,7 +656,7 @@ function guestEventDetail(hashTag, userId) {
                     defaultImage: '$defaultImage',
                     paymentDeadlineDate: '$paymentDeadlineDate',
                     activities: '$activities',
-                    thanksMessage: '$thanksMessage'
+                    welcomeMessage: '$welcomeMessage'
                 }
             },
             {
@@ -724,8 +724,8 @@ function guestEventDetail(hashTag, userId) {
                     defaultImage: {
                         $first: '$defaultImage'
                     },
-                    thanksMessage: {
-                        $first: '$thanksMessage'
+                    welcomeMessage: {
+                        $first: '$welcomeMessage'
                     },
                     activity: {
                         $push: '$activities',
@@ -1167,6 +1167,11 @@ module.exports.addItemToCart = (itemData, hashTag, userId) => {
             console.log("find event id of hashtag", response)
             itemsAddedInCart(response._id, itemData, userId).then((response) => {
                 console.log("all items added", response)
+                // cartItemList(response.data.eventDetail._id, userId).then((cartTotalItem) => {
+                //     console.log("total items of cart after added", cartTotalItem)
+                // }).catch((error) => {
+                //     console.log("error while get cart item", error)
+                // })
                 resolve({ data: response.data })
             }).catch((error) => {
                 reject({ status: 500, message: 'Error while get cart list' })
