@@ -133,6 +133,10 @@ module.exports.updateSetPriceOfEvent = (req, res) => {
 	if (req.body.paymentDeadlineTime) updateDetails['paymentDeadlineTime'] = req.body.paymentDeadlineTime
 	if (req.body.bankDetails) updateDetails['bankDetails'] = req.body.bankDetails
 	if (req.body.eventId) updateDetails['eventId'] = req.body.eventId
+	if (req.body.hearAbout) updateDetails['hearAbout'] = req.body.hearAbout
+	if (req.body.payMentTransferDate) updateDetails['payMentTransferDate'] = req.body.payMentTransferDate
+	if (req.body.isLogistics) updateDetails['isLogistics'] = req.body.isLogistics
+	if (req.body.regestery) updateDetails['regestery'] = req.body.regestery
 	console.log("update", updateDetails)
 	eventService.updateSetPrice(updateDetails).then((updated) => {
 		console.log("update completed", updated)
@@ -419,7 +423,6 @@ module.exports.updateGroupInsideActivity = (req, res) => {
 module.exports.MyEventList = (req, res) => {
 	// const userId = req.user.user._id;
 	let loginUser = req.user
-	let finalId
 	if (loginUser.user) {
 		finalId = loginUser.user._id
 	} else if (loginUser.userres) {

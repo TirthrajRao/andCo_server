@@ -364,7 +364,7 @@ module.exports.updateGroupInsideActivity = (groupData) => {
                 console.log('callbackError: ', callbackError);
                 reject({ status: 500, message: 'Internal Server Error' });
             } else {
-                resolve({ status: 200, message: 'New Groups Created Successfully.' });
+                resolve({ status: 200, message: 'Groups Updated Successfully.' });
             }
         });
     });

@@ -49,6 +49,9 @@ const event = new Schema({
 	isLogistics: {
 		type: Boolean
 	},
+	regestery: {
+		type: String
+	},
 	eventTheme: {
 		type: String
 	},
@@ -136,6 +139,9 @@ const event = new Schema({
 			type: String
 		},
 		message: {
+			type: String
+		},
+		vendorMessage: {
 			type: String
 		}
 	},
