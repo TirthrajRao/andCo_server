@@ -28,11 +28,12 @@ const config = require("../configNew");
 module.exports.signUp = (req, res) => {
 	const emailId = req.body.email
 	let password = req.body.password;
+	console.log("password", password)
 
 	var bytes = CryptoJS.AES.decrypt(password, key);
 	var originalText = bytes.toString(CryptoJS.enc.Utf8);
 
-
+	console.log("original text", originalText)
 	const newUser = {
 		// email: req.body.email,
 		firstName: req.body.firstName,
@@ -42,7 +43,10 @@ module.exports.signUp = (req, res) => {
 	}
 	userService.signUp(emailId, newUser).then((newUserUpdate) => {
 		console.log("new user update completed", newUserUpdate)
-		return res.status(200).json({ message: newUserUpdate.message })
+		let newUserObject = {}
+		newUserObject['email'] = emailId
+		newUserObject['password'] = password
+		return res.status(200).json({ data: newUserObject, message: newUserUpdate.message })
 	}).catch((error) => {
 		console.log("error while update user", error)
 		return res.status(error.status).json({ message: error.message })

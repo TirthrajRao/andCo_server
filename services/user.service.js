@@ -24,14 +24,31 @@ const mailService = require('../services/mail.service');
 const signUp = (email, userData) => {
     console.log("user details========", userData)
     return new Promise((resolve, reject) => {
-
         UserModel.findOneAndUpdate({ email: email },
-            { $set: userData }
+            { $set: userData }, { upsert: true, new: true }
         ).exec((error, userUpdate) => {
             if (error) console.log("error while update details of user", error)
             else {
-                resolve({ message: 'User update completed' })
-                console.log("user detaoils update completed", userUpdate)
+                console.log("new user details", userUpdate)
+                let data = {}
+                data.firstName = userUpdate.firstName
+                // data.lastName = userUpdate.lastName
+                const defaultPasswordEmailoptions = {
+                    to: userUpdate.email,
+                    subject: `Welcome to andco`,
+                    template: 'signUp'
+                };
+                mailService.mail(defaultPasswordEmailoptions, data, null, function (err, mailResult) {
+                    if (err) {
+                        console.log('error:', error);
+                        reject({ status: 500, message: 'Internal Server Error' });
+                    } else {
+                        console.log("created new user details", mailResult)
+                        resolve({ data: userUpdate, message: 'User update completed' })
+                        // resolve({ status: 200, message: 'Mail Send to login user for code.' })
+                    }
+                });
+                // console.log("user detaoils update completed", userUpdate)
             }
         })
         // const emailVarification = Math.floor(100000 + Math.random() * 900000);
@@ -91,7 +108,7 @@ const mailSendToUser = (data) => {
                                 mailService.mail(defaultPasswordEmailoptions, data, null, function (err, mailResult) {
                                     if (err) {
                                         console.log('error:', error);
-                                        reject({ status: 500, message: 'Internal Server Error' });
+                                        // reject({ status: 500, message: 'Internal Server Error' });
                                     } else {
                                         console.log("created new user details", userres)
                                         // const finalresponse = { email: userres.email, userId: userres._id }
