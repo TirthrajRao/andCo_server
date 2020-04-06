@@ -293,7 +293,8 @@ module.exports.deleteActivityFromEvent = (req, res) => {
  * @api {delete} /api/event/group/:groupId
  */
 module.exports.deleteGroupFromActivity = (req, res) => {
-	const groupId = req.body.groupId;
+	console.log("details of remove group", req.body)
+	const groupId = req.body._id;
 	eventService.deleteGroupFromActivity(groupId).then((response) => {
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
