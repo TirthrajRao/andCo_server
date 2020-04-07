@@ -34,22 +34,8 @@ module.exports.createNewEvent = (req, res) => {
 		eventType: req.body.eventType,
 		eventTitle: req.body.eventTitle,
 		eventTheme: req.body.background,
-		// startDate: req.body.startDate,
-		// endDate: req.body.endDate,
 		hashTag: hashTag,
-		// isPublic: req.body.isPublic,
-		// paymentDeadlineDate: req.body.deadlineDate,
-		// isLogistics: req.body.isLogistics,
-		// defaultImage: req.body.defaultImage,
-		// thanksMessage: {
-		// 	attachment: '',
-		// 	message: ''
-		// }
 	}
-
-	// if (req.files.background) {
-	// 	newEvent.eventTheme = req.files.background[0].path;
-	// }
 
 	if (req.files.profile) {
 		newEvent.profilePhoto = req.files.profile[0].path;

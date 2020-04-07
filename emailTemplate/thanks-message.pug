@@ -1,16 +1,118 @@
-if image
-    - var imageUrl = image
-else
-   -  var imageUrl = 'https://andcowith.me/server/uploads/default/thank_you_card.jpg' 
+//- if image
+//-     - var imageUrl = image
+//- else
+//-    -  var imageUrl = 'https://andcowith.me/server/uploads/default/thank_you_card.jpg' 
 
-if message
-    - var myMessage = message
-else 
-    - var myMessage = 'A great big thank you for shopping with Aso-Ebi.'
+//- if message
+//-     - var myMessage = message
+//- else 
+//-     - var myMessage = 'A great big thank you for shopping with Aso-Ebi.'
 
-h3 #{myMessage}
+//- h3 #{myMessage}
 
-div(style="height: 500px; width: 600px; overflow: hidden;")
-    img(src=imageUrl style="max-height: 100%; max-width: 100%; min-height: 100%; min-width: 100%; object-fit: cover;")
+//- div(style="height: 500px; width: 600px; overflow: hidden;")
+//-     img(src=imageUrl style="max-height: 100%; max-width: 100%; min-height: 100%; min-width: 100%; object-fit: cover;")
 
 
+
+
+
+html
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    style.
+      @import url('https://fonts.googleapis.com/css?family=Advent+Pro|Manjari&display=swap');
+      p {
+      margin: 0;
+      font-family: 'Manjari', sans-serif !important;
+      }
+      h2 {
+      font-family: 'Manjari', sans-serif !important;
+      }
+      .andco-email-template {
+      background-image: url("https://test.andcowith.me/assets/images/thank_you.png");
+      background-repeat: no-repeat;
+      margin: auto;
+      font-family: 'Manjari', sans-serif !important;
+      padding: 80px 0;
+      }
+      .inner {
+      text-align: center;
+      margin: auto;
+      }
+      .email-img {
+      margin-bottom: 40px;
+      }
+      .inner-box {
+      background: linear-gradient(100deg, #cf9d57, #ede382, #93632f);
+      width: 500px;
+      border-radius: 10px;
+      text-align: center;
+      padding: 20px 40px;
+      margin: 0px auto;
+      }
+      .inner-content p {
+      color: #751f00;
+      font-size: 20px;
+      line-height: 33px;
+      font-weight: 600;
+      font-family: 'Manjari', sans-serif !important;
+      }
+      .inner-box h2 {
+      font-size: 20px;
+      color: #000000;
+      font-weight: bold;
+      font-family: 'Manjari', sans-serif !important;
+      }
+      .guest-profile {
+      height: 100px;
+      width: 100px;
+      overflow: hidden;
+      border-radius: 50%;
+      border: 2px solid #111214;
+      margin: auto;
+      }
+      .guest-profile img {
+      max-width: 100%;
+      min-width: 100%;
+      max-height: 100%;
+      min-height: 100%;
+      object-fit: cover;
+      }
+      @media(max-width:575px) {
+      .inner-box {
+      width: 250px;
+      padding: 20px;
+      }
+      .email-img img {
+      height: 40px;
+      }
+      .inner-content p {
+      font-size: 16px;
+      line-height: 30px;
+      font-weight: unset;
+      }
+      .inner-box h2 {
+      line-height: 26px;
+      font-size: 16px;
+      }
+      .guest-profile {
+      height: 60px;
+      width: 60px;
+      }
+      }
+  body.andco-email-template
+- var imgUrl = image
+    .inner
+      .email-img
+        img(src='https://test.andcowith.me/assets/images/andco_logo.png', alt='andco-log')
+      .inner-box
+        .inner-content
+          .guest-profile
+            img(src=imgUrl, alt='profile photo')
+          h2 #{eventTitle}
+          h2 #{eventHashTag}
+          p
+            |#{message}
