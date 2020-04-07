@@ -106,16 +106,17 @@ const event = new Schema({
 			type: Number
 		}
 	},
-	afterEventMessage: {
-		message: {
+	afterEventMessageDetails: {
+		afterEventMessage: {
 			type: String
 		},
 		messageDate: {
-			type: String
+			type: Date,
+			default: new Date()
 		},
-		messagePreference: {
+		listOfGuest: {
 			type: String
-		},
+		}
 	},
 	invitationMessage: {
 		type: String
@@ -133,6 +134,9 @@ const event = new Schema({
 		guestList: {
 			type: String
 		}
+	},
+	afterEventMessage: {
+
 	},
 	hearAbout: {
 		aboutType: {

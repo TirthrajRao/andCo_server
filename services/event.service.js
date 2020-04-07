@@ -400,7 +400,7 @@ const eventDetail = (eventId, userId) => {
                     defaultImage: '$defaultImage',
                     paymentDeadlineDate: '$paymentDeadlineDate',
                     activities: '$activities',
-                    afterEventMessage: '$afterEventMessage',
+                    afterEventMessage: '$afterEventMessageDetails',
                     invitationMessage: '$invitationMessage',
                     reminderDetails: '$reminderDetails',
                     welcomeMessage: '$welcomeMessage'
@@ -4404,6 +4404,20 @@ function updateReminderDetails(reminderDetails) {
 }
 
 
+function setAfterEventMessage(details) {
+    return new Promise((resolve, reject) => {
+        EventModel.findByIdAndUpdate({ _id: details.eventId }, { afterEventMessageDetails: details }, { upsert: true, new: true })
+            .exec((error, afterMessgae) => {
+                if (error)
+                    reject({ status: 500, message: 'Error while set after Event Message' })
+                else
+                    resolve({ message: 'After event message set' })
+            })
+    })
+}
+
+
+module.exports.setAfterEventMessage = setAfterEventMessage
 module.exports.updateReminderDetails = updateReminderDetails
 module.exports.setReminderMessage = setReminderMessage
 module.exports.addInvitationMessage = addInvitationMessage

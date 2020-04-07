@@ -293,7 +293,8 @@ module.exports.deleteActivityFromEvent = (req, res) => {
  * @api {delete} /api/event/group/:groupId
  */
 module.exports.deleteGroupFromActivity = (req, res) => {
-	const groupId = req.body.groupId;
+	console.log("details of remove group", req.body)
+	const groupId = req.body._id;
 	eventService.deleteGroupFromActivity(groupId).then((response) => {
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
@@ -995,12 +996,6 @@ module.exports.addInvitationMessage = (req, res) => {
 module.exports.setReminderMessage = (req, res) => {
 	console.log("details of reminder", req.body)
 	let data = req.body
-
-	// const eventId = req.body.eventId;
-	// let hashTag = req.body.hashTag.split(' ').join('_');
-
-
-
 	eventService.setReminderMessage(data).then((response) => {
 		console.log("reminder set", response)
 		return res.status(200).json({ message: response.message })
@@ -1022,6 +1017,17 @@ module.exports.updateReminderDetails = (req, res) => {
 	eventService.updateReminderDetails(eventData).then((updateReminder) => {
 		console.log("details update", updateReminder)
 		return res.status(200).json({ message: updateReminder.message })
+	}).catch((error) => {
+		console.log("error while update", error)
+		return res.status(error.status).json({ message: error.message })
+	})
+}
+
+
+module.exports.setAfterEventMessage = (req, res) => {
+	let details = req.body
+	eventService.setAfterEventMessage(details).then((response) => {
+		return res.status(200).json({ message: response.message })
 	}).catch((error) => {
 		console.log("error while update", error)
 		return res.status(error.status).json({ message: error.message })
