@@ -83,6 +83,8 @@ router.route('/event/set-price')
     .post([ensureAuthenticated.validateToken], EventController.setPriceOfEvent)
     .put([ensureAuthenticated.validateToken], EventController.updateSetPriceOfEvent)
 
+router.post('/event/setAfterEventMessage', ensureAuthenticated.validateToken, EventController.setAfterEventMessage)
+
 // router.post('/event/set-price', ensureAuthenticated.validateToken, EventController.setPriceOfEvent)
 router.get('/event/set-price/:id', ensureAuthenticated.validateToken, EventController.getPriceOfEvent)
 
