@@ -1862,14 +1862,16 @@ module.exports.orderCheckout = (userId, cartData) => {
                 console.log('Transaction Error:', transactionError);
                 reject({ status: 500, message: 'Internal Server Error' });
             } else {
-                console.log("trancation is completed", transaction)
+                // console.log("trancation is completed", transaction)
                 clearCartAfterCheckout(userId, cartData.eventId).then((response) => {
                     findEmailUsingUserId(userId).then((response) => {
                         const email = response.data.email;
                         findMessageUsingEventId(cartData.eventId).then((response) => {
                             console.log("response of final when trancation is created", response)
                             const messageData = {};
-
+                            messageData.eventHashTag = response.data.hashTag
+                            messageData.eventTitle = response.data.eventTitle
+                            messageData.image = config.ngrockUrl + response.data.profilePhoto
                             if (response.data.thankyouMessage == '') {
                                 messageData.message = '';
                             } else {
@@ -1890,21 +1892,22 @@ module.exports.orderCheckout = (userId, cartData) => {
                                 template: 'thanks-message'
                             };
 
-                            // mailService.mail(defaultPasswordEmailoptions, messageData, null, function (err, mailResult) {
-                            //     console.log('Mail Result:', mailResult);
-                            //     if (err) {
-                            //         resolve({ status: 200, message: 'Order Placed successfully but mail not sent for some reason' });
-                            //     } else {
-                            //         resolve({ status: 200, message: 'Order Placed successfully' })
-                            //     }
-                            // })
                             paymentThankYouDetails(transaction.eventId).then((response) => {
                                 console.log("response of created event with name", response)
                                 let thankYouDetails = {
                                     finalTotal: transaction.finalTotal + transaction.donation,
                                     createrName: response.data
                                 }
-                                resolve({ data: thankYouDetails, message: 'Payment Successfully Done' })
+                                mailService.mail(defaultPasswordEmailoptions, messageData, null, function (err, mailResult) {
+                                    console.log('Mail Result:', mailResult);
+                                    if (err) {
+                                        resolve({ status: 200, message: 'Order Placed successfully but mail not sent for some reason' });
+                                    } else {
+                                        console.log("mail send for purchase to guest", mailResult)
+                                        // resolve({ status: 200, message: 'Order Placed successfully' })
+                                        resolve({ data: thankYouDetails, message: 'Payment Successfully Done' })
+                                    }
+                                })
                             }).catch((error) => {
                                 console.log("error while get name of creater", error)
                                 reject({ status: 500, message: 'Error while get details of user' })
