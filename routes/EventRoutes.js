@@ -115,8 +115,11 @@ router.put('/group-delete', EventController.deleteGroupFromActivity);
 router.put('/group/delete-item', EventController.deleteItemFromGroup);
 router.delete('/event-delete/:id', ensureAuthenticated.validateToken, EventController.deleteEvent);
 router.get('/mycollection', ensureAuthenticated.validateToken, EventController.MyEventListTotalTransaction);
-
 router.get('/event-transaction', EventController.eventWithTransactionAndUserDetail);
 
+
+// Routes For generate pdf of guest list
+
+router.post('/generatePdf' , ensureAuthenticated.validateToken , EventController.generatePdf)
 
 module.exports = router;

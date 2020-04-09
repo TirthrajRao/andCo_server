@@ -1,6 +1,6 @@
 module.exports = {
 	databaseOption: {},
-	baseUrl: 'http://localhost:4200',
+	baseUrl: 'http://localhost/andco_server/',
 	// baseUrl: 'http://localhost:4200',
 	forgotPasswordLink: '/#/forgot-password/',
 	welcomeGuest: '/#/welcome-guest/',
