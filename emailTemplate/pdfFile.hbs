@@ -1,0 +1,256 @@
+<html>
+
+<head>
+    <title>PDF</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Advent+Pro|Manjari&display=swap');
+
+        body {
+            font-family: 'Manjari', sans-serif !important;
+        }
+
+        p,
+        h3 {
+            margin: 0;
+            text-transform: capitalize;
+        }
+
+        .page-box {
+            border: 1px dotted gray;
+            padding: 10px 20px;
+            margin: 15px;
+        }
+
+        .profile-content {
+            text-align: center;
+        }
+
+        .profile-content h4 {
+            color: #440909;
+            font-weight: bold;
+            font-size: 18px;
+            text-transform: capitalize;
+        }
+
+        .profile-photo {
+            height: 90px;
+            width: 90px;
+            overflow: hidden;
+            border-radius: 50%;
+            border: 2px solid #111214;
+            margin: auto;
+        }
+
+        .profile-photo img {
+            max-width: 100%;
+            min-width: 100%;
+            max-height: 100%;
+            min-height: 100%;
+            object-fit: cover;
+        }
+
+        .info-box {
+            font-size: 15px;
+            font-weight: 600;
+            border-top: 2px solid #440909;
+            border-bottom: 2px solid #440909;
+            padding: 12px 0 6px;
+        }
+
+        .guest-name {
+            margin: 10px 0;
+        }
+
+        .guest-name h3 {
+            font-weight: 600;
+            margin-left: 15px;
+            font-size: 18px;
+            text-transform: capitalize;
+        }
+
+        .profile-name {
+            float: left;
+            background-color: #440909;
+            border-radius: 50%;
+            text-transform: uppercase;
+            color: #FFFFFF;
+            font-size: 16px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .inner-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .info-box {
+            font-size: 12px;
+            font-weight: 600;
+            border-top: 2px solid #440909;
+            border-bottom: 2px solid #440909;
+            padding: 12px 0 6px;
+            text-transform: capitalize;
+        }
+
+        .info i {
+            float: left;
+            margin-right: 5px;
+            color: #440909;
+            font-size: 20px;
+        }
+
+        .info p {
+            word-break: break-all;
+        }
+
+        .guest-single-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .guest-single-item p {
+            color: #000;
+            font-weight: 500;
+            font-size: 13px;
+            line-height: 46px;
+            text-transform: capitalize;
+        }
+
+        .guest-event-name {
+            text-align: center;
+        }
+
+        .guest-item-price {
+            text-align: right;
+        }
+
+        .total-spent {
+            background-color: #FFF4F4;
+            color: #440909;
+            padding: 12px 20px 0px;
+            margin-bottom: 15px;
+        }
+
+        .total-spent h5 {
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: capitalize;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <div class="page-box">
+            <div class="profile-content">
+                <div class="profile-photo">
+                    <img src="{{#with event}}{{profilePhoto}}{{/with}}" alt="profile photo">
+                </div>
+                <h4 class="mt-3">
+                    {{#with event}}
+                    {{eventTitle}}
+                    {{/with}}
+                </h4>
+                <h4>
+                    {{#with event}}
+                    {{hashTag}}
+                    {{/with}}
+                </h4>
+            </div>
+            <div class="inner-class">
+                {{#each data}}
+                <div class="inner-header">
+                    <div class="profile-name">
+                        <span>
+                            {{!-- {{#with}} --}}
+                            {{firstLetter}}{{lastLetter}}
+                            {{!-- {{/with}} --}}
+                        </span>
+                    </div>
+                    <div class="guest-name">
+                        <h3>
+                            {{firstName}} {{lastName}}
+                        </h3>
+                    </div>
+                </div>
+                <div class="info-box">
+                    <div class="row m-0">
+                        <div class="col-sm-4">
+                            <div class="info">
+                                <i class="fa fa-map-marker" aria-hidden="true"></i>
+                                <p>{{address}}</p>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="info">
+                                <i class="fa fa-phone" aria-hidden="true"></i>
+                                <p>{{phoneNo}}</p>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="info">
+                                <i class="fa fa-envelope" aria-hidden="true"></i>
+                                <p>{{email}}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <ul class="mt-3 pl-0">
+                    {{#items}}
+                    <li class="guest-single-item">
+                        <div class="guest-item-name">
+                            <p>
+                                {{quantity}}
+                                {{#with itemId}}
+                                {{itemName}}
+                                {{/with}}
+                            </p>
+                        </div>
+                        <div class="guest-event-name">
+                            <p>
+                                {{#with itemId}}
+                                {{#with activityId}}
+                                {{activityName}}
+                                {{/with}}
+                                {{/with}}
+                            </p>
+                        </div>
+                        <div class="guest-item-price">
+                            <p>
+                                ₦
+                                {{#with itemId}}
+                                {{itemPrice}}
+                                {{/with}}
+                            </p>
+                        </div>
+                    </li>
+                    {{/items}}
+                </ul>
+                <div class="total-spent w-100 d-inline-block">
+                    <div class="date float-left">
+                        <h5>Date of purchase : <span>20/2/2020</span></h5>
+                    </div>
+                    <div class="total float-right">
+                        <h5>Total: <span> ₦ {{total}}</span></h5>
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+</body>
+
+</html>

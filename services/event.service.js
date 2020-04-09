@@ -1871,7 +1871,7 @@ module.exports.orderCheckout = (userId, cartData) => {
                             const messageData = {};
                             messageData.eventHashTag = response.data.hashTag
                             messageData.eventTitle = response.data.eventTitle
-                            messageData.image = config.ngrockUrl + response.data.profilePhoto
+                            messageData.image = config.baseUrl + response.data.profilePhoto
                             if (response.data.thankyouMessage == '') {
                                 messageData.message = '';
                             } else {

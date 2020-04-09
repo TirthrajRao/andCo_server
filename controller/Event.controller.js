@@ -5,6 +5,9 @@ const _ = require("lodash");
 // services
 const eventService = require("../services/event.service");
 const paymentService = require("../services/payment.service");
+const pdfService = require("../services/pdf.service");
+const config = require("../configNew");
+
 
 // Create New Event Password API
 /**
@@ -1021,6 +1024,40 @@ module.exports.setAfterEventMessage = (req, res) => {
 }
 
 
+
+module.exports.generatePdf = (req, res) => {
+	let data = req.body
+	let eventId = data.eventId
+	let loginUser = req.user
+	let finalId
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
+	console.log("final data to display", data)
+
+	eventService.eventDetail(eventId, finalId).then((response) => {
+		console.log("response of event", response)
+		let eventDetail = {
+			eventTitle: response.data.eventTitle,
+			hashTag: response.data.hashTag,
+			profilePhoto: config.baseUrl + response.data.profilePhoto
+		}
+		pdfService.pdfGenerate(data.data, eventDetail).then((response) => {
+			console.log("response of data", response)
+			let finalData = {
+				data: response,
+				hashTag: eventDetail.hashTag
+			}
+			return res.status(200).json({ data: finalData })
+		}).catch((error) => {
+			console.log("error while generate pdf", error)
+		})
+	}).catch((error) => {
+		console.log("error while get details", error)
+	})
+}
 
 
 
