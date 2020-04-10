@@ -90,6 +90,28 @@ module.exports.changeProfile = (req, res) => {
 	console.log("only photo update", newEvent)
 }
 
+
+module.exports.checkHashtag = (req, res) => {
+
+	let loginUser = req.user
+	let finalId
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
+	let data = req.body
+	console.log("hashtag========", data)
+	eventService.fnHashtagAvailable(data, finalId).then((response) => {
+		console.log("response of hashtag is or not", response)
+		return res.status(200).json({ data: response })
+	}).catch((error) => {
+		console.log("error while if it is", error)
+		return res.status(error.status).json({ message: error.message })
+	})
+}
+
+
 /**
  * Set price of event 
  */
@@ -1036,7 +1058,8 @@ module.exports.generatePdf = (req, res) => {
 			console.log("response of data", response)
 			let finalData = {
 				data: response,
-				hashTag: eventDetail.hashTag
+				hashTag: eventDetail.hashTag,
+				profilePhoto: eventDetail.profilePhoto
 			}
 			return res.status(200).json({ data: finalData })
 		}).catch((error) => {

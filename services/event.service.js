@@ -58,17 +58,26 @@ module.exports.createNewEvent = (eventData) => {
  * Function For Check Hashtag Availability
  * @param {string} hashTag 
  */
-function fnHashtagAvailable(hashTag) {
+function fnHashtagAvailable(details, userId) {
+    console.log("details of hashtag", details)
     return new Promise((resolve, reject) => {
-        EventModel.findOne({ hashTag: hashTag }, (error, event) => {
+        EventModel.findOne({ hashTag: details.data }, (error, event) => {
+            console.log("event is find or not", event)
             if (error) {
                 console.log("Internal Server Error");
                 reject({ status: 500, message: 'Internal Server Error' });
             } else if (!event) {
                 console.log('HashTag Is Available');
                 resolve(true)
-            } else {
-                console.log('HashTag Is Not Available');
+            } else if (event.hashTag == details.data && event._id == details.eventId) {
+                console.log('HashTag Is for edit', event);
+                resolve(true)
+            } else if (event.hashTag == details.data && event._id != details.eventId) {
+                console.log("when it is used by other")
+                resolve(false)
+            }
+            else {
+                console.log("this is last one")
                 resolve(false)
             }
         });
@@ -4465,6 +4474,8 @@ function setAfterEventMessage(details) {
 }
 
 
+
+module.exports.fnHashtagAvailable = fnHashtagAvailable
 module.exports.setAfterEventMessage = setAfterEventMessage
 module.exports.updateReminderDetails = updateReminderDetails
 module.exports.setReminderMessage = setReminderMessage

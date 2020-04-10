@@ -29,6 +29,10 @@ router.post('/event/join-event', ensureAuthenticated.validateToken, EventControl
 router.get('/event/search-hashtag', EventController.eventListUsingHashTag);
 router.get('/event/public-event', EventController.eventListForHomepage);
 
+// Routes For checkHashTag is avalible or not
+router.post('/checkHashTag', ensureAuthenticated.validateToken, EventController.checkHashtag)
+
+
 // Routes For Cart Operations
 router.get('/event/cart-list/:hashTag', ensureAuthenticated.validateToken, EventController.cartItemList);
 router.get('/event/final-list/:id', ensureAuthenticated.validateToken, EventController.cartItemListWithTotal);
@@ -118,8 +122,9 @@ router.get('/mycollection', ensureAuthenticated.validateToken, EventController.M
 router.get('/event-transaction', EventController.eventWithTransactionAndUserDetail);
 
 
+
 // Routes For generate pdf of guest list
 
-router.post('/generatePdf' , ensureAuthenticated.validateToken , EventController.generatePdf)
+router.post('/generatePdf', ensureAuthenticated.validateToken, EventController.generatePdf)
 
 module.exports = router;
