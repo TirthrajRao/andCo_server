@@ -39,15 +39,15 @@ const event = new Schema({
 	hashTag: {
 		type: String
 	},
-	isPublic: {
-		type: Boolean,
-		default: true
-	},
+	// isPublic: {
+	// 	type: Boolean,
+	// 	default: true
+	// },
 	profilePhoto: {
 		type: String
 	},
 	isLogistics: {
-		type: Boolean
+		type: String
 	},
 	regestery: {
 		type: String
