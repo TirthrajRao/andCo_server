@@ -440,6 +440,7 @@ module.exports.MyEventList = (req, res) => {
 	} else if (loginUser.userres) {
 		finalId = loginUser.userres._id
 	}
+	console.log("final id", finalId)
 	eventService.MyEventList(finalId).then((response) => {
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
