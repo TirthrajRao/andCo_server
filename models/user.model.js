@@ -39,7 +39,7 @@ const User = new mongoose.Schema({
 		default: 'user',
 		enum: ['user', 'admin', 'subadmin'],
 	},
-	bankAccount: {
+	bankAccount: [{
 		accountNumber: {
 			type: Number,
 		},
@@ -50,8 +50,8 @@ const User = new mongoose.Schema({
 			type: Boolean,
 			default: false,
 		},
-	},
-	cardAccount: {
+	}],
+	cardAccount: [{
 		cardNumber: {
 			type: Number
 		},
@@ -62,7 +62,7 @@ const User = new mongoose.Schema({
 			type: Boolean,
 			default: false,
 		},
-	},
+	}],
 	address: {
 		deliverName: {
 			type: String

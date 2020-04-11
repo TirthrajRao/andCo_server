@@ -305,10 +305,16 @@ module.exports.removeBankAccount = (req, res) => {
 module.exports.getAccountDetailList = (req, res) => {
 
 	console.log('UserId:', req.user);
-
-	const userId = req.user.user._id;
-	console.log('UserId:', userId);
-	userService.getAccountDetailList(userId).then((response) => {
+	let loginUser = req.user
+	let finalFlage = req.body.flag
+	if (loginUser.user) {
+		finalId = loginUser.user._id
+	} else if (loginUser.userres) {
+		finalId = loginUser.userres._id
+	}
+	// const userId = req.user.user._id;
+	// console.log('UserId:', userId);
+	userService.getAccountDetailList(finalId).then((response) => {
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
 		console.log('error: ', error);

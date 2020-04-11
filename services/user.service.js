@@ -771,6 +771,13 @@ const getAccountDetailList = (userId) => {
                             as: "bankDetail",
                             cond: { $eq: ["$$bankDetail.isDeleted", false] }
                         }
+                    },
+                    cardDetails: {
+                        $filter: {
+                            input: "$cardAccount",
+                            as: "cardDetails",
+                            cond: { $eq: ["$$cardDetails.isDeleted", false] }
+                        }
                     }
                 }
             }
@@ -882,7 +889,7 @@ function addAccountDetails(data, userId, finalFlage) {
     console.log("details of account", data, finalFlage)
     return new Promise((resolve, reject) => {
         if (finalFlage == false) {
-            UserModel.findByIdAndUpdate({ _id: userId }, { $set: { bankAccount: data } }, { upsert: true, new: true })
+            UserModel.findByIdAndUpdate({ _id: userId }, { $push: { bankAccount: data } }, { upsert: true, new: true })
                 .exec((error, accountAdded) => {
                     if (error)
                         //  console.log("error while add account", error)
@@ -894,7 +901,7 @@ function addAccountDetails(data, userId, finalFlage) {
                 })
         }
         if (finalFlage == true) {
-            UserModel.findByIdAndUpdate({ _id: userId }, { $set: { cardAccount: data } }, { upsert: true, new: true })
+            UserModel.findByIdAndUpdate({ _id: userId }, { $push: { cardAccount: data } }, { upsert: true, new: true })
                 .exec((error, cardAdded) => {
                     if (error)
                         //  console.log("error while add account", error)
