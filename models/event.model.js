@@ -95,17 +95,29 @@ const event = new Schema({
 			type: String
 		}
 	},
-	bankDetails: {
-		bankName: {
-			type: String,
+	bankAccount: {
+		_id: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'User',
 		},
-		accountNumber: {
-			type: Number,
-		},
-		cardNumber: {
-			type: Number
-		}
 	},
+	cardAccount: {
+		_id: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'User',
+		},
+	},
+	// bankDetails: {
+	// 	bankName: {
+	// 		type: String,
+	// 	},
+	// 	accountNumber: {
+	// 		type: Number,
+	// 	},
+	// 	cardNumber: {
+	// 		type: Number
+	// 	}
+	// },
 	afterEventMessageDetails: {
 		afterEventMessage: {
 			type: String

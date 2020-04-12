@@ -118,6 +118,20 @@ module.exports.checkHashtag = (req, res) => {
 module.exports.setPriceOfEvent = (req, res) => {
 	console.log("details of set price", req.body)
 	let setDetails = req.body
+	if (setDetails.bankDetails.flag == 'bank') {
+		console.log("call this")
+		let bankAccount = {
+			_id: setDetails.bankDetails._id
+		}
+		setDetails['bankAccount'] = bankAccount
+	}
+	if (setDetails.bankDetails.flag == 'card') {
+		console.log("call this")
+		let cardAccount = {
+			_id: setDetails.bankDetails._id
+		}
+		setDetails['cardAccount'] = cardAccount
+	}
 	eventService.setPriceOfEvent(setDetails).then((response) => {
 		console.log("response of set price", response)
 		return res.status(200).json({ message: response.message })
@@ -137,6 +151,24 @@ module.exports.updateSetPriceOfEvent = (req, res) => {
 	} else if (loginUser.userres) {
 		finalId = loginUser.userres._id
 	}
+	let bankAccount
+	let cardAccount
+	if (req.body.bankDetails.flag == 'bank') {
+		console.log("call this")
+
+		bankAccount = {
+			_id: req.body.bankDetails._id
+		}
+		// req.body['bankAccount'] = bankAccount
+	}
+	if (req.body.bankDetails.flag == 'card') {
+		console.log("call this")
+		cardAccount = {
+			_id: req.body.bankDetails._id
+		}
+		// req.body['cardAccount'] = cardAccount
+	}
+
 	let updateDetails = {}
 	if (req.body.thanksMessage) updateDetails['thanksMessage'] = req.body.thanksMessage
 	if (req.body.afterEventMessage) updateDetails['afterEventMessage'] = req.body.afterEventMessage
@@ -148,6 +180,8 @@ module.exports.updateSetPriceOfEvent = (req, res) => {
 	if (req.body.payMentTransferDate) updateDetails['payMentTransferDate'] = req.body.payMentTransferDate
 	if (req.body.isLogistics) updateDetails['isLogistics'] = req.body.isLogistics
 	if (req.body.regestery) updateDetails['regestery'] = req.body.regestery
+	if (req.body.bankDetails.flag == 'bank') updateDetails['bankAccount'] = bankAccount
+	if (req.body.bankDetails.flag == 'card') updateDetails['cardAccount'] = cardAccount
 	console.log("update", updateDetails)
 	eventService.updateSetPrice(updateDetails).then((updated) => {
 		console.log("update completed", updated)
