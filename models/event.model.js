@@ -107,17 +107,6 @@ const event = new Schema({
 			ref: 'User',
 		},
 	},
-	// bankDetails: {
-	// 	bankName: {
-	// 		type: String,
-	// 	},
-	// 	accountNumber: {
-	// 		type: Number,
-	// 	},
-	// 	cardNumber: {
-	// 		type: Number
-	// 	}
-	// },
 	afterEventMessageDetails: {
 		afterEventMessage: {
 			type: String

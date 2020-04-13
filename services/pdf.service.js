@@ -22,15 +22,9 @@ hbs.registerHelper('formatCurrency', function (value) {
 
 async function pdfGenerate(dataDetails, eventDetails) {
     console.log("what is in=========", dataDetails)
-    let newOne = {
-        sign: '₦'
-    }
-    console.log("sign is print or not", newOne)
-
     const data = {
         data: dataDetails,
         event: eventDetails,
-        NGN: newOne
     }
     try {
         const browser = await puppeteer.launch({ args: ['--no-sandbox'] })
