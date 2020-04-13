@@ -647,7 +647,7 @@ const facebookLogin = (accessToken) => {
     return new Promise((resolve, reject) => {
         facebookAuthentication(accessToken).then((response) => {
             console.log("Response", response);
-            UserModel.findOne({ email: response.socialId }).exec((err, user) => {
+            UserModel.findOne({ socialId: response.socialId }).exec((err, user) => {
                 if (err) {
                     reject({ status: 500, message: 'Internal Server Error' });
                 } else if (user) {
