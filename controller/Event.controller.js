@@ -469,6 +469,7 @@ module.exports.updateGroupInsideActivity = (req, res) => {
 module.exports.MyEventList = (req, res) => {
 	// const userId = req.user.user._id;
 	let loginUser = req.user
+	console.log("login user of social", loginUser)
 	if (loginUser.user) {
 		finalId = loginUser.user._id
 	} else if (loginUser.userres) {
@@ -1099,9 +1100,11 @@ module.exports.generatePdf = (req, res) => {
 			return res.status(200).json({ data: finalData })
 		}).catch((error) => {
 			console.log("error while generate pdf", error)
+			return res.status(error.status).json({ message: error.message })
 		})
 	}).catch((error) => {
 		console.log("error while get details", error)
+		return res.status(error.status).json({ message: error.message })
 	})
 }
 

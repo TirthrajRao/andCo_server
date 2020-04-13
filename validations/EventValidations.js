@@ -14,6 +14,7 @@ const requiredNumber = Joi.number().required();
 // New Event API Validation
 
 module.exports.newEvent = (req, res, next) => {
+	console.log("call this", req.body)
 	const schema = Joi.object().keys({
 		eventType: requiredString,
 		eventTitle: requiredString,
@@ -30,6 +31,7 @@ module.exports.newEvent = (req, res, next) => {
 		{ convert: true },
 		(err, value) => {
 			if (err) {
+				console.log("what is errror", err)
 				return res.status(400).json({
 					message: err.details[0] && err.details[0].message ? err.details[0].message : 'Bad request'
 				});

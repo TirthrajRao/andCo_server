@@ -4369,14 +4369,51 @@ function setPriceOfEvent(details) {
 
 
 function updateSetPrice(details) {
+    console.log("details of update set price", details)
     return new Promise((resolve, reject) => {
         EventModel.findByIdAndUpdate({ _id: details.eventId }, { $set: details }, { upsert: true, new: true })
             .exec((error, updateDetails) => {
-
                 if (error) reject({ status: 500, message: 'Error while update set price details' })
-                else resolve({ message: 'Set price details updated' })
-                console.log("details update completed", updateDetails)
+                else
+                    // console.log("details update completed", updateDetails)
+                    checkAccount(details, updateDetails).then((finalUpdate) => {
+                        console.log("check all account ", finalUpdate)
+                        resolve({ message: 'Set price details updated' })
+                    }).catch((error) => {
+                        console.log("error while checked", error)
+                        reject({ status: error.status, message: error.message })
+                    })
             })
+    })
+}
+
+
+const checkAccount = (data, dataOfUpdate) => {
+    let remove = dataOfUpdate
+    // console.log("new account =====", remove)
+    return new Promise((resolve, reject) => {
+        if (data.bankAccount) {
+            EventModel.findByIdAndUpdate({ _id: remove._id }, { $set: { cardAccount: null } }, { upsert: true, new: true })
+                .exec((error, finalOne) => {
+                    if (error)
+                        //  console.log("error while remove", error)
+                        reject({ status: 500, message: 'Error while remove bank account' })
+                    else
+                        // console.log("remove card", finalOne)
+                        resolve({ message: 'Remove Old card account' })
+                })
+        }
+        else if (data.cardAccount) {
+            EventModel.findByIdAndUpdate({ _id: remove._id }, { $set: { bankAccount: null } }, { upsert: true, new: true })
+                .exec((error, finalOne) => {
+                    if (error)
+                        //  console.log("error while remove", error)
+                        reject({ status: 500, message: 'Error while remove bank account' })
+                    else
+                        // console.log("remove card", finalOne)
+                        resolve({ message: 'Remove Old bank account' })
+                })
+        }
     })
 }
 
