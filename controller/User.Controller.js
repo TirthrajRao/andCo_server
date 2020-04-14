@@ -366,7 +366,6 @@ module.exports.enterAddress = (req, res) => {
 
 module.exports.getAddressDetails = (req, res) => {
 	let loginUser = req.user
-
 	if (loginUser.user) {
 		finalId = loginUser.user._id
 	} else if (loginUser.userres) {

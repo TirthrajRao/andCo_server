@@ -1,6 +1,6 @@
 module.exports = {
 	databaseOption: {},
-	// baseUrl: 'http://localhost/andco_server/',
+	// baseUrlServer: 'http://localhost:3000/andco_server/uploads/pdf/',
 	baseUrl: 'http://localhost:4200',
 	forgotPasswordLink: '/#/forgot-password/',
 	welcomeGuest: '/#/welcome-guest/',
@@ -11,5 +11,5 @@ module.exports = {
 	outLookUrl: 'https://graph.microsoft.com/v1.0/me/',
 	yahooUrl: 'https://social.yahooapis.com/v1/user/',
 	jwtSecret: 'asoebi',
-	ngrockUrl: 'https://andcowith.me/server/',
+	ngrockUrl: 'https://test.andcowith.me:9001/',
 };
