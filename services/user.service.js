@@ -783,7 +783,8 @@ const getAccountDetailList = (userId) => {
             }
         ]).exec(function (accErr, accList) {
             if (accErr) {
-                reject({ status: 500, message: 'Internal Server Error' });
+                console.log("what is error ", accErr)
+                // reject({ status: 500, message: 'Internal Server Error' });
             } else {
                 console.log('accList:', accList);
                 resolve({ status: 200, message: 'Successfully Get the Bank Detail List.', data: accList[0] });

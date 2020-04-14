@@ -1660,42 +1660,74 @@ function getTotalOfCart(userId, hashTag) {
     return new Promise((resolve, reject) => {
         findEventIdWithHashtag(hashTag).then((eventId) => {
             cartItemList(eventId, userId).then((itemList) => {
-                grandTotal = 0
-                let cartList = itemList.data.cartList
-                console.log("total item of cart", cartList)
-                cartList.forEach((singleCartItem) => {
-                    subTotal = singleCartItem.itemPrice * singleCartItem.quantity
-                    grandTotal = grandTotal + subTotal
-                    finalGrandTotal = grandTotal
-                })
-                console.log("final total of all items", finalGrandTotal)
-                UserModel.findOne({
-                    _id: userId,
-                    'donationOfEvent.eventId': eventId,
-                    donationOfEvent: {
-                        $elemMatch: {
-                            eventId: eventId
-                        }
-                    }
-                },
-                    {
+                console.log("what is the list of cart", itemList)
+                if (itemList.data.cartList && itemList.data.cartList.length > 0) {
+                    grandTotal = 0
+                    let cartList = itemList.data.cartList
+                    console.log("total item of cart", cartList)
+                    cartList.forEach((singleCartItem) => {
+                        subTotal = singleCartItem.itemPrice * singleCartItem.quantity
+                        grandTotal = grandTotal + subTotal
+                        finalGrandTotal = grandTotal
+                    })
+                    console.log("final total of all items", finalGrandTotal)
+                    finalGrandTotalBy = finalGrandTotal
+                    UserModel.findOne({
+                        _id: userId,
+                        'donationOfEvent.eventId': eventId,
                         donationOfEvent: {
                             $elemMatch: {
                                 eventId: eventId
                             }
                         }
-                    }).exec((error, donationDetails) => {
-                        if (error)
-                            // console.log("error while get donation", error)
-                            reject({ status: 500, message: 'Error while get donation' })
-                        else {
-                            // console.log("donation details", donationDetails)
-                            let finalDonation = donationDetails.donationOfEvent[0].donation
-                            finalGrandTotal = finalGrandTotal + finalDonation
-                            // console.log("hve sav final mdvu joye", finalGrandTotal)
-                            resolve({ total: finalGrandTotal, donation: donationDetails.donationOfEvent[0].donation })
+                    },
+                        {
+                            donationOfEvent: {
+                                $elemMatch: {
+                                    eventId: eventId
+                                }
+                            }
+                        }).exec((error, donationDetails) => {
+                            if (error)
+                                // console.log("error while get donation", error)
+                                reject({ status: 500, message: 'Error while get donation' })
+                            else {
+                                // console.log("donation details", donationDetails)
+                                let finalDonation = donationDetails.donationOfEvent[0].donation
+
+                                // console.log("hve sav final mdvu joye", finalGrandTotal)
+                                resolve({ total: finalGrandTotalBy, donation: finalDonation })
+                            }
+                        })
+                } else {
+                    UserModel.findOne({
+                        _id: userId,
+                        'donationOfEvent.eventId': eventId,
+                        donationOfEvent: {
+                            $elemMatch: {
+                                eventId: eventId
+                            }
                         }
-                    })
+                    },
+                        {
+                            donationOfEvent: {
+                                $elemMatch: {
+                                    eventId: eventId
+                                }
+                            }
+                        }).exec((error, donationDetails) => {
+                            if (error)
+                                // console.log("error while get donation", error)
+                                reject({ status: 500, message: 'Error while get donation' })
+                            else {
+                                // console.log("donation details", donationDetails)
+                                let finalDonation = donationDetails.donationOfEvent[0].donation
+
+                                // console.log("hve sav final mdvu joye", finalGrandTotal)
+                                resolve({ donation: finalDonation })
+                            }
+                        })
+                }
             }).catch((error) => {
                 reject({ status: 500, message: 'error while get items of cart' })
                 console.log("error while get items of cart", error)
@@ -1871,7 +1903,7 @@ module.exports.orderCheckout = (userId, cartData) => {
                 console.log('Transaction Error:', transactionError);
                 reject({ status: 500, message: 'Internal Server Error' });
             } else {
-                // console.log("trancation is completed", transaction)
+                console.log("trancation is completed", transaction)
                 clearCartAfterCheckout(userId, cartData.eventId).then((response) => {
                     findEmailUsingUserId(userId).then((response) => {
                         const email = response.data.email;
@@ -1914,8 +1946,8 @@ module.exports.orderCheckout = (userId, cartData) => {
                                     } else {
                                         console.log("mail send for purchase to guest", mailResult)
                                         // resolve({ status: 200, message: 'Order Placed successfully' })
-                                        resolve({ data: thankYouDetails, message: 'Payment Successfully Done' })
                                     }
+                                    resolve({ data: thankYouDetails, message: 'Payment Successfully Done' })
                                 })
                             }).catch((error) => {
                                 console.log("error while get name of creater", error)
@@ -2901,10 +2933,11 @@ const activityWiseCollection = (eventId) => {
                         })
                     })
                     eventTotalCollection(eventId).then((eventTotal) => {
+                        // console.log("total of from another", eventTotal)
                         const data = {};
                         data.groupWise = eventList;
                         data.eventTotal = eventTotal
-                        console.log("total of event ", eventTotal)
+                        console.log("total of event ", data)
                         resolve({ status: 200, message: 'Collected Amount Detail!', data: data });
                         // resolve({ data: eventTotal })
                     }).catch((error) => {
@@ -2938,7 +2971,7 @@ const eventTotalCollection = (eventId) => {
                         grandDonation = 0
                         totalOfEvent.forEach((singleEvent) => {
 
-                            console.log("total of single event", singleEvent.finalTotal)
+                            console.log("total of single event", singleEvent.donation)
                             // Total Of Event
 
                             subTotal = singleEvent.finalTotal
@@ -2946,11 +2979,13 @@ const eventTotalCollection = (eventId) => {
                             finalTotalOfEvent = grandTotal
 
                             // Total Of Donation
-                            if (singleEvent.donation) {
+                            if (singleEvent.donation >= 0) {
                                 subDonation = singleEvent.donation
                                 grandDonation = grandDonation + subDonation
                                 finalDonationTotal = grandDonation
+                                console.log("total of only donation", finalDonationTotal)
                             } else {
+                                console.log("what is if 0 donation")
                                 finalDonationTotal = 0
                             }
 
@@ -2963,6 +2998,7 @@ const eventTotalCollection = (eventId) => {
                         totalCost.eventTotal = finalTotalOfEvent
                         totalCost.donationTotal = finalDonationTotal
                         totalCost.finalTotal = finalGrandTotal
+                        console.log("total cost with donation", totalCost)
                         resolve(totalCost)
                     } else {
                         resolve({ message: 'There is no item purchase in this event' })
