@@ -11,5 +11,5 @@ module.exports = {
 	outLookUrl: 'https://graph.microsoft.com/v1.0/me/',
 	yahooUrl: 'https://social.yahooapis.com/v1/user/',
 	jwtSecret: 'asoebi',
-	ngrockUrl: 'https://andcowith.me/server/',
+	ngrockUrl: 'https://test.andcowith.me:9001/',
 };

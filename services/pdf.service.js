@@ -3,6 +3,7 @@ const fs = require('fs-extra');
 const hbs = require('handlebars')
 const path = require('path');
 const moment = require('moment');
+const config = require('../configNew');
 
 
 const compile = async function (templateName, data) {
@@ -21,7 +22,7 @@ hbs.registerHelper('formatCurrency', function (value) {
 })
 
 async function pdfGenerate(dataDetails, eventDetails) {
-    console.log("what is in=========", dataDetails)
+    console.log("what is in=========", eventDetails)
     const data = {
         data: dataDetails,
         event: eventDetails,
@@ -35,7 +36,7 @@ async function pdfGenerate(dataDetails, eventDetails) {
         await page.setContent(content);
         await page.emulateMedia('screen');
         const buffer = await page.pdf({
-            path: 'myPdf.pdf',
+            path: 'uploads/pdf/' + eventDetails.hashTag + '.pdf',
             format: 'A4',
             printBackground: true
         });

@@ -1085,6 +1085,7 @@ module.exports.setAfterEventMessage = (req, res) => {
 
 module.exports.generatePdf = (req, res) => {
 	let data = req.body
+	console.log("details of ", data)
 	let eventId = data.eventId
 	let loginUser = req.user
 	let finalId
@@ -1100,14 +1101,15 @@ module.exports.generatePdf = (req, res) => {
 		let eventDetail = {
 			eventTitle: response.data.eventTitle,
 			hashTag: response.data.hashTag,
-			profilePhoto: config.baseUrl + response.data.profilePhoto
+			profilePhoto: config.ngrockUrl + response.data.profilePhoto
 		}
 		pdfService.pdfGenerate(data.data, eventDetail).then((response) => {
 			console.log("response of data", response)
 			let finalData = {
 				data: response,
 				hashTag: eventDetail.hashTag,
-				profilePhoto: eventDetail.profilePhoto
+				profilePhoto: eventDetail.profilePhoto,
+				// pdfUrl: 
 			}
 			return res.status(200).json({ data: finalData })
 		}).catch((error) => {
