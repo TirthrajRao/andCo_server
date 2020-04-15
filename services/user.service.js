@@ -638,7 +638,7 @@ const facebookLogin = (accessToken) => {
                 } else if (user) {
                     console.log("user mde che ke nai", user)
                     const payload = { user };
-                    var token = jwt.sign(payload, config.jwtSecret);
+                    // var token = jwt.sign(payload, config.jwtSecret);
                     loginUserEvent(user._id).then((userEvents) => {
                         console.log("user have event or not", userEvents)
                         checkTotalEvent(user._id).then((totalEventList) => {
@@ -652,7 +652,7 @@ const facebookLogin = (accessToken) => {
                     }).catch((error) => {
                         console.log("find to user event", error)
                     })
-                    resolve({ status: 200, message: 'Login Successfully', data: tokenData })
+                    // resolve({ status: 200, message: 'Login Successfully', data: tokenData })
                 } else {
                     console.log("jo user na mde to ama jay")
                     UserModel.create(response, (useerr, userres) => {
@@ -773,17 +773,37 @@ const getAccountDetailList = (userId) => {
                         $filter: {
                             input: "$cardAccount",
                             as: "cardDetails",
-                            cond: { $eq: ["$$cardDetails.isDeleted", false] }
+                            cond: {
+                                $eq: ["$$cardDetails.isDeleted", false]
+                            }
                         }
                     }
                 }
-            }
+            },
+            // {
+            //     $group: {
+            //         _id: '$_id',
+            //         bankDetail: {
+            //             $first: '$bankDetail'
+            //         },
+            //         cardDetails: {
+            //             $first: '$cardDetails'
+            //         }
+            //     }
+            // }
         ]).exec(function (accErr, accList) {
             if (accErr) {
                 console.log("what is error ", accErr)
-                // reject({ status: 500, message: 'Internal Server Error' });
+                reject({ status: 500, message: 'Internal Server Error' });
             } else {
                 console.log('accList:', accList);
+                if (accList[0].bankDetail == null) {
+                    accList[0].bankDetail = []
+                }
+                if (accList[0].cardDetails == null) {
+                    accList[0].cardDetails = []
+                }
+                console.log("issue of null", accList[0])
                 resolve({ status: 200, message: 'Successfully Get the Bank Detail List.', data: accList[0] });
             }
         });
