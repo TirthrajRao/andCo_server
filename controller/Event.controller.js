@@ -1028,10 +1028,25 @@ module.exports.addInvitationMessage = (req, res) => {
 	})
 }
 
+module.exports.addPayMessage = (req, res) => {
+	let data = req.body
+	eventService.addPayMessage(data).then((response) => {
+		return res.status(200).json({ data: response })
+	}).catch((error) => {
+		return res.status(error.status).json({ message: error.message })
+	})
+}
+
 module.exports.setReminderMessage = (req, res) => {
 	console.log("details of reminder", req.body)
-	let data = req.body
-	eventService.setReminderMessage(data).then((response) => {
+	let eventData = {};
+
+	if (req.body.reminderMessage) eventData['reminderMessage'] = req.body.reminderMessage;
+	if (req.body.reminderStartDate) eventData['reminderStartDate'] = req.body.reminderStartDate;
+	if (req.body.reminderStartTime) eventData['reminderStartTime'] = req.body.reminderStartTime;
+	if (req.body.eventId) eventData['eventId'] = req.body.eventId
+	if (req.body.guestList) eventData['guestList'] = req.body.guestList
+	eventService.setReminderMessage(eventData).then((response) => {
 		console.log("reminder set", response)
 		return res.status(200).json({ message: response.message })
 	}).catch((error) => {
@@ -1039,6 +1054,8 @@ module.exports.setReminderMessage = (req, res) => {
 		return res.status(error.status).json({ message: error.message })
 	})
 }
+
+
 module.exports.updateReminderDetails = (req, res) => {
 	console.log("details of update reminder ", req.body)
 	let eventData = {};
@@ -1061,7 +1078,12 @@ module.exports.updateReminderDetails = (req, res) => {
 
 module.exports.setAfterEventMessage = (req, res) => {
 	let details = req.body
-	eventService.setAfterEventMessage(details).then((response) => {
+
+	let eventData = {};
+	if (details.eventId) eventData['eventId'] = details.eventId
+	if (details.afterEventMessage) eventData['afterEventMessage'] = details.afterEventMessage;
+	if (details.listOfGuest) eventData['listOfGuest'] = details.listOfGuest;
+	eventService.setAfterEventMessage(eventData).then((response) => {
 		return res.status(200).json({ message: response.message })
 	}).catch((error) => {
 		console.log("error while update", error)
