@@ -53,31 +53,6 @@ const signUp = (email, userData) => {
                 // console.log("user detaoils update completed", userUpdate)
             }
         })
-        // const emailVarification = Math.floor(100000 + Math.random() * 900000);
-        // userData.emailVarification = emailVarification;
-        // console.log("emailVarification code:", emailVarification);
-        // UserModel.create(userData, (useerr, userres) => {
-        //     if (useerr) {
-        //         console.log('usererror: ', useerr);
-        //         reject({ status: 500, message: 'Internal Server Error' });
-        //     } else {
-        //         userData.emailVarification = emailVarification;
-        //         const defaultPasswordEmailoptions = {
-        //             to: userData.email,
-        //             subject: `Welcome to ${process.env.SITENAME} Confirm your email`,
-        //             template: 'welcome'
-        //         };
-        //         mailService.mail(defaultPasswordEmailoptions, userData, null, function (err, mailResult) {
-        //             if (err) {
-        //                 console.log('error:', error);
-        //                 reject({ status: 500, message: 'Internal Server Error' });
-        //             } else {
-        //                 const finalresponse = { email: userres.email, userId: userres._id }
-        //                 resolve({ status: 200, message: 'You have Registered Successfully.Verification Code Send To Your Mail.', data: finalresponse })
-        //             }
-        //         });
-        //     }
-        // });
     });
 }
 
@@ -584,11 +559,21 @@ const googleLogin = (accessToken) => {
                 if (err) {
                     reject({ status: 500, message: 'Internal Server Error' });
                 } else if (user) {
+                    console.log("check the login user", user)
                     const payload = { user };
-                    var token = jwt.sign(payload, config.jwtSecret);
-                    const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName }
-
-                    resolve({ status: 200, message: 'Login Successfully', data: tokenData })
+                    loginUserEvent(user._id).then((userEvents) => {
+                        console.log("user have event or not", userEvents)
+                        checkTotalEvent(user._id).then((totalEventList) => {
+                            console.log("total events of user", totalEventList)
+                            var token = jwt.sign(payload, config.jwtSecret);
+                            const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName, eventId: userEvents.status, totalEvent: totalEventList }
+                            resolve({ status: 200, message: 'Login Successfully', data: tokenData });
+                        }).catch((error) => {
+                            console.log("error while get total events", error)
+                        })
+                    }).catch((error) => {
+                        console.log("find to user event", error)
+                    })
                 } else {
                     UserModel.create(response, (useerr, userres) => {
                         if (useerr) {
@@ -654,7 +639,19 @@ const facebookLogin = (accessToken) => {
                     console.log("user mde che ke nai", user)
                     const payload = { user };
                     var token = jwt.sign(payload, config.jwtSecret);
-                    const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName }
+                    loginUserEvent(user._id).then((userEvents) => {
+                        console.log("user have event or not", userEvents)
+                        checkTotalEvent(user._id).then((totalEventList) => {
+                            console.log("total events of user", totalEventList)
+                            var token = jwt.sign(payload, config.jwtSecret);
+                            const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName, eventId: userEvents.status, totalEvent: totalEventList }
+                            resolve({ status: 200, message: 'Login Successfully', data: tokenData });
+                        }).catch((error) => {
+                            console.log("error while get total events", error)
+                        })
+                    }).catch((error) => {
+                        console.log("find to user event", error)
+                    })
                     resolve({ status: 200, message: 'Login Successfully', data: tokenData })
                 } else {
                     console.log("jo user na mde to ama jay")
