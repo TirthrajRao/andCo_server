@@ -582,12 +582,21 @@ const googleLogin = (accessToken) => {
                 if (err) {
                     reject({ status: 500, message: 'Internal Server Error' });
                 } else if (user) {
-                    // console.log("chec")
+                    console.log("check the login user", user)
                     const payload = { user };
-                    var token = jwt.sign(payload, config.jwtSecret);
-                    const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName }
-
-                    resolve({ status: 200, message: 'Login Successfully', data: tokenData })
+                    loginUserEvent(user._id).then((userEvents) => {
+                        console.log("user have event or not", userEvents)
+                        checkTotalEvent(user._id).then((totalEventList) => {
+                            console.log("total events of user", totalEventList)
+                            var token = jwt.sign(payload, config.jwtSecret);
+                            const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName, eventId: userEvents.status, totalEvent: totalEventList }
+                            resolve({ status: 200, message: 'Login Successfully', data: tokenData });
+                        }).catch((error) => {
+                            console.log("error while get total events", error)
+                        })
+                    }).catch((error) => {
+                        console.log("find to user event", error)
+                    })
                 } else {
                     UserModel.create(response, (useerr, userres) => {
                         if (useerr) {
@@ -652,7 +661,19 @@ const facebookLogin = (accessToken) => {
                 } else if (user) {
                     const payload = { user };
                     var token = jwt.sign(payload, config.jwtSecret);
-                    const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName }
+                    loginUserEvent(user._id).then((userEvents) => {
+                        console.log("user have event or not", userEvents)
+                        checkTotalEvent(user._id).then((totalEventList) => {
+                            console.log("total events of user", totalEventList)
+                            var token = jwt.sign(payload, config.jwtSecret);
+                            const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName, eventId: userEvents.status, totalEvent: totalEventList }
+                            resolve({ status: 200, message: 'Login Successfully', data: tokenData });
+                        }).catch((error) => {
+                            console.log("error while get total events", error)
+                        })
+                    }).catch((error) => {
+                        console.log("find to user event", error)
+                    })
                     resolve({ status: 200, message: 'Login Successfully', data: tokenData })
                 } else {
                     UserModel.create(response, (useerr, userres) => {

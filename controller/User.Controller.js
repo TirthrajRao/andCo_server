@@ -51,28 +51,6 @@ module.exports.signUp = (req, res) => {
 		console.log("error while update user", error)
 		return res.status(error.status).json({ message: error.message })
 	})
-	// UserModel.findOne({ email: req.body.email }, (error, user) => {
-	// 	if (user == null) {
-	// 		userService.signUp(newUser).then((response) => {
-	// 			return res.status(200).json({ message: response.message, data: response.data });
-	// 		}).catch((error) => {
-	// 			console.log('error: ', error);
-	// 			return res.status(error.status ? error.status : 500).json({ message: error.message ? error.message : 'Internal Server Error' });
-	// 		});
-	// 	} else if (error) {
-	// 		const errorResponse = {
-	// 			status: false,
-	// 			message: 'Internal server Error',
-	// 		};
-	// 		return res.status(500).send(errorResponse);
-	// 	} else {
-	// 		const successResponse = {
-	// 			status: false,
-	// 			message: 'User already registered please login.',
-	// 		};
-	// 		return res.status(400).send(successResponse);
-	// 	}
-	// });
 }
 
 
