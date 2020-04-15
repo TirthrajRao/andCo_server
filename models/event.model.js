@@ -122,6 +122,9 @@ const event = new Schema({
 	invitationMessage: {
 		type: String
 	},
+	payMessage: {
+		type: String
+	},
 	reminderDetails: {
 		reminderMessage: {
 			type: String

@@ -24,6 +24,10 @@ router.put('/after-eventmsg', eventValidation.afterEventMessageDetail, EventCont
 router.post('/event/invitation', ensureAuthenticated.validateToken, EventController.addInvitationMessage)
 router.post('/event/setReminder', ensureAuthenticated.validateToken, EventController.setReminderMessage)
 router.put('/event/setReminder', ensureAuthenticated.validateToken, EventController.updateReminderDetails)
+router.post('/event/addPayMessage', ensureAuthenticated.validateToken, EventController.addPayMessage)
+router.post('/event/setAfterEventMessage', ensureAuthenticated.validateToken, EventController.setAfterEventMessage)
+
+
 // Routes For Event Joining Operations
 router.post('/event/join-event', ensureAuthenticated.validateToken, EventController.eventJoining);
 router.get('/event/search-hashtag', EventController.eventListUsingHashTag);
@@ -81,15 +85,9 @@ router.get('/event/guestEvent/:hashTag', [ensureAuthenticated.validateToken], Ev
 //Routes For Event Profile Change and Set price of event
 
 router.post('/event/changeProfile', cpUpload, EventController.changeProfile)
-
-
 router.route('/event/set-price')
     .post([ensureAuthenticated.validateToken], EventController.setPriceOfEvent)
     .put([ensureAuthenticated.validateToken], EventController.updateSetPriceOfEvent)
-
-router.post('/event/setAfterEventMessage', ensureAuthenticated.validateToken, EventController.setAfterEventMessage)
-
-// router.post('/event/set-price', ensureAuthenticated.validateToken, EventController.setPriceOfEvent)
 router.get('/event/set-price/:id', ensureAuthenticated.validateToken, EventController.getPriceOfEvent)
 
 // Routes For Message Operations

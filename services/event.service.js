@@ -412,7 +412,8 @@ const eventDetail = (eventId, userId) => {
                     afterEventMessage: '$afterEventMessageDetails',
                     invitationMessage: '$invitationMessage',
                     reminderDetails: '$reminderDetails',
-                    welcomeMessage: '$welcomeMessage'
+                    welcomeMessage: '$welcomeMessage',
+                    payMessage: '$payMessage'
                 }
             },
             {
@@ -491,6 +492,9 @@ const eventDetail = (eventId, userId) => {
                     },
                     welcomeMessage: {
                         $first: '$welcomeMessage'
+                    },
+                    payMessage: {
+                        $first: '$payMessage'
                     },
                     activity: {
                         $push: '$activities',
@@ -4458,9 +4462,25 @@ function addInvitationMessage(data) {
     })
 }
 
+
+function addPayMessage(data) {
+    return new Promise((resolve, reject) => {
+        console.log("details of message")
+        EventModel.findByIdAndUpdate({ _id: data.eventId }, { payMessage: data.payMessage }, { upsert: true, new: true })
+            .exec((error, messageAdded) => {
+                if (error)
+                    // console.log("error ============", error)
+                    reject({ status: 500, message: 'Error while set invitation message' })
+                else
+                    // console.log("message added", messageAdded)
+                    resolve(messageAdded)
+            })
+    })
+}
+
 function setReminderMessage(data) {
     return new Promise((resolve, reject) => {
-        EventModel.findByIdAndUpdate({ _id: data.eventId }, { reminderDetails: data }, { upsert: true, new: true })
+        EventModel.findByIdAndUpdate({ _id: data.eventId }, { $set: { reminderDetails: data } }, { upsert: true, new: true })
             .exec((error, reminderSet) => {
                 if (error)
                     reject({ status: 500, message: 'Error while set reminder message' })
@@ -4491,9 +4511,10 @@ function updateReminderDetails(reminderDetails) {
 
 function setAfterEventMessage(details) {
     return new Promise((resolve, reject) => {
-        EventModel.findByIdAndUpdate({ _id: details.eventId }, { afterEventMessageDetails: details }, { upsert: true, new: true })
+        EventModel.findByIdAndUpdate({ _id: details.eventId }, { $set: { afterEventMessageDetails: details } }, { upsert: true, new: true })
             .exec((error, afterMessgae) => {
                 if (error)
+                    // console.log("what is error",)
                     reject({ status: 500, message: 'Error while set after Event Message' })
                 else
                     resolve({ message: 'After event message set' })
@@ -4503,6 +4524,7 @@ function setAfterEventMessage(details) {
 
 
 
+module.exports.addPayMessage = addPayMessage
 module.exports.fnHashtagAvailable = fnHashtagAvailable
 module.exports.setAfterEventMessage = setAfterEventMessage
 module.exports.updateReminderDetails = updateReminderDetails
