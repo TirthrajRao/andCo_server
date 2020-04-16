@@ -60,7 +60,7 @@ function mail(options, data, attach, callback) {
 
     //Fill default options
     if (!options.from) {
-        options.from = '"AsoEbi"<no-reply@asoebi.com>';
+        options.from = '"andCo"<no-reply@asoebi.com>';
     }
 
     if (!options.type) {

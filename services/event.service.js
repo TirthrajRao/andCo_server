@@ -1934,7 +1934,7 @@ module.exports.orderCheckout = (userId, cartData) => {
 
                             const defaultPasswordEmailoptions = {
                                 to: email,
-                                subject: 'Thanks For Contribution To Aso-Ebi',
+                                subject: 'Thanks For Contribution To andCo',
                                 template: 'thanks-message'
                             };
 
@@ -3140,7 +3140,8 @@ const eventGuestListWithAmount = (eventId) => {
                         {
                             $project: {
                                 item: 1,
-                                eventId: 1
+                                eventId: 1,
+                                createdAt: 1
                             }
                         }
                     ],
@@ -3185,7 +3186,8 @@ const eventGuestListWithAmount = (eventId) => {
                             email: '$guestDetail.email',
                             address: '$guestDetail.address',
                             itemId: '$transactionDetails.item.itemId',
-                            quantity: '$transactionDetails.item.quantity'
+                            quantity: '$transactionDetails.item.quantity',
+                            purchaseDate: '$transactionDetails.createdAt'
                         }
                     }
                 }
@@ -3240,7 +3242,8 @@ const eventGuestListWithAmount = (eventId) => {
                         email: '$guestDetails.email',
                         address: '$guestDetails.address',
                         itemId: '$guestDetails.itemId',
-                        quantity: '$guestDetails.quantity'
+                        quantity: '$guestDetails.quantity',
+                        purchaseDate: '$guestDetails.purchaseDate'
                     }
                 }
             },
@@ -3261,6 +3264,9 @@ const eventGuestListWithAmount = (eventId) => {
                     },
                     address: {
                         $first: '$guestDetails.address'
+                    },
+                    date: {
+                        $first: '$guestDetails.purchaseDate'
                     },
                     items: {
                         $push: {
@@ -3328,6 +3334,9 @@ const eventGuestListWithAmount = (eventId) => {
                     address: {
                         $first: '$address'
                     },
+                    finalDate: {
+                        $first: '$date'
+                    },
                     items: {
                         $push: '$items'
                     },
@@ -3338,8 +3347,9 @@ const eventGuestListWithAmount = (eventId) => {
                 console.log("Guest List Error:", guestListErr);
                 reject(guestListErr);
             } else {
+                console.log("response of date", guestListRes)
                 resolve({ data: guestListRes })
-                resolve({ status: 200, message: 'Event Guest List!', data: guestListRes[0] });
+                // resolve({ status: 200, message: 'Event Guest List!', data: guestListRes[0] });
             }
         });
     });
