@@ -882,8 +882,13 @@ function getAddressDetails(userId) {
                     //  console.log("erorr while get address", error)
                     reject({ status: 500, message: 'Error while get details of address' })
                 else {
+
                     let sendData = addressFind.address
-                    resolve({ sendData })
+                    if(sendData){
+                        resolve({ sendData })
+                    }else{
+                        resolve({message:'No details of address'})
+                    }
                     console.log("details of address", addressFind)
                 }
             })
