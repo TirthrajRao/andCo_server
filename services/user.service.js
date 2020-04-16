@@ -605,7 +605,7 @@ const googleLogin = (accessToken) => {
                         } else {
                             const payload = { userres };
                             var token = jwt.sign(payload, config.jwtSecret);
-                            const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName }
+                            const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName, totalEvent: 0 }
                             resolve({ status: 200, message: 'Login Successfully', data: tokenData })
                         }
                     })
@@ -683,7 +683,7 @@ const facebookLogin = (accessToken) => {
                         } else {
                             const payload = { userres };
                             var token = jwt.sign(payload, config.jwtSecret);
-                            const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName }
+                            const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName, totalEvent: 0 }
                             resolve({ status: 200, message: 'Login Successfully', data: tokenData })
                         }
                     });
