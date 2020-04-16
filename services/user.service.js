@@ -582,7 +582,7 @@ const googleLogin = (accessToken) => {
                         } else {
                             const payload = { userres };
                             var token = jwt.sign(payload, config.jwtSecret);
-                            const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName }
+                            const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName, totalEvent: 0 }
                             resolve({ status: 200, message: 'Login Successfully', data: tokenData })
                         }
                     })
@@ -663,7 +663,7 @@ const facebookLogin = (accessToken) => {
                             console.log("new user created ", userres)
                             const payload = { userres };
                             var token = jwt.sign(payload, config.jwtSecret);
-                            const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName }
+                            const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName, totalEvent: 0 }
                             resolve({ status: 200, message: 'Login Successfully', data: tokenData })
                         }
                     });
@@ -865,8 +865,13 @@ function getAddressDetails(userId) {
                     //  console.log("erorr while get address", error)
                     reject({ status: 500, message: 'Error while get details of address' })
                 else {
+
                     let sendData = addressFind.address
-                    resolve({ sendData })
+                    if(sendData){
+                        resolve({ sendData })
+                    }else{
+                        resolve({message:'No details of address'})
+                    }
                     console.log("details of address", addressFind)
                 }
             })

@@ -267,9 +267,9 @@ module.exports.updateGroupInsideActivity = (groupData) => {
                         });
                     },
                     male: function (cb) {
-                        console.log("cb =========", cb)
+                        // console.log("cb =========", cb)
                         async.eachSeries(singleGroup.male, (maleData, callback) => {
-                            console.log("male data", maleData)
+                            console.log("when already avalible male", maleData)
                             if (maleData.itemId) {
                                 const newValues = { $set: { 'item.$.itemName': maleData.itemName, 'item.$.itemPrice': maleData.itemPrice, 'item.$.itemGender': 'male' } }
                                 GroupModel.updateOne({ _id: singleGroup.groupId, 'item._id': ObjectId(maleData.itemId) }, newValues)
@@ -282,7 +282,7 @@ module.exports.updateGroupInsideActivity = (groupData) => {
                                         }
                                     });
                             } else {
-                                console.log("first male check")
+                                console.log("when male item is new for group")
                                 const maleItem = { itemName: maleData.itemName, itemPrice: maleData.itemPrice, itemGender: 'male', }
                                 GroupModel.updateOne({ _id: singleGroup.groupId }, { $push: { item: maleItem } }, { new: true, upsert: true }).exec((error, response) => {
                                     if (error) {
