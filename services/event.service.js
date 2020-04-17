@@ -3108,6 +3108,7 @@ const eventGuestListWithAmount = (eventId) => {
                     eventId: 1,
                     hashTag: 1,
                     guestDetail: 1,
+                    purchaseDate: '$cartItems.createdAt',
                     transactionDetails: {
                         $filter: {
                             input: "$cartItems",
@@ -3142,7 +3143,7 @@ const eventGuestListWithAmount = (eventId) => {
                             address: '$guestDetail.address',
                             itemId: '$transactionDetails.item.itemId',
                             quantity: '$transactionDetails.item.quantity',
-                            purchaseDate: '$transactionDetails.createdAt'
+                            purchaseDate: '$purchaseDate'
                         }
                     }
                 }
@@ -3221,7 +3222,7 @@ const eventGuestListWithAmount = (eventId) => {
                         $first: '$guestDetails.address'
                     },
                     date: {
-                        $first: '$guestDetails.purchaseDate'
+                        $first: { '$max': '$guestDetails.purchaseDate' }
                     },
                     items: {
                         $push: {

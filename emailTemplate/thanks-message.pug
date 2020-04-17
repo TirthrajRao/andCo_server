@@ -36,7 +36,8 @@ html
       background-repeat: no-repeat;
       margin: auto;
       font-family: 'Manjari', sans-serif !important;
-      padding: 80px 0;
+      padding: 70px 0;
+      background-color: black;
       }
       .inner {
       text-align: center;
@@ -46,7 +47,7 @@ html
       margin-bottom: 40px;
       }
       .inner-box {
-      background: linear-gradient(100deg, #cf9d57, #ede382, #93632f);
+      background-color: #6D4B23;
       width: 500px;
       border-radius: 10px;
       text-align: center;
@@ -54,7 +55,7 @@ html
       margin: 0px auto;
       }
       .inner-content p {
-      color: #751f00;
+      color: #FAE88C;
       font-size: 20px;
       line-height: 33px;
       font-weight: 600;
@@ -62,7 +63,7 @@ html
       }
       .inner-box h2 {
       font-size: 20px;
-      color: #000000;
+      color: #FFFFFF;
       font-weight: bold;
       font-family: 'Manjari', sans-serif !important;
       }
@@ -104,14 +105,13 @@ html
       }
       }
   body.andco-email-template
-- var imgUrl = image
     .inner
       .email-img
         img(src='https://test.andcowith.me/assets/images/andco_logo.png', alt='andco-log')
       .inner-box
         .inner-content
           .guest-profile
-            img(src=imgUrl, alt='profile photo')
+            img(src=image, alt='profile photo')
           h2 #{eventTitle}
           h2 #{eventHashTag}
           p

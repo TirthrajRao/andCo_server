@@ -9,6 +9,8 @@ const cookieParser = require("cookie-parser");
 const cron = require('node-cron');
 const fs = require('fs')
 const eventController = require('./controller/Event.controller');
+var cors = require('cors');
+
 
 // const CYPHERKEY = 'asoebi'
 
@@ -40,6 +42,9 @@ const Database = require("./config/database");
 // }
 
 const app = express();
+app.use(cors({
+	credentials: false
+}));
 // const server = http.createServer(app);
 
 // Following Code For Secure Server https

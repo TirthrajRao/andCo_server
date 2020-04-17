@@ -44,7 +44,7 @@ router.post('/account', ensureAuthenticated.validateToken, UserController.addAcc
 //Deliver Address API
 
 router.post('/address', ensureAuthenticated.validateToken, UserController.enterAddress)
-router.get('/address', ensureAuthenticated.validateToken, UserController.getAddressDetails)
+router.get('/addressDetails', ensureAuthenticated.validateToken, UserController.getAddressDetails)
 // Adminside Related API
 
 router.get('/user/user-list', ensureAuthenticated.validateToken, UserController.totalUserList);
