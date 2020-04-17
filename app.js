@@ -9,6 +9,8 @@ const cookieParser = require("cookie-parser");
 const cron = require('node-cron');
 const fs = require('fs')
 const eventController = require('./controller/Event.controller');
+var cors = require('cors');
+
 
 // const CYPHERKEY = 'asoebi'
 
@@ -40,6 +42,9 @@ const Database = require("./config/database");
 // }
 
 const app = express();
+app.use(cors({
+	credentials: false
+}));
 // const server = http.createServer(app);
 
 // Following Code For Secure Server https
@@ -131,7 +136,7 @@ if (config.env.name === "production") {
 	// server.on("error", onError);
 	// server.on("listening", onListen);
 } else if (config.env.name === "test") {
-console.log("=================test")
+	console.log("=================test")
 	var server = https.createServer(
 		// {
 		// 	key: fs.readFileSync("/var/www/html/Aso-ebi/ssl/privkey1.pem"),
@@ -143,10 +148,10 @@ console.log("=================test")
 	// var server = http.createServer(app);
 	console.log(`Server started on port no  ${config.env.port}`);
 	databaseConnectivity(config.env.name);
-	 server.listen(config.env.port);
-	 // console.log("error su ave che", onError)
-	 // server.on("error", onError);
-	 // server.on("listening", onListen);
+	server.listen(config.env.port);
+	// console.log("error su ave che", onError)
+	// server.on("error", onError);
+	// server.on("listening", onListen);
 	// Development and Testing mode
 } else {
 	if (config.env.name === "development" && config.env.https) {
