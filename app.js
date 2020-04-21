@@ -9,6 +9,7 @@ const cookieParser = require("cookie-parser");
 const cron = require('node-cron');
 const fs = require('fs')
 const eventController = require('./controller/Event.controller');
+var config = require('./configNew');
 var cors = require('cors');
 
 
@@ -18,7 +19,7 @@ var cors = require('cors');
 //This Cronjob For Guest Mail 
 
 cron.schedule('0 17 * * *', () => {
-	console.log('running a task every 5 seconds');
+	console.log('running a task every 5 seconds', new Date());
 	eventController.checkForEmailDateAndTime();
 });
 
@@ -174,7 +175,19 @@ console.log("=================in testing server ")
 	// server.on("listening", onListen);
 }
 
-
+app.use(function (req, res, next) {
+	console.log("what is right now", config.baseUrl)
+	// res.setHeader('Access-Control-Allow-Origin', config.baseUrl);
+	res.setHeader('Access-Control-Allow-Origin', '*');
+	res.setHeader('Access-Control-Allow-Headers', 'origin, X-Requested-With, Content-Type, Accept, Authorization, x-access-token');
+	if (req.method === 'OPTIONS') {
+		res.setHeader('Access-Control-Allow-Methods', 'PUT,POST,PATCH,DELETE,GET');
+		return res.status(200).json({});
+	}
+	else {
+		next();
+	}
+});
 
 // db configuration
 // console.log("process.env.DEV_ADDRESS", process.env.DEV_ADDRESS);

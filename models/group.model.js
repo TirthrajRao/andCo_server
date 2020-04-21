@@ -25,6 +25,9 @@ const group = new Schema({
             type: String,
             require: true
         },
+        description: {
+            type: String
+        },
         isDeleted: {
             type: Boolean,
             default: false
