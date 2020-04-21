@@ -272,7 +272,7 @@ module.exports.updateGroupInsideActivity = (groupData) => {
                         async.eachSeries(singleGroup.male, (maleData, callback) => {
                             console.log("when already avalible male", maleData)
                             if (maleData.itemId) {
-                                const newValues = { $set: { 'item.$.itemName': maleData.itemName, 'item.$.itemPrice': maleData.itemPrice, 'item.$.itemGender': 'male' } }
+                                const newValues = { $set: { 'item.$.itemName': maleData.itemName, 'item.$.itemPrice': maleData.itemPrice, 'item.$.itemGender': 'male', 'item.$.description': maleData.description } }
                                 GroupModel.updateOne({ _id: singleGroup.groupId, 'item._id': ObjectId(maleData.itemId) }, newValues)
                                     .exec((error, response) => {
                                         if (error) {
@@ -284,7 +284,7 @@ module.exports.updateGroupInsideActivity = (groupData) => {
                                     });
                             } else {
                                 console.log("when male item is new for group")
-                                const maleItem = { itemName: maleData.itemName, itemPrice: maleData.itemPrice, itemGender: 'male', }
+                                const maleItem = { itemName: maleData.itemName, itemPrice: maleData.itemPrice, itemGender: 'male', description: maleData.description }
                                 GroupModel.updateOne({ _id: singleGroup.groupId }, { $push: { item: maleItem } }, { new: true, upsert: true }).exec((error, response) => {
                                     if (error) {
                                         console.log('Internal Server Error');
@@ -306,7 +306,7 @@ module.exports.updateGroupInsideActivity = (groupData) => {
 
                         async.eachSeries(singleGroup.female, (femaleData, callback) => {
                             if (femaleData.itemId) {
-                                const newValues = { $set: { 'item.$.itemName': femaleData.itemName, 'item.$.itemPrice': femaleData.itemPrice, 'item.$.itemGender': 'female' } }
+                                const newValues = { $set: { 'item.$.itemName': femaleData.itemName, 'item.$.itemPrice': femaleData.itemPrice, 'item.$.itemGender': 'female', 'item.$.description': femaleData.description } }
                                 GroupModel.updateOne({ _id: singleGroup.groupId, 'item._id': ObjectId(femaleData.itemId) }, newValues)
                                     .exec((error, response) => {
                                         if (error) {
@@ -316,7 +316,7 @@ module.exports.updateGroupInsideActivity = (groupData) => {
                                         }
                                     });
                             } else {
-                                const femaleItem = { itemName: femaleData.itemName, itemPrice: femaleData.itemPrice, itemGender: 'female', }
+                                const femaleItem = { itemName: femaleData.itemName, itemPrice: femaleData.itemPrice, itemGender: 'female', description: femaleData.description }
                                 GroupModel.updateOne({ _id: singleGroup.groupId }, { $push: { item: femaleItem } }, { new: true, upsert: true }).exec((error, response) => {
                                     if (error) {
                                         console.log('Internal Server Error');
@@ -2396,7 +2396,7 @@ const eventDetailWithActivity = (eventId) => {
             {
                 $lookup: {
                     from: 'users',
-                    localField: 'guest',
+                    localField: 'guest._id',
                     foreignField: '_id',
                     as: 'guestDetail'
                 }
@@ -2416,7 +2416,8 @@ const eventDetailWithActivity = (eventId) => {
                         userId: '$guestDetail._id',
                         firstName: '$guestDetail.firstName',
                         lastName: '$guestDetail.lastName',
-                        mobile: '$guestDetail.mobile',
+                        address: '$guestDetail.address',
+                        // mobile: '$guestDetail.mobile',
                         email: '$guestDetail.email'
                     },
                     hashTag: 1,
@@ -2489,6 +2490,7 @@ const eventDetailWithActivity = (eventId) => {
                 console.log("Event Detail Error:", eventDetailError);
                 reject(eventDetailError);
             } else {
+                // console.log("response of guest list", eventDetail[0].guestDetail)
                 fnListOfGuestThatMadePayment(eventId).then((response) => {
                     eventDetail[0].guestListWithPayment = response.data;
                     resolve({ status: 200, message: 'Event Detail With Guest!', data: eventDetail[0] });
@@ -2590,7 +2592,7 @@ function fnListOfGuestThatMadePayment(eventId) {
                     userId: '$guestDetail._id',
                     firstName: '$guestDetail.firstName',
                     lastName: '$guestDetail.lastName',
-                    mobile: '$guestDetail.mobile',
+                    address: '$guestDetail.address',
                     email: '$guestDetail.email'
                 }
             },
@@ -2598,6 +2600,7 @@ function fnListOfGuestThatMadePayment(eventId) {
             if (UserListError) {
                 reject({ status: 500, message: 'Internal Server Error' });
             } else {
+                // console.log("what is in data of payment list", UserList)
                 resolve({ status: 200, message: 'User List fetched Successfully', data: UserList });
             }
         });
@@ -3708,6 +3711,122 @@ const bankDetailInsideEvent = (bankData) => {
     });
 }
 
+
+const sendReminderMailToGuest = () => {
+    return new Promise((resolve, reject) => {
+        EventModel.aggregate([
+            {
+
+                $match: {
+                    $and: [
+                        { 'isDeleted': false },
+                        // { 'afterEventMessageDetails.messageDate': currentDate },
+                    ]
+                }
+            },
+            {
+                $project: {
+                    eventId: '$_id',
+                    messagePreference: '$reminderDetails.guestList'
+                }
+            }
+        ]).exec(function (err, eventList) {
+            if (err) {
+                reject(err);
+            } else {
+                console.log('Cron Job working or not', eventList);
+                async.eachSeries(eventList, (singleEvent, callback) => {
+                    // console.log('Single singleEventList', singleEvent);
+                    guestListOfReminder(singleEvent.eventId, singleEvent.messagePreference).then((response) => {
+                        callback();
+                    }).catch((error) => {
+                        console.log('hey error comes', error);
+                        callback();
+                    });
+                });
+            }
+        });
+    })
+}
+
+
+/**
+ * @param {EventId} eventId 
+ * @param {Whom to send mail} messagePreference
+ * Get list of guest to send reminder message  
+ */
+const guestListOfReminder = (eventId, messagePreference) => {
+    return new Promise((resolve, reject) => {
+        const emailArray = [];
+        if (messagePreference == 'allList') {
+            eventDetailWithActivity(eventId).then((response) => {
+                // console.log("what is the response of details of activity", response)
+                _.forEach(response.data.guestDetail, (singleUser) => {
+                    console.log("single user details", singleUser)
+                    if (singleUser.email) {
+                        emailArray.push(singleUser.email)
+                    } else {
+                        console.log("this is call when no email")
+                        emailArray.push(singleUser.address.email)
+                    }
+                })
+                console.log("email array of send mail", emailArray)
+                eventAfterMessage(eventId).then((response) => {
+                    console.log('Response From:', response);
+                    const message = {};
+                    message['eventTitle'] = response[0].eventTitle,
+                        message['hashTag'] = response[0].hashTag
+                    message['profile'] = config.ngrockUrl + response[0].profilePhoto
+                    message['reminder'] = response[0].reminderDetails.reminderMessage
+                    console.log("message of mail", message)
+                    cronJobForSendEmailToGuest(emailArray, message).then((response) => {
+                        resolve(true);
+                    }).catch((err) => {
+                        reject(false);
+                    })
+                }).catch((err) => {
+                    console.log('Internal Server Error', err);
+                })
+            }).catch((err) => {
+                console.log('Internal Server Error', err);
+            })
+        } else if (messagePreference == 'buyList') {
+            eventDetailWithActivity(eventId).then((response) => {
+                _.forEach(response.data.guestListWithPayment, (singleUser) => {
+                    if (singleUser.email) {
+                        emailArray.push(singleUser.email)
+                    } else {
+                        console.log("this is call when no email")
+                        emailArray.push(singleUser.address.email)
+                    }
+                })
+                console.log("array of only buy user list", emailArray)
+                eventAfterMessage(eventId).then((response) => {
+                    console.log('Response From:', response);
+                    const message = {};
+                    message['eventTitle'] = response[0].eventTitle,
+                        message['hashTag'] = response[0].hashTag
+                    message['profile'] = config.ngrockUrl + response[0].profilePhoto
+                    message['reminder'] = response[0].reminderDetails.reminderMessage
+                    console.log("message of mail", message)
+                    cronJobForSendEmailToGuest(emailArray, message).then((response) => {
+                        resolve(true);
+                    }).catch((err) => {
+                        reject(false);
+                    })
+                }).catch((err) => {
+                    console.log('Internal Server Error', err);
+                })
+            }).catch((err) => {
+                console.log('Internal Server Error', err);
+            })
+        } else {
+            // console.log('Internal Server Error', err);
+        }
+    })
+}
+
+
 // This Function Check Message Date Is Equal To System Date Or Not
 const checkForEmailDateAndTime = () => {
     return new Promise((resolve, reject) => {
@@ -3718,24 +3837,24 @@ const checkForEmailDateAndTime = () => {
 
                 $match: {
                     $and: [
-                        { 'afterEventMessage.messageDate': currentDate },
                         { 'isDeleted': false },
+                        // { 'afterEventMessageDetails.messageDate': currentDate },
                     ]
                 }
             },
             {
                 $project: {
                     eventId: '$_id',
-                    messagePreference: '$afterEventMessage.messagePreference'
+                    messagePreference: '$afterEventMessageDetails.listOfGuest'
                 }
             }
         ]).exec(function (err, eventList) {
             if (err) {
                 reject(err);
             } else {
-                console.log('Event List', eventList);
+                console.log('Cron Job working or not', eventList);
                 async.eachSeries(eventList, (singleEvent, callback) => {
-                    console.log('Single singleEventList', singleEvent);
+                    // console.log('Single singleEventList', singleEvent);
                     guestListBasedOnPreference(singleEvent.eventId, singleEvent.messagePreference).then((response) => {
                         callback();
                     }).catch((error) => {
@@ -3756,14 +3875,27 @@ const checkForEmailDateAndTime = () => {
 const guestListBasedOnPreference = (eventId, messagePreference) => {
     return new Promise((resolve, reject) => {
         const emailArray = [];
-        if (messagePreference == 'allGuest') {
+        if (messagePreference == 'totalList') {
             eventDetailWithActivity(eventId).then((response) => {
+                // console.log("what is the response of details of activity", response)
                 _.forEach(response.data.guestDetail, (singleUser) => {
-                    emailArray.push(singleUser.email)
+                    console.log("single user details", singleUser)
+                    if (singleUser.email) {
+                        emailArray.push(singleUser.email)
+                    } else {
+                        console.log("this is call when no email")
+                        emailArray.push(singleUser.address.email)
+                    }
                 })
+                console.log("email array of send mail", emailArray)
                 eventAfterMessage(eventId).then((response) => {
                     console.log('Response From:', response);
-                    const message = response.message;
+                    const message = {};
+                    message['eventTitle'] = response[0].eventTitle,
+                        message['hashTag'] = response[0].hashTag
+                    message['profile'] = config.ngrockUrl + response[0].profilePhoto
+                    message['afterMessage'] = response[0].afterEventMessage.afterEventMessage
+                    console.log("message of mail", message)
                     cronJobForSendEmailToGuest(emailArray, message).then((response) => {
                         resolve(true);
                     }).catch((err) => {
@@ -3772,19 +3904,30 @@ const guestListBasedOnPreference = (eventId, messagePreference) => {
                 }).catch((err) => {
                     console.log('Internal Server Error', err);
                 })
-
             }).catch((err) => {
                 console.log('Internal Server Error', err);
             })
-        } else if (messagePreference == 'onlyPaidGuest') {
+        } else if (messagePreference == 'onlyBuy') {
             eventDetailWithActivity(eventId).then((response) => {
-                const message = response.data
+                // console.log("call for only buy user list",response.data.guestListWithPayment )
+                // const message = response.data
                 _.forEach(response.data.guestListWithPayment, (singleUser) => {
-                    emailArray.push(singleUser.email)
+                    if (singleUser.email) {
+                        emailArray.push(singleUser.email)
+                    } else {
+                        console.log("this is call when no email")
+                        emailArray.push(singleUser.address.email)
+                    }
                 })
+                console.log("array of only buy user list", emailArray)
                 eventAfterMessage(eventId).then((response) => {
-                    console.log('Response From:', response);
-                    const message = response.message;
+                    // console.log('Response From:', response);
+                    const message = {};
+                    message['eventTitle'] = response[0].eventTitle,
+                        message['hashTag'] = response[0].hashTag
+                    message['profile'] = config.ngrockUrl + response[0].profilePhoto
+                    message['afterMessage'] = response[0].afterEventMessage.afterEventMessage
+                    console.log("message of mail", message)
                     cronJobForSendEmailToGuest(emailArray, message).then((response) => {
                         resolve(true);
                     }).catch((err) => {
@@ -3797,7 +3940,7 @@ const guestListBasedOnPreference = (eventId, messagePreference) => {
                 console.log('Internal Server Error', err);
             })
         } else {
-            console.log('Internal Server Error', err);
+            // console.log('Internal Server Error', err);
         }
     });
 }
@@ -3813,7 +3956,11 @@ const eventAfterMessage = (eventId) => {
             },
             {
                 $project: {
-                    afterEventMessage: '$afterEventMessage'
+                    eventTitle: '$eventTitle',
+                    hashTag: '$hashTag',
+                    profilePhoto: '$profilePhoto',
+                    afterEventMessage: '$afterEventMessageDetails',
+                    reminderDetails: '$reminderDetails'
                 }
             },
         ]).exec(function (eventDetailError, eventDetail) {
@@ -3857,18 +4004,28 @@ const cronJobForSendEmailToGuest = (emailArray, message) => {
  */
 const sendInvitationEmail = (email, message) => {
     return new Promise((resolve, reject) => {
-
-        const defaultPasswordEmailoptions = {
-            to: email,
-            subject: 'Thank You For Your Presence',
-            template: 'afterevent-message'
-        };
-
+        console.log("mail details to send", email, message)
+        defaultPasswordEmailoptions = {}
+        if (message.afterMessage) {
+            defaultPasswordEmailoptions = {
+                to: email,
+                subject: 'Thank You For Your Presence',
+                template: 'afterevent-message'
+            };
+        }
+        if (message.reminder) {
+            console.log("call this for only reminder")
+            defaultPasswordEmailoptions = {
+                to: email,
+                subject: 'Reminder Message',
+                template: 'reminder-message'
+            }
+        }
         mailService.mail(defaultPasswordEmailoptions, message, null, function (err, mailResult) {
             if (err) {
                 reject({ status: 500, message: 'Internal Server Error' });
             } else {
-                resolve({ status: 200, message: 'ResetPassword Link Send in Email' });
+                resolve({ status: 200, message: 'message Send in Email' });
             }
         });
     });
@@ -4579,7 +4736,7 @@ function setAfterEventMessage(details) {
 }
 
 
-
+module.exports.sendReminderMailToGuest = sendReminderMailToGuest
 module.exports.addPayMessage = addPayMessage
 module.exports.fnHashtagAvailable = fnHashtagAvailable
 module.exports.setAfterEventMessage = setAfterEventMessage

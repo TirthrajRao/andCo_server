@@ -945,10 +945,23 @@ module.exports.eventGuestListWithAmount = (req, res) => {
 	});
 }
 
+/**
+ * After event message send to guestList
+ */
 module.exports.checkForEmailDateAndTime = (req, res) => {
 	console.log('Function is calling');
 	eventService.checkForEmailDateAndTime();
 }
+
+
+/**
+ * Reminder message send to guestList
+ */
+module.exports.sendReminderMailToGuest = (req, res) => {
+	eventService.sendReminderMailToGuest();
+}
+
+
 
 module.exports.addBankAccountDetailToEvent = (req, res) => {
 
@@ -1083,6 +1096,7 @@ module.exports.setAfterEventMessage = (req, res) => {
 	if (details.eventId) eventData['eventId'] = details.eventId
 	if (details.afterEventMessage) eventData['afterEventMessage'] = details.afterEventMessage;
 	if (details.listOfGuest) eventData['listOfGuest'] = details.listOfGuest;
+	eventData['messageDate'] = new Date()
 	eventService.setAfterEventMessage(eventData).then((response) => {
 		return res.status(200).json({ message: response.message })
 	}).catch((error) => {

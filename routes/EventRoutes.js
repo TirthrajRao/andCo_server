@@ -125,4 +125,7 @@ router.get('/event-transaction', EventController.eventWithTransactionAndUserDeta
 
 router.post('/generatePdf', ensureAuthenticated.validateToken, EventController.generatePdf)
 
+
+router.get('/cronJob', EventController.sendReminderMailToGuest)
+
 module.exports = router;

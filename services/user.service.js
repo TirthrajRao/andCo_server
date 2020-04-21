@@ -589,7 +589,7 @@ const googleLogin = (accessToken) => {
                         checkTotalEvent(user._id).then((totalEventList) => {
                             console.log("total events of user", totalEventList)
                             var token = jwt.sign(payload, config.jwtSecret);
-                            const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName, eventId: userEvents.status, totalEvent: totalEventList }
+                            const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName, eventId: userEvents.status, totalEvent: totalEventList, newUser: true }
                             resolve({ status: 200, message: 'Login Successfully', data: tokenData });
                         }).catch((error) => {
                             console.log("error while get total events", error)
@@ -605,7 +605,7 @@ const googleLogin = (accessToken) => {
                         } else {
                             const payload = { userres };
                             var token = jwt.sign(payload, config.jwtSecret);
-                            const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName, totalEvent: 0 }
+                            const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName, totalEvent: 0, newUser: false }
                             resolve({ status: 200, message: 'Login Successfully', data: tokenData })
                         }
                     })
@@ -666,7 +666,7 @@ const facebookLogin = (accessToken) => {
                         checkTotalEvent(user._id).then((totalEventList) => {
                             console.log("total events of user", totalEventList)
                             var token = jwt.sign(payload, config.jwtSecret);
-                            const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName, eventId: userEvents.status, totalEvent: totalEventList }
+                            const tokenData = { accessToken: token, UserRole: user.userRole, firstName: user.firstName, lastName: user.lastName, eventId: userEvents.status, totalEvent: totalEventList, newUser: true }
                             resolve({ status: 200, message: 'Login Successfully', data: tokenData });
                         }).catch((error) => {
                             console.log("error while get total events", error)
@@ -683,7 +683,7 @@ const facebookLogin = (accessToken) => {
                         } else {
                             const payload = { userres };
                             var token = jwt.sign(payload, config.jwtSecret);
-                            const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName, totalEvent: 0 }
+                            const tokenData = { accessToken: token, UserRole: userres.userRole, firstName: userres.firstName, lastName: userres.lastName, totalEvent: 0, newUser: false }
                             resolve({ status: 200, message: 'Login Successfully', data: tokenData })
                         }
                     });
@@ -884,10 +884,10 @@ function getAddressDetails(userId) {
                 else {
 
                     let sendData = addressFind.address
-                    if(sendData){
+                    if (sendData) {
                         resolve({ sendData })
-                    }else{
-                        resolve({message:'No details of address'})
+                    } else {
+                        resolve({ message: 'No details of address' })
                     }
                     console.log("details of address", addressFind)
                 }
