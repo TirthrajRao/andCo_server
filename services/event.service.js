@@ -4487,6 +4487,9 @@ const eventWithTransactionAndUserDetail = (eventId) => {
                     },
                     itemGender: {
                         $first: '$item.itemGender'
+                    },
+                    itemId: {
+                        $first: '$item.itemId'
                     }
                 }
             },
@@ -4500,31 +4503,155 @@ const eventWithTransactionAndUserDetail = (eventId) => {
                     itemPrice: 1,
                     itemTotal: 1,
                     itemGender: 1,
+                    itemId: 1
                 }
             }
         ]).exec(function (eventListError, eventList) {
             if (eventListError) {
                 reject({ status: 500, message: 'Internal Server Error', data: eventListError });
             } else {
-                eventGuestListWithAmount(eventId).then((guestList) => {
-                    onlyEventDetail(eventId).then((eventDetail) => {
-                        const eventData = {};
-                        eventData.guestList = guestList.data;
-                        eventData.eventDetail = eventDetail;
-                        eventData.eventList = eventList;
-                        resolve({ status: 200, message: 'Collected Amount Detail!', data: eventData });
-                    }).catch((error) => {
-                        console.log('Error:', error);
-                        reject({ status: 500, message: 'Internal Server Error' });
-                    })
+                eventGroupitems(eventId, eventList).then((totalItems) => {
+                    console.log("final items to display", totalItems)
+                    resolve({ data: totalItems })
                 }).catch((error) => {
-                    console.log('Error:', error);
-                    reject({ status: 500, message: 'Internal Server Error' });
+                    console.log("error while get items of event", error)
                 })
+                // resolve({ data: eventList })
+                // eventGuestListWithAmount(eventId).then((guestList) => {
+                //     onlyEventDetail(eventId).then((eventDetail) => {
+                //         const eventData = {};
+                //         eventData.guestList = guestList.data;
+                //         eventData.eventDetail = eventDetail;
+                //         eventData.eventList = eventList;
+                //         resolve({ status: 200, message: 'Collected Amount Detail!', data: eventData });
+                //     }).catch((error) => {
+                //         console.log('Error:', error);
+                //         reject({ status: 500, message: 'Internal Server Error' });
+                //     })
+                // }).catch((error) => {
+                //     console.log('Error:', error);
+                //     reject({ status: 500, message: 'Internal Server Error' });
+                // })
             }
         });
     })
 }
+
+
+const eventGroupitems = (eventId, listOfitems) => {
+    return new Promise((resolve, reject) => {
+        GroupModel.aggregate([
+            {
+                $match: {
+                    'eventId': ObjectId(eventId)
+                }
+            },
+            {
+                $project: {
+                    activityName: '$activityId',
+                    groupName: '$groupName',
+                    items: '$item'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'event',
+                    let: {
+                        activity: '$activityName'
+                    },
+                    pipeline: [
+                        {
+                            $unwind: {
+                                path: '$activities',
+                                // preserveNullAndEmptyArrays: true
+                            }
+                        },
+                        {
+                            $match: {
+                                $expr: {
+                                    $eq: ["$activities._id", "$$activity"]
+                                }
+                            }
+                        },
+                        {
+                            $project: {
+                                activityName: '$activities.activityName'
+                            }
+                        }
+                    ],
+                    as: 'activityName'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$activityName'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$items'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'transaction',
+                    let: {
+                        newItems: '$items'
+                    },
+                    pipeline: [
+                        {
+                            $unwind: {
+                                path: '$item'
+                            }
+                        },
+                        {
+                            $match: {
+                                $expr: {
+                                    $eq: ["$$newItems._id", "$item.itemId"]
+                                }
+                            }
+                        }
+                    ],
+                    as: 'newItems'
+                }
+            },
+            {
+                $project: {
+                    activityName: 1,
+                    groupName: 1,
+                    finalItem: {
+                        $cond: {
+                            if: { $size: "$newItems" },
+                            then: {
+                                itemQuantity: '$newItems.item.quantity',
+                                itemPrice: '$items.itemPrice',
+                                itemGender: '$items.itemGender',
+                                itemName: '$items.itemName'
+                            },
+                            else: {
+                                itemQuantity: 0,
+                                itemPrice: '$items.itemPrice',
+                                itemGender: '$items.itemGender',
+                                itemName: '$items.itemName'
+                            }
+                        }
+                    }
+                }
+            }
+        ]).exec((error, totalitems) => {
+            if (error)
+                console.log("error while find items", error)
+            else
+                // console.log("tota items list", totalitems)
+                resolve(totalitems)
+        })
+    })
+}
+
+// {
+//     $cond: { if: { $lt: ["$paymentDeadlineDate", new Date()] }, then: false, else: true }
+// }
+
 
 /**
  * @param {EventId} eventId 
