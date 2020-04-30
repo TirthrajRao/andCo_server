@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require("bcrypt");
 const randomstring = require("randomstring");
 const request = require('request');
+const async = require("async");
+
 
 const siteName = 'andco'
 
@@ -394,7 +396,26 @@ const totalUserList = () => {
             if (userListError) {
                 reject(userListError);
             } else {
-                resolve({ status: 200, message: 'Total User List!', data: userList });
+                // console.log("total user list for admin", userList)
+                async.eachSeries(userList, (singleUser, callback) => {
+                    console.log("single user list", singleUser)
+                    checkTotalEvent(singleUser._id).then((response) => {
+                        // console.log("total event of all user", response)
+                        singleUser['totalEvent'] = response
+                        callback();
+                    }).catch((error) => {
+                        console.log("error while get total events", error)
+                        callback();
+                    })
+                }, (callBackError, callBackResponse) => {
+                    if (callBackError) {
+                        console.log("error while get user event", callBackError)
+                        reject({ status: 500, message: 'Error while get total event list' })
+                    } else {
+                        console.log("response of user", userList)
+                        resolve({ data: userList, message: 'User with total list' })
+                    }
+                })
             }
         });
     });

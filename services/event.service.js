@@ -748,7 +748,7 @@ function guestEventDetail(hashTag, userId) {
             if (error)
                 console.log("error while get details of guest", error)
             else {
-                // console.log("guest event details use of hashtag", guestEvent)
+                console.log("guest event details use of hashtag", guestEvent)
                 fnCheckForCelebrant(guestEvent[0]._id, userId).then((response) => {
                     guestEvent[0].isCelebrant = response;
                     fnCheckForGuestJoined(guestEvent[0]._id, userId).then((response) => {
@@ -4442,6 +4442,9 @@ const eventWithTransactionAndUserDetail = (eventId) => {
                     },
                     itemGender: {
                         $first: '$item.itemGender'
+                    },
+                    itemId: {
+                        $first: '$item.itemId'
                     }
                 }
             },
@@ -4455,31 +4458,363 @@ const eventWithTransactionAndUserDetail = (eventId) => {
                     itemPrice: 1,
                     itemTotal: 1,
                     itemGender: 1,
+                    itemId: 1
                 }
             }
         ]).exec(function (eventListError, eventList) {
             if (eventListError) {
                 reject({ status: 500, message: 'Internal Server Error', data: eventListError });
             } else {
-                eventGuestListWithAmount(eventId).then((guestList) => {
-                    onlyEventDetail(eventId).then((eventDetail) => {
-                        const eventData = {};
-                        eventData.guestList = guestList.data;
-                        eventData.eventDetail = eventDetail;
-                        eventData.eventList = eventList;
-                        resolve({ status: 200, message: 'Collected Amount Detail!', data: eventData });
+                eventGroupitems(eventId, eventList).then((totalItems) => {
+                    console.log("final items to display", totalItems)
+                    // resolve({ data: totalItems })
+                    totalGuestWithCollection(eventId).then((guestList) => {
+                        onlyEventDetail(eventId).then((eventDetail) => {
+                            resolve({ data: guestList.data })
+                            const eventData = {};
+                            eventData.guestList = guestList.data;
+                            eventData.eventDetail = eventDetail;
+                            eventData.eventList = eventList;
+                            // resolve({ status: 200, message: 'Collected Amount Detail!', data: eventData });
+                        }).catch((error) => {
+                            console.log('Error:', error);
+                            reject({ status: 500, message: 'Internal Server Error' });
+                        })
                     }).catch((error) => {
                         console.log('Error:', error);
                         reject({ status: 500, message: 'Internal Server Error' });
                     })
                 }).catch((error) => {
-                    console.log('Error:', error);
-                    reject({ status: 500, message: 'Internal Server Error' });
+                    console.log("error while get items of event", error)
                 })
             }
         });
     })
 }
+
+/**
+ * @param {eventId} eventId 
+ * @param {TotalItems of cart} listOfitems
+ * get all items with add quantity 
+ */
+const eventGroupitems = (eventId, listOfitems) => {
+    return new Promise((resolve, reject) => {
+        GroupModel.aggregate([
+            {
+                $match: {
+                    'eventId': ObjectId(eventId)
+                }
+            },
+            {
+                $project: {
+                    activityName: '$activityId',
+                    groupName: '$groupName',
+                    items: '$item'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'event',
+                    let: {
+                        activity: '$activityName'
+                    },
+                    pipeline: [
+                        {
+                            $unwind: {
+                                path: '$activities',
+                                // preserveNullAndEmptyArrays: true
+                            }
+                        },
+                        {
+                            $match: {
+                                $expr: {
+                                    $eq: ["$activities._id", "$$activity"]
+                                }
+                            }
+                        },
+                        {
+                            $project: {
+                                activityName: '$activities.activityName'
+                            }
+                        }
+                    ],
+                    as: 'activityName'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$activityName'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$items'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'transaction',
+                    let: {
+                        newItems: '$items'
+                    },
+                    pipeline: [
+                        {
+                            $unwind: {
+                                path: '$item'
+                            }
+                        },
+                        {
+                            $match: {
+                                $expr: {
+                                    $eq: ["$$newItems._id", "$item.itemId"]
+                                }
+                            }
+                        }
+                    ],
+                    as: 'newItems'
+                }
+            },
+            {
+                $project: {
+                    activityName: 1,
+                    groupName: 1,
+                    finalItem: {
+                        $cond: {
+                            if: { $size: "$newItems" },
+                            then: {
+                                itemQuantity: {
+                                    $sum: '$newItems.item.quantity'
+                                },
+                                itemPrice: '$items.itemPrice',
+                                itemGender: '$items.itemGender',
+                                itemName: '$items.itemName'
+                            },
+                            else: {
+                                itemQuantity: 0,
+                                itemPrice: '$items.itemPrice',
+                                itemGender: '$items.itemGender',
+                                itemName: '$items.itemName'
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    activityName: {
+                        $first: '$activityName'
+                    },
+                    groupName: {
+                        $first: '$groupName'
+                    },
+                    displayItems: {
+                        $push: '$finalItem'
+                    }
+                }
+            },
+            // {
+            //     $project: {
+            //         _id: '$activityName',
+            //         // activityName: '$activityName',
+            //         groupName: '$groupName',
+            //         displayItems: '$displayItems'
+            //     }
+            // },
+            // {
+            //     $group: {
+            //         _id: '$_id',
+            //         groupName: {
+            //             $push: '$groupName'
+            //         },
+            //         displayItems: {
+            //             $push: '$displayItems'
+            //         }
+            //     }
+            // }
+        ]).exec((error, totalitems) => {
+            if (error)
+                console.log("error while find items", error)
+            else
+                // console.log("tota items list", totalitems)
+                resolve(totalitems)
+        })
+    })
+}
+
+
+/**
+ * @param {eventId} eventId
+ * Get total guest list with total amount and donation 
+ */
+const totalGuestWithCollection = (eventId) => {
+    console.log('EventId:', eventId);
+    return new Promise((resolve, reject) => {
+        EventModel.aggregate([
+
+            // $match Of EventId In Event Model
+            {
+                $match: { '_id': ObjectId(eventId) }
+            },
+            // $project for Reduce To Limited Data
+            {
+                $project: {
+                    hashTag: '$hashTag',
+                    eventId: '$_id',
+                    guest: '$guest',
+                }
+            },
+            // $unwind Guest Array For lookup
+            {
+                $unwind: {
+                    path: '$guest',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            // $lookup For Guest Detail From User Model
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'guest._id',
+                    foreignField: '_id',
+                    as: 'guestDetail'
+                }
+            },
+            // $unwind GuestDetail Array For Project Operation
+            {
+                $unwind: {
+                    path: '$guestDetail',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            // $sort Using Guest FirstName
+            { $sort: { 'guestDetail.firstName': -1, } },
+            // $project For Limited The Data Collection
+            {
+                $project: {
+                    hashTag: 1,
+                    eventId: 1,
+                    guestDetail: {
+                        userId: '$guestDetail._id',
+                        firstName: '$guestDetail.firstName',
+                        lastName: '$guestDetail.lastName',
+                        mobile: '$guestDetail.mobile',
+                        email: '$guestDetail.email'
+                    },
+                },
+            },
+            // $lookup In Transaction Model For User Transaction Detail
+            {
+                $lookup: {
+                    from: 'transaction',
+                    localField: 'guestDetail.userId',
+                    foreignField: 'userId',
+                    as: 'transactionDetail'
+                }
+            },
+            {
+                $project: {
+                    eventId: 1,
+                    hashTag: 1,
+                    guestDetail: 1,
+                    transactionDetails: {
+                        $filter: {
+                            input: "$transactionDetail",
+                            as: "transaction",
+                            cond: { $and: [{ $eq: ["$$transaction.eventId", ObjectId(eventId)] }] }
+                        }
+                    }
+                }
+            },
+            // // $unwind TransactionDetail Array For $group 
+            {
+                $unwind: {
+                    path: '$transactionDetails',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            // // $group Using Guest UserId For Transaction Total
+            {
+                $group: {
+                    _id: '$guestDetail.userId',
+                    totalCollection: {
+                        $sum: '$transactionDetails.finalTotal'
+                    },
+                    totalDonation: {
+                        $sum: '$transactionDetails.donation'
+                    },
+                    guestDetail: {
+                        $first: '$guestDetail'
+                    },
+                    eventId: {
+                        $first: '$eventId',
+                    },
+                    hashTag: {
+                        $first: '$hashTag',
+                    }
+                }
+            },
+            // // $project For Modifie Result
+            {
+                $project: {
+                    eventId: 1,
+                    hashTag: 1,
+                    totalCollection: 1,
+                    totalDonation: 1,
+                    finalTotal: { $sum: ["$totalCollection", "$totalDonation"] },
+                    userId: '$guestDetail.userId',
+                    firstName: '$guestDetail.firstName',
+                    lastName: '$guestDetail.lastName',
+                    email: '$guestDetail.email',
+                    mobile: '$guestDetail.mobile',
+                }
+            },
+            // // $project For Modifie Result
+            {
+                $project: {
+                    eventId: 1,
+                    hashTag: 1,
+                    guestDetail: {
+                        userId: '$userId',
+                        firstName: '$firstName',
+                        lastName: '$lastName',
+                        email: '$email',
+                        mobile: '$mobile',
+                        totalCollection: '$totalCollection',
+                        totalDonation: '$totalDonation',
+                        finalTotal: '$finalTotal'
+                    }
+                }
+            },
+            // // $group Using EventId
+            {
+                $group: {
+                    _id: '$eventId',
+                    hashTag: {
+                        $first: '$hashTag'
+                    },
+                    eventId: {
+                        $first: '$eventId'
+                    },
+                    guestDetail: {
+                        $push: '$guestDetail'
+                    }
+                }
+            }
+        ]).exec(function (guestListErr, guestListRes) {
+            if (guestListErr) {
+                console.log("Guest List Error:", guestListErr);
+                reject(guestListErr);
+            } else {
+                resolve({ status: 200, message: 'Event Guest List!', data: guestListRes[0] });
+            }
+        });
+    });
+}
+
+
+
+
 
 /**
  * @param {EventId} eventId 

@@ -52,6 +52,9 @@ const event = new Schema({
 	regestery: {
 		type: String
 	},
+	linkOfEvent: {
+		type: String
+	},
 	eventTheme: {
 		type: String
 	},

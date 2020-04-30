@@ -80,7 +80,7 @@ router.get('/event/myevent-list', ensureAuthenticated.validateToken, EventContro
 router.get('/event/event-list', EventController.eventList);
 router.get('/event/:id', [ensureAuthenticated.validateToken], EventController.eventDetail);
 router.get('/event/activity/:id', [ensureAuthenticated.validateToken], EventController.activityDetailsOfEvent)
-router.get('/event/guestEvent/:hashTag', [ensureAuthenticated.validateToken], EventController.guestEventDetails)
+router.get('/event/guestEvent/:hashTag', EventController.guestEventDetails)
 
 //Routes For Event Profile Change and Set price of event
 

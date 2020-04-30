@@ -47,7 +47,7 @@ router.post('/address', ensureAuthenticated.validateToken, UserController.enterA
 router.get('/addressDetails', ensureAuthenticated.validateToken, UserController.getAddressDetails)
 // Adminside Related API
 
-router.get('/user/user-list', ensureAuthenticated.validateToken, UserController.totalUserList);
+router.get('/user/user-list', UserController.totalUserList);
 router.post('/sub-admin', ensureAuthenticated.validateToken, UserController.addSubAdmin);
 
 module.exports = router;
