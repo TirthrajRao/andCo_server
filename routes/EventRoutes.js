@@ -128,4 +128,8 @@ router.post('/generatePdf', ensureAuthenticated.validateToken, EventController.g
 
 router.get('/cronJob', EventController.sendReminderMailToGuest)
 
+
+
+router.get('/allEvent', EventController.getAllEvents)
+
 module.exports = router;

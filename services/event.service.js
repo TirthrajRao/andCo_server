@@ -91,11 +91,7 @@ function fnHashtagAvailable(details, userId) {
 function fnGenerateEventLink(event) {
     console.log("call thay che ke nai", event)
     return new Promise((resolve, reject) => {
-        // const param = String(event._id);
-        // const baseParam = CryptoJS.AES.encrypt(JSON.stringify(param), key).toString();
-        // console.log("base param", baseParam)
-        // const baseParam = Buffer.from(param).toString('base64');
-        const link = config.baseUrl + config.welcomeGuest + event.hashTag;
+        const link = config.baseUrl + '?event=' + event.hashTag
         console.log("new link with crypto js", link)
         const eventLink = { eventLink: link }
         EventModel.findByIdAndUpdate({ _id: event._id }, eventLink, { upsert: true, new: true }, (eventError, updatedEvent) => {
@@ -747,32 +743,34 @@ function guestEventDetail(hashTag, userId) {
             },
         ]).exec((error, guestEvent) => {
             if (error)
-                console.log("error while get details of guest", error)
+                // console.log("error while get details of guest", error)
+                reject({ status: 500, message: 'Error while get Guest event details' })
             else {
                 console.log("guest event details use of hashtag", guestEvent)
-                fnCheckForCelebrant(guestEvent[0]._id, userId).then((response) => {
-                    guestEvent[0].isCelebrant = response;
-                    fnCheckForGuestJoined(guestEvent[0]._id, userId).then((response) => {
-                        let todayDate = new Date
-                        let paymentDeadlineDate = Date.parse(guestEvent[0].paymentDeadlineDate)
-                        console.log("today date is sure or not", guestEvent[0])
-                        if (todayDate > paymentDeadlineDate) {
-                            console.log("payment is closed")
-                            guestEvent[0].isClosed = true
-                        } else {
-                            console.log("payment is open")
-                            guestEvent[0].isClosed = false
-                        }
-                        guestEvent[0].isJoined = response;
-                        resolve({ status: 200, message: 'Event Detail fetch Successfully!', data: guestEvent[0] });
-                    }).catch((error) => {
-                        console.log("error while where guest is join the event or not", error)
-                        // reject({ status: 500, message: 'Internal Server Error', data: eventDetailError });
-                    });
-                }).catch((error) => {
-                    console.log("error while check is celebrant", error)
-                    // reject({ status: 500, message: 'Internal Server Error' });
-                });
+                // fnCheckForCelebrant(guestEvent[0]._id, userId).then((response) => {
+                //     guestEvent[0].isCelebrant = response;
+                //     fnCheckForGuestJoined(guestEvent[0]._id, userId).then((response) => {
+                let todayDate = new Date
+                let paymentDeadlineDate = Date.parse(guestEvent[0].paymentDeadlineDate)
+                //         console.log("today date is sure or not", guestEvent[0])
+                if (todayDate > paymentDeadlineDate) {
+                    console.log("payment is closed")
+                    guestEvent[0].isClosed = true
+                } else {
+                    console.log("payment is open")
+                    guestEvent[0].isClosed = false
+                }
+                //         guestEvent[0].isJoined = response;
+                //         resolve({ status: 200, message: 'Event Detail fetch Successfully!', data: guestEvent[0] });
+                //     }).catch((error) => {
+                //         console.log("error while where guest is join the event or not", error)
+                //         // reject({ status: 500, message: 'Internal Server Error', data: eventDetailError });
+                //     });
+                // }).catch((error) => {
+                //     console.log("error while check is celebrant", error)
+                //     // reject({ status: 500, message: 'Internal Server Error' });
+                // });
+                resolve({ status: 200, message: 'Event Detail fetch Successfully!', data: guestEvent[0] });
             }
         })
     })
@@ -5071,6 +5069,44 @@ function setAfterEventMessage(details) {
 }
 
 
+
+function changeLink() {
+    return new Promise((resolve, reject) => {
+        EventModel.find()
+            .exec((error, allEvents) => {
+                if (error) console.log("error while find all evebt", error)
+                else
+                    // finalArray = []
+                    // console.log("total events of existing", allEvents)
+                    async.eachSeries(allEvents, (singleEvent, callBack) => {
+                        // console.log("single event details", singleEvent)
+                        const link = config.baseUrl + '?event=' + singleEvent.hashTag
+                        console.log("new link with crypto js", link)
+                        const eventLink = { eventLink: link }
+                        EventModel.findByIdAndUpdate({ _id: singleEvent._id }, eventLink, { upsert: true, new: true }, (eventError, updatedEvent) => {
+                            if (eventError) {
+                                console.log('usererror: ', eventError);
+                                reject({ status: 500, message: 'Internal Server Error' });
+                            } else {
+                                console.log("link update completed", updatedEvent)
+                                // finalArray.push(updatedEvent)
+                                // resolve({ status: 200, message: 'Event Created Successfully.', data: updatedEvent });
+                            }
+                        });
+                        callBack()
+                    }, (callbackError, callbackResponse) => {
+                        if (error) console.log("error while update the query", callbackError)
+                        else {
+
+                            console.log("response of call back", callbackResponse)
+                            resolve({ message: 'Link of all existing event completed' })
+                        }
+                    })
+            })
+    })
+}
+
+module.exports.changeLink = changeLink
 module.exports.sendReminderMailToGuest = sendReminderMailToGuest
 module.exports.addPayMessage = addPayMessage
 module.exports.fnHashtagAvailable = fnHashtagAvailable
