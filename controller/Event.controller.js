@@ -180,6 +180,7 @@ module.exports.updateSetPriceOfEvent = (req, res) => {
 	if (req.body.payMentTransferDate) updateDetails['payMentTransferDate'] = req.body.payMentTransferDate
 	if (req.body.isLogistics) updateDetails['isLogistics'] = req.body.isLogistics
 	if (req.body.regestery) updateDetails['regestery'] = req.body.regestery
+	if (req.body.linkOfEvent) updateDetails['linkOfEvent'] = req.body.linkOfEvent
 	if (req.body.bankDetails.flag == 'bank') updateDetails['bankAccount'] = bankAccount
 	if (req.body.bankDetails.flag == 'card') updateDetails['cardAccount'] = cardAccount
 	console.log("update", updateDetails)
@@ -283,15 +284,15 @@ module.exports.activityDetailsOfEvent = (req, res) => {
 module.exports.guestEventDetails = (req, res) => {
 	console.log("guest event hashtag", req.params)
 	const eventhashTag = req.params.hashTag
-	let loginUser = req.user
-	let finalId
-	if (loginUser.user) {
-		finalId = loginUser.user._id
-	} else if (loginUser.userres) {
-		finalId = loginUser.userres._id
-	}
+	// let loginUser = req.user
+	// let finalId
+	// if (loginUser.user) {
+	// 	finalId = loginUser.user._id
+	// } else if (loginUser.userres) {
+	// 	finalId = loginUser.userres._id
+	// }
 	// const userId = req.user.user._id;
-	eventService.guestEventDetail(eventhashTag, finalId).then((response) => {
+	eventService.guestEventDetail(eventhashTag).then((response) => {
 		console.log("response of guest link event", response)
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
