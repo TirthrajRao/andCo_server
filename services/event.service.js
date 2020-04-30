@@ -5076,32 +5076,43 @@ function changeLink() {
             .exec((error, allEvents) => {
                 if (error) console.log("error while find all evebt", error)
                 else
-                    // finalArray = []
-                    // console.log("total events of existing", allEvents)
-                    async.eachSeries(allEvents, (singleEvent, callBack) => {
-                        // console.log("single event details", singleEvent)
-                        const link = config.baseUrl + '?event=' + singleEvent.hashTag
-                        console.log("new link with crypto js", link)
-                        const eventLink = { eventLink: link }
-                        EventModel.findByIdAndUpdate({ _id: singleEvent._id }, eventLink, { upsert: true, new: true }, (eventError, updatedEvent) => {
-                            if (eventError) {
-                                console.log('usererror: ', eventError);
-                                reject({ status: 500, message: 'Internal Server Error' });
-                            } else {
-                                console.log("link update completed", updatedEvent)
-                                // finalArray.push(updatedEvent)
-                                // resolve({ status: 200, message: 'Event Created Successfully.', data: updatedEvent });
-                            }
-                        });
-                        callBack()
-                    }, (callbackError, callbackResponse) => {
-                        if (error) console.log("error while update the query", callbackError)
-                        else {
+                    finalArray = []
+                errLog = []
 
-                            console.log("response of call back", callbackResponse)
-                            resolve({ message: 'Link of all existing event completed' })
+                // console.log("total events of existing", allEvents)
+                async.eachSeries(allEvents, (singleEvent, callBack) => {
+                    // console.log("single event details", singleEvent)
+                    const link = config.baseUrl + '?event=' + singleEvent.hashTag
+                    console.log("new link with crypto js", link)
+                    const eventLink = { eventLink: link }
+                    EventModel.findByIdAndUpdate({ _id: singleEvent._id }, eventLink, { upsert: true, new: true }, (eventError, updatedEvent) => {
+                        if (eventError) {
+                            errLog.push({ _id: singleEvent._id, eventError: eventError })
+                            console.log('usererror: ', eventError);
+                            callBack()
+                            // reject({ status: 500, message: 'Internal Server Error' });
+                        } else {
+                            console.log("link update completed", updatedEvent)
+                            let newObject = {
+                                eventId: updatedEvent._id,
+                                hashTag: updatedEvent.hashTag,
+                                eventLink: updatedEvent.eventLink
+                            }
+                            finalArray.push(newObject)
+                            // allEvents.push(updatedEvent)
+                            // finalArray.push(updatedEvent)
+                            callBack()
+                            // resolve({ status: 200, message: 'Event Created Successfully.', data: updatedEvent });
                         }
-                    })
+                    });
+
+                }, (callbackError, callbackResponse) => {
+                    if (error) console.log("error while update the query", callbackError)
+                    else {
+                        console.log("response of call back", callbackResponse)
+                        resolve({ message: 'Update eventLink of all existing events', finalArray, errLog })
+                    }
+                })
             })
     })
 }

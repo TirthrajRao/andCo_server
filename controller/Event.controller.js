@@ -1152,7 +1152,7 @@ module.exports.getAllEvents = (req, res) => {
 	console.log("call thay che ke nai")
 	eventService.changeLink().then((response) => {
 		console.log("all database link change", response)
-		return res.status(200).json({ data: response.data, message: response.message })
+		return res.status(200).json({ data: response, message: response.message })
 	}).catch((error) => {
 		console.log("error while change link", error)
 	})
