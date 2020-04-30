@@ -50,6 +50,8 @@ router.get('/addressDetails', ensureAuthenticated.validateToken, UserController.
 router.get('/user/user-list', UserController.totalUserList);
 router.post('/sub-admin', ensureAuthenticated.validateToken, UserController.addSubAdmin);
 
+
+
 module.exports = router;
 
 
