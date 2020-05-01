@@ -654,19 +654,34 @@ module.exports.getTotalOfCart = (req, res) => {
 	})
 }
 
+
+module.exports.getItems = (req, res) => {
+	let check = JSON.parse(req.params.data)
+	let allitems = check.allItems
+	console.log("what is the value", allitems)
+	eventService.getCartItems(check.eventId, allitems).then((finalItems) => {
+		console.log("final items array", finalItems)
+		return res.status(200).json(finalItems)
+	}).catch((error) => {
+		console.log("error======", error)
+	})
+}
+
+
 /**
  * Add Account details of guest user
  */
 module.exports.addPaymentDetails = (req, res) => {
-	console.log("req.body ======", req.body)
 	let cartList = req.body.cartItems
-	let loginUser = req.user
 	let finalFlage = req.body.flag
-	if (loginUser.user) {
-		finalId = loginUser.user._id
-	} else if (loginUser.userres) {
-		finalId = loginUser.userres._id
-	}
+	let guestDetails = req.body.guestDetails
+	console.log("req.body ======", guestDetails)
+	// let loginUser = req.user
+	// if (loginUser.user) {
+	// 	finalId = loginUser.user._id	
+	// } else if (loginUser.userres) {
+	// 	finalId = loginUser.userres._id
+	// }
 	let finalData = {}
 	if (req.body.flag == false) {
 		if (req.body.bankName) finalData['bankName'] = req.body.bankName
@@ -679,19 +694,34 @@ module.exports.addPaymentDetails = (req, res) => {
 		if (req.body.cvv) finalData['cvv'] = req.body.cvv
 		console.log("final data of card", finalData)
 	}
-	eventService.addAccountDetails(finalData, finalId, finalFlage).then((response) => {
-		console.log("details added completed", response)
-		eventService.orderCheckout(finalId, cartList).then((paymentDone) => {
+	console.log("final cart item", cartList)
+	eventService.addGuestDetails(guestDetails).then((guestAdded) => {
+		console.log("guest user added", guestAdded.data)
+		let userId = guestAdded.data
+		eventService.orderCheckout(userId, cartList).then((paymentDone) => {
 			console.log("payment compledted", paymentDone)
-			return res.status(200).json({ data: paymentDone.data, message: response.message })
+			return res.status(200).json({ data: paymentDone.data, message: paymentDone.message })
 		}).catch((error) => {
 			console.log("error while payment", error)
 			return res.status(error.status).json({ message: error.message })
 		})
 	}).catch((error) => {
-		console.log("error while add details ", error)
-		return res.status(error.status).json({ message: error.message })
+		console.log("error while add guest", error)
 	})
+
+	// eventService.addAccountDetails(finalData, finalId, finalFlage).then((response) => {
+	// 	console.log("details added completed", response)
+	// 	eventService.orderCheckout(finalId, cartList).then((paymentDone) => {
+	// 		console.log("payment compledted", paymentDone)
+	// 		return res.status(200).json({ data: paymentDone.data, message: response.message })
+	// 	}).catch((error) => {
+	// 		console.log("error while payment", error)
+	// 		return res.status(error.status).json({ message: error.message })
+	// 	})
+	// }).catch((error) => {
+	// 	console.log("error while add details ", error)
+	// 	return res.status(error.status).json({ message: error.message })
+	// })
 }
 
 /**

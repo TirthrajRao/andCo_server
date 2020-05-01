@@ -48,7 +48,7 @@ router.get('/event/getTotalOfCart/:hashTag', ensureAuthenticated.validateToken, 
 // router.post('/guestAccount', ensureAuthenticated.validateToken, EventController.addPaymentDetails)
 
 router.route('/guestAccount')
-    .post([ensureAuthenticated.validateToken, EventController.addPaymentDetails])
+    .post([EventController.addPaymentDetails])
     .get(ensureAuthenticated.validateToken, EventController.getAccountDetails)
 
 // Routes For Event Operations
@@ -118,7 +118,7 @@ router.put('/group/delete-item', EventController.deleteItemFromGroup);
 router.delete('/event-delete/:id', ensureAuthenticated.validateToken, EventController.deleteEvent);
 router.get('/mycollection', ensureAuthenticated.validateToken, EventController.MyEventListTotalTransaction);
 router.get('/event-transaction', EventController.eventWithTransactionAndUserDetail);
-
+router.get('/itemDetails/:data', EventController.getItems)
 
 
 // Routes For generate pdf of guest list
