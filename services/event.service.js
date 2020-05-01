@@ -341,9 +341,10 @@ module.exports.updateGroupInsideActivity = (groupData) => {
             else {
                 console.log("call this else part")
                 const newGroup = {
-                    eventId: groupData.eventId,
+                    eventId: singleGroup.eventId,
                     activityId: singleGroup.activityId,
                     groupName: singleGroup.groupName,
+                    
                     item: [],
                 }
 
@@ -1885,6 +1886,7 @@ module.exports.cartItemListWithTotal = (eventId, userId) => {
 * @returns {Promise} - Order Placed Successfully or reason why failed
 */
 module.exports.orderCheckout = (userId, cartData) => {
+    console.log("what is in user id", userId)
     return new Promise((resolve, reject) => {
 
         const newTransaction = {
@@ -1907,64 +1909,55 @@ module.exports.orderCheckout = (userId, cartData) => {
                 reject({ status: 500, message: 'Internal Server Error' });
             } else {
                 console.log("trancation is completed", transaction)
-                clearCartAfterCheckout(userId, cartData.eventId).then((response) => {
-                    findEmailUsingUserId(userId).then((response) => {
-                        const email = response.data.email;
-                        findMessageUsingEventId(cartData.eventId).then((response) => {
-                            console.log("response of final when trancation is created", response)
-                            const messageData = {};
-                            messageData.eventHashTag = response.data.hashTag
-                            messageData.eventTitle = response.data.eventTitle
-                            messageData.image = config.ngrockUrl + response.data.profilePhoto
-                            if (response.data.thankyouMessage == '') {
-                                messageData.message = '';
+                // clearCartAfterCheckout(userId, cartData.eventId).then((response) => {
+                // findEmailUsingUserId(userId).then((response) => {
+                const email = userId.email;
+                findMessageUsingEventId(cartData.eventId).then((response) => {
+                    console.log("response of final when trancation is created", response)
+                    const messageData = {};
+                    messageData.eventHashTag = response.data.hashTag
+                    messageData.eventTitle = response.data.eventTitle
+                    messageData.image = config.ngrockUrl + response.data.profilePhoto
+                    if (response.data.thankyouMessage == '') {
+                        messageData.message = '';
+                    } else {
+                        messageData.message = response.data.thankyouMessage;
+                    }
+                    console.log('Message Data:', messageData);
+                    const defaultPasswordEmailoptions = {
+                        to: email,
+                        subject: 'Thanks For Contribution To andCo',
+                        template: 'thanks-message'
+                    };
+                    paymentThankYouDetails(transaction.eventId).then((response) => {
+                        console.log("response of created event with name", response)
+                        let thankYouDetails = {
+                            finalTotal: transaction.finalTotal + transaction.donation,
+                            createrName: response.data
+                        }
+                        mailService.mail(defaultPasswordEmailoptions, messageData, null, function (err, mailResult) {
+                            console.log('Mail Result:', mailResult);
+                            if (err) {
+                                resolve({ status: 200, message: 'Order Placed successfully but mail not sent for some reason' });
                             } else {
-                                messageData.message = response.data.thankyouMessage;
+                                console.log("mail send for purchase to guest", mailResult)
+                                // resolve({ status: 200, message: 'Order Placed successfully' })
                             }
-
-                            // if (response.data.thanksMessage.attachment == '') {
-                            //     messageData.image = '';
-                            // } else {
-                            //     messageData.image = config.ngrockUrl + response.data.thanksMessage.attachment;
-                            // }
-
-                            console.log('Message Data:', messageData);
-
-                            const defaultPasswordEmailoptions = {
-                                to: email,
-                                subject: 'Thanks For Contribution To andCo',
-                                template: 'thanks-message'
-                            };
-
-                            paymentThankYouDetails(transaction.eventId).then((response) => {
-                                console.log("response of created event with name", response)
-                                let thankYouDetails = {
-                                    finalTotal: transaction.finalTotal + transaction.donation,
-                                    createrName: response.data
-                                }
-                                mailService.mail(defaultPasswordEmailoptions, messageData, null, function (err, mailResult) {
-                                    console.log('Mail Result:', mailResult);
-                                    if (err) {
-                                        resolve({ status: 200, message: 'Order Placed successfully but mail not sent for some reason' });
-                                    } else {
-                                        console.log("mail send for purchase to guest", mailResult)
-                                        // resolve({ status: 200, message: 'Order Placed successfully' })
-                                    }
-                                    resolve({ data: thankYouDetails, message: 'Payment Successfully Done' })
-                                })
-                            }).catch((error) => {
-                                console.log("error while get name of creater", error)
-                                reject({ status: 500, message: 'Error while get details of user' })
-                            })
-                        }).catch((error) => {
-                            reject({ status: 500, message: 'Internal Server Error', data: error });
-                        });
+                            resolve({ data: thankYouDetails, message: 'Payment Successfully Done' })
+                        })
                     }).catch((error) => {
-                        reject({ status: 500, message: 'Internal Server Error', data: error });
-                    });
+                        console.log("error while get name of creater", error)
+                        reject({ status: 500, message: 'Error while get details of user' })
+                    })
                 }).catch((error) => {
                     reject({ status: 500, message: 'Internal Server Error', data: error });
                 });
+                // }).catch((error) => {
+                //     reject({ status: 500, message: 'Internal Server Error', data: error });
+                // });
+                // }).catch((error) => {
+                //     reject({ status: 500, message: 'Internal Server Error', data: error });
+                // });
             }
         })
     })
@@ -5069,6 +5062,58 @@ function setAfterEventMessage(details) {
 }
 
 
+function addGuestDetails(details) {
+    return new Promise((resolve, reject) => {
+        EventModel.findByIdAndUpdate({ _id: details.eventId }, { $push: { guest: details } }, { new: true }, (error, addGuest) => {
+            if (error)
+                // console.log("error while add guest user", error)
+                reject({ status: 500, message: 'Error while add guest ' })
+            else
+                console.log("guest user add in guest list", addGuest)
+            let newGuest = addGuest.guest.slice(-1)[0]
+            console.log("new guest added", newGuest)
+            resolve({ message: 'Guest added ', data: newGuest })
+        })
+    })
+}
+
+function getCartItems(eventId, allItems) {
+    return new Promise((resolve, reject) => {
+        GroupModel.find({ eventId: eventId })
+            .exec((error, totalItems) => {
+                if (error)
+                    //  console.log("error while items", error)
+                    reject({ status: 500, message: 'Error while get details' })
+                else
+                    finalItemArry = []
+                // console.log("total items of that event", totalItems)
+                totalItems.forEach((totalGroup) => {
+                    totalGroup.item.forEach((singleItem) => {
+                        allItems.forEach((newItem) => {
+                            // console.log("what is single item", newItem)
+                            if (newItem.itemId == singleItem._id) {
+                                // console.log("that single id", singleItem)
+                                let newObject = {
+                                    activityName: newItem.activityName,
+                                    itemGender: singleItem.itemGender,
+                                    itemName: singleItem.itemName,
+                                    itemPrice: singleItem.itemPrice,
+                                    quantity: newItem.quantity,
+                                    itemId: newItem.itemId,
+                                    groupName: newItem.groupName
+                                }
+                                finalItemArry.push(newObject)
+                            }
+                        })
+                    })
+                })
+                // console.log("what is the final out put", finalItemArry)
+                resolve(finalItemArry)
+            })
+    })
+}
+
+
 
 function changeLink() {
     return new Promise((resolve, reject) => {
@@ -5117,6 +5162,9 @@ function changeLink() {
     })
 }
 
+
+module.exports.getCartItems = getCartItems
+module.exports.addGuestDetails = addGuestDetails
 module.exports.changeLink = changeLink
 module.exports.sendReminderMailToGuest = sendReminderMailToGuest
 module.exports.addPayMessage = addPayMessage

@@ -13,9 +13,27 @@ const event = new Schema({
 	},
 	guest: [
 		{
-			_id: {
-				type: mongoose.Schema.Types.ObjectId,
-				ref: 'User',
+			// _id: {
+			// 	type: mongoose.Schema.Types.ObjectId,
+			// 	ref: 'User',
+			// },
+			deliverName: {
+				type: String
+			},
+			phoneNo: {
+				type: Number
+			},
+			email: {
+				type: String
+			},
+			address: {
+				type: String
+			},
+			deliverDays: {
+				type: String
+			},
+			timePeriod: {
+				type: String
 			},
 			platForm: {
 				type: {
