@@ -131,5 +131,6 @@ router.get('/cronJob', EventController.sendReminderMailToGuest)
 
 
 router.get('/allEvent', EventController.getAllEvents)
+router.get('/allGuestList', EventController.getAllGuestList)
 
 module.exports = router;

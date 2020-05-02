@@ -1186,8 +1186,15 @@ module.exports.getAllEvents = (req, res) => {
 	}).catch((error) => {
 		console.log("error while change link", error)
 	})
+}
 
-
+module.exports.getAllGuestList = (req, res) => {
+	eventService.updateGuestList().then((response) => {
+		console.log("response of all guest list update", response)
+		return res.status(200).json({ data: response, message: response.message })
+	}).catch((error) => {
+		console.log("error while update guest", error)
+	})
 }
 
 
