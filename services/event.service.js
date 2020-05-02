@@ -343,7 +343,7 @@ module.exports.updateGroupInsideActivity = (groupData) => {
                     eventId: singleGroup.eventId,
                     activityId: singleGroup.activityId,
                     groupName: singleGroup.groupName,
-                    
+
                     item: [],
                 }
 
@@ -3028,34 +3028,60 @@ const eventGuestListWithAmount = (eventId) => {
                 $project: {
                     hashTag: '$hashTag',
                     eventId: '$_id',
-                    guest: '$guest',
+                    guestDetail: '$guest',
                 }
             },
             // $unwind Guest Array For lookup
-            {
-                $unwind: {
-                    path: '$guest',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            // $lookup For Guest Detail From User Model
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'guest._id',
-                    foreignField: '_id',
-                    as: 'guestDetail'
-                }
-            },
-            // $unwind GuestDetail Array For Project Operation
             {
                 $unwind: {
                     path: '$guestDetail',
                     preserveNullAndEmptyArrays: true
                 }
             },
+            // $lookup For Guest Detail From User Model
+            // {
+            //     $lookup: {
+            //         from: 'event',
+            //         let: {
+            //             guest: '$guest._id',
+            //         },
+            //         pipeline: [
+            //             {
+            //                 $unwind: '$guest'
+            //             },
+            //             {
+            //                 $match: {
+            //                     $expr: {
+            //                         $eq: ["$guest._id", "$$guest"]
+            //                     }
+            //                 }
+            //             },
+            //             {
+            //                 $project: {
+            //                     guest: 1
+            //                 }
+            //             }
+            //         ],
+            //         as: 'guestDetail'
+            //     }
+            // }
+            // {
+            //     $lookup: {
+            //         from: 'users',
+            //         localField: 'guest._id',
+            //         foreignField: '_id',
+            //         as: 'guestDetail'
+            //     }
+            // },
+            // $unwind GuestDetail Array For Project Operation
+            // {
+            //     $unwind: {
+            //         path: '$guestDetail',
+            //         preserveNullAndEmptyArrays: true
+            //     }
+            // },
             // $sort Using Guest FirstName
-            { $sort: { 'guestDetail.firstName': -1, } },
+            { $sort: { 'guestDetail.deliverName': 1, } },
             // $project For Limited The Data Collection
             {
                 $project: {
@@ -3063,11 +3089,11 @@ const eventGuestListWithAmount = (eventId) => {
                     eventId: 1,
                     guestDetail: {
                         userId: '$guestDetail._id',
-                        firstName: '$guestDetail.firstName',
-                        lastName: '$guestDetail.lastName',
-                        mobile: '$guestDetail.address.phoneNo',
-                        email: '$guestDetail.address.email',
-                        address: '$guestDetail.address.address'
+                        firstName: '$guestDetail.deliverName',
+                        // lastName: '$guestDetail.lastName',
+                        mobile: '$guestDetail.phoneNo',
+                        email: '$guestDetail.email',
+                        address: '$guestDetail.address'
                     },
 
                 },
@@ -3112,7 +3138,7 @@ const eventGuestListWithAmount = (eventId) => {
                     }
                 }
             },
-            // // $unwind TransactionDetail Array For $group 
+            // // // $unwind TransactionDetail Array For $group 
             {
                 $unwind: {
                     path: '$transactionDetails',
@@ -3131,7 +3157,7 @@ const eventGuestListWithAmount = (eventId) => {
                     guestDetails: {
                         $push: {
                             firstName: '$guestDetail.firstName',
-                            lastName: '$guestDetail.lastName',
+                            // lastName: '$guestDetail.lastName',
                             phoneNo: '$guestDetail.mobile',
                             email: '$guestDetail.email',
                             address: '$guestDetail.address',
@@ -3187,7 +3213,7 @@ const eventGuestListWithAmount = (eventId) => {
                     _id: '$_id',
                     guestDetails: {
                         firstName: '$guestDetails.firstName',
-                        lastName: '$guestDetails.lastName',
+                        // lastName: '$guestDetails.lastName',
                         phoneNo: '$guestDetails.phoneNo',
                         email: '$guestDetails.email',
                         address: '$guestDetails.address',
@@ -3203,9 +3229,9 @@ const eventGuestListWithAmount = (eventId) => {
                     firstName: {
                         $first: '$guestDetails.firstName',
                     },
-                    lastName: {
-                        $first: '$guestDetails.lastName'
-                    },
+                    // lastName: {
+                    //     $first: '$guestDetails.lastName'
+                    // },
                     phoneNo: {
                         $first: '$guestDetails.phoneNo'
                     },
@@ -3272,9 +3298,9 @@ const eventGuestListWithAmount = (eventId) => {
                     firstName: {
                         $first: '$firstName',
                     },
-                    lastName: {
-                        $first: '$lastName'
-                    },
+                    // lastName: {
+                    //     $first: '$lastName'
+                    // },
                     phoneNo: {
                         $first: '$phoneNo'
                     },
@@ -3332,45 +3358,46 @@ const eventGuestList = (eventId) => {
             {
                 $project: {
                     userId: '$guest._id',
+                    firstName: '$guest.deliverName',
                     platForm: '$guest.platForm'
                 }
             },
-            {
-                $lookup: {
-                    from: 'users',
-                    let: {
-                        userName: '$userId'
-                    },
-                    pipeline: [
-                        {
-                            $match: {
-                                $expr: {
-                                    $eq: ["$_id", "$$userName"]
-                                }
-                            }
-                        },
-                        {
-                            $project: {
-                                firstName: 1,
-                                lastName: 1,
-                                // platForm: '$guest.platForm'
-                            }
-                        }
-                    ],
-                    as: 'userId'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$userId'
-                }
-            },
+            // {
+            //     $lookup: {
+            //         from: 'users',
+            //         let: {
+            //             userName: '$userId'
+            //         },
+            //         pipeline: [
+            //             {
+            //                 $match: {
+            //                     $expr: {
+            //                         $eq: ["$_id", "$$userName"]
+            //                     }
+            //                 }
+            //             },
+            //             {
+            //                 $project: {
+            //                     firstName: 1,
+            //                     lastName: 1,
+            //                     // platForm: '$guest.platForm'
+            //                 }
+            //             }
+            //         ],
+            //         as: 'userId'
+            //     }
+            // },
+            // {
+            //     $unwind: {
+            //         path: '$userId'
+            //     }
+            // },
             {
                 $group: {
                     _id: '$_id',
                     user: {
                         $push: {
-                            userName: '$userId',
+                            userName: '$firstName',
                             platForm: '$platForm'
                         }
                     }
@@ -5118,6 +5145,50 @@ function changeLink() {
 }
 
 
+function updateGuestList() {
+    return new Promise((resolve, reject) => {
+        EventModel.find()
+            .exec((error, allList) => {
+                if (error) console.log("error======", error)
+                else
+                    finalArray = []
+                errLog = []
+                // console.log("all events", allList)
+                async.eachSeries(allList, (singleEvent, callBack) => {
+                    // if (singleEvent.guest && singleEvent.guest.length) {
+                    // console.log("single event with guest list", singleEvent)
+                    let guestList = []
+                    EventModel.findByIdAndUpdate({ _id: singleEvent._id }, { $set: { guest: guestList } }, { upsert: true, new: true }, (error, removeGuestList) => {
+                        if (error) {
+                            console.log("error while remove guest", error)
+                            errLog.push({ _id: singleEvent._id, eventError: error })
+                            // console.log('usererror: ', eventError);
+                            callBack()
+                        }
+                        else {
+                            let newObject = {
+                                eventId: singleEvent._id,
+                                hashTag: singleEvent.hashTag,
+                                guestList: removeGuestList.guest
+                            }
+                            finalArray.push(newObject)
+                            callBack()
+                        }
+                        console.log("guest list remove from data base", removeGuestList)
+                    })
+                    // }
+                }, (callbackError, callbackResponse) => {
+                    if (error) console.log("error big one========", callbackError)
+                    else
+                        console.log("response of final event", callbackResponse)
+                    resolve({ message: 'Update all events existing guest list', finalArray, errLog })
+                })
+            })
+    })
+}
+
+
+module.exports.updateGuestList = updateGuestList
 module.exports.getCartItems = getCartItems
 module.exports.addGuestDetails = addGuestDetails
 module.exports.changeLink = changeLink
