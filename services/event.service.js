@@ -5255,6 +5255,7 @@ function changeTime() {
                             })
                         }
                     }
+                    callBack()
                 }, (callbackError, callbackResponse) => {
                     if (error) console.log("final error", callbackError)
                     else
