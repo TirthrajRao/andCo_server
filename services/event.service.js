@@ -4906,7 +4906,7 @@ function updateSetPrice(details) {
 
 const checkAccount = (data, dataOfUpdate) => {
     let remove = dataOfUpdate
-    // console.log("new account =====", remove)
+    console.log("new account =====", remove)
     return new Promise((resolve, reject) => {
         if (data.bankAccount) {
             EventModel.findByIdAndUpdate({ _id: remove._id }, { $set: { cardAccount: null } }, { upsert: true, new: true })
@@ -4929,6 +4929,8 @@ const checkAccount = (data, dataOfUpdate) => {
                         // console.log("remove card", finalOne)
                         resolve({ message: 'Remove Old bank account' })
                 })
+        } else {
+            resolve({ message: 'No account change' })
         }
     })
 }
@@ -5188,6 +5190,75 @@ function updateGuestList() {
 }
 
 
+
+function changeTime() {
+    return new Promise((resolve, reject) => {
+        EventModel.find()
+            .exec((error, total) => {
+                if (error) console.log("error----------", error)
+                else
+                    finalArray = []
+                // console.log("total events", total)
+                async.eachSeries(total, (singleEvent, callBack) => {
+
+                    let onlyTime = singleEvent.paymentDeadlineTime.split(" ")
+                    if (onlyTime[1] == 'AM') {
+                        // console.log("Only AM===========", onlyTime)
+                        let newTimeAM = onlyTime[0].split(":")
+                        let finalTime
+                        if (newTimeAM[0] <= 9) {
+                            console.log("newTime of 9 or before 9=========", newTimeAM[0])
+                             finalTime = (0 + newTimeAM[0]) + ':' + newTimeAM[1]
+                            console.log("new time for am", finalTime)
+                        } else {
+                            console.log("baki nu ama", newTimeAM[0])
+                        finalTime = newTimeAM[0] + ':' + newTimeAM[1]
+                        }
+                        EventModel.findByIdAndUpdate({ _id: singleEvent._id }, { $set: { paymentDeadlineTime: finalTime } }, { upsert: true, new: true }, (error, update) => {
+                            if (error) console.log("error while change time log", error)
+                            else {
+                                console.log("time update", update)
+                                let newObject = {
+                                    eventTitle: singleEvent.eventTitle,
+                                    hashTag: singleEvent.hashTag,
+                                    paymentDeadlineTime: update.paymentDeadlineTime
+                                }
+                                finalArray.push(newObject)
+                                callBack()
+                            }
+                        })
+                    } else {
+                        // console.log("only PM time ======", onlyTime)
+                        let newTime = onlyTime[0].split(":")
+                        let mainCount = 12
+                        let finalTime = ((mainCount + Number(newTime[0])) + ':' + newTime[1])
+                        console.log("this is done by me", finalTime)
+                        EventModel.findByIdAndUpdate({ _id: singleEvent._id }, { $set: { paymentDeadlineTime: finalTime } }, { upsert: true, new: true }, (error, update) => {
+                            if (error) console.log("error while change time log", error)
+                            else {
+                                console.log("time update", update)
+                                let newObject = {
+                                    eventTitle: singleEvent.eventTitle,
+                                    hashTag: singleEvent.hashTag,
+                                    paymentDeadlineTime: update.paymentDeadlineTime
+                                }
+                                finalArray.push(newObject)
+                                callBack()
+                            }
+                        })
+                    }
+                }, (callbackError, callbackResponse) => {
+                    if (error) console.log("final error", callbackError)
+                    else
+                        console.log("all completed response", callbackResponse)
+                    resolve({ message: 'Time update completed', finalArray })
+                })
+            })
+    })
+}
+
+
+module.exports.changeTime = changeTime
 module.exports.updateGuestList = updateGuestList
 module.exports.getCartItems = getCartItems
 module.exports.addGuestDetails = addGuestDetails

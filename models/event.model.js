@@ -48,6 +48,9 @@ const event = new Schema({
 	paymentDeadlineDate: {
 		type: Date
 	},
+	timeZoneSelect: {
+		type: String
+	},
 	payMentTransferDate: {
 		type: String
 	},
