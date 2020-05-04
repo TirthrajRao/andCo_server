@@ -116,7 +116,8 @@ module.exports.checkHashtag = (req, res) => {
  * Set price of event 
  */
 module.exports.setPriceOfEvent = (req, res) => {
-	console.log("details of set price", req.body)
+	// console.log("details of set price", req.body)
+
 	let setDetails = req.body
 	if (setDetails.bankDetails.flag == 'bank') {
 		console.log("call this")
@@ -132,6 +133,11 @@ module.exports.setPriceOfEvent = (req, res) => {
 		}
 		setDetails['cardAccount'] = cardAccount
 	}
+	if (!setDetails.timeZoneSelect) {
+		console.log("when time is normal")
+		setDetails['timeZoneSelect'] = req.body.defaultTime
+	}
+	console.log("details of final ", setDetails)
 	eventService.setPriceOfEvent(setDetails).then((response) => {
 		console.log("response of set price", response)
 		return res.status(200).json({ message: response.message })
@@ -181,6 +187,7 @@ module.exports.updateSetPriceOfEvent = (req, res) => {
 	if (req.body.isLogistics) updateDetails['isLogistics'] = req.body.isLogistics
 	if (req.body.regestery) updateDetails['regestery'] = req.body.regestery
 	if (req.body.linkOfEvent) updateDetails['linkOfEvent'] = req.body.linkOfEvent
+	if (req.body.timeZoneSelect) updateDetails['timeZoneSelect'] = req.body.timeZoneSelect
 	if (req.body.bankDetails.flag == 'bank') updateDetails['bankAccount'] = bankAccount
 	if (req.body.bankDetails.flag == 'card') updateDetails['cardAccount'] = cardAccount
 	console.log("update", updateDetails)
@@ -1197,5 +1204,12 @@ module.exports.getAllGuestList = (req, res) => {
 	})
 }
 
-
+module.exports.changeTimeLog = (req, res) => {
+	eventService.changeTime().then((response) => {
+		console.log("response of all guest list update", response)
+		return res.status(200).json({ data: response, message: response.message })
+	}).catch((error) => {
+		console.log("error while update guest", error)
+	})
+}
 
