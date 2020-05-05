@@ -1182,8 +1182,7 @@ module.exports.generatePdf = (req, res) => {
 			let finalData = {
 				data: response,
 				hashTag: eventDetail.hashTag,
-				profilePhoto: eventDetail.profilePhoto,
-				// pdfUrl: 
+				profilePhoto: eventDetail.profilePhoto, 
 			}
 			return res.status(200).json({ data: finalData })
 		}).catch((error) => {

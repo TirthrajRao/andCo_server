@@ -132,8 +132,8 @@ router.get('/cronJob', EventController.sendReminderMailToGuest)
 
 // Changes data script
 
-router.get('/allEvent', EventController.getAllEvents)
-router.get('/allGuestList', EventController.getAllGuestList)
-router.get('/setPriceTimelog', EventController.changeTimeLog)
+// router.get('/allEvent', EventController.getAllEvents)
+// router.get('/allGuestList', EventController.getAllGuestList)
+// router.get('/setPriceTimelog', EventController.changeTimeLog)
 
 module.exports = router;
