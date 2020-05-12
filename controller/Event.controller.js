@@ -300,7 +300,7 @@ module.exports.guestEventDetails = (req, res) => {
 	// }
 	// const userId = req.user.user._id;
 	eventService.guestEventDetail(eventhashTag).then((response) => {
-		console.log("response of guest link event", response)
+		// console.log("response of guest link event", response)
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
 		console.log("error while get details of event", error)
@@ -1086,6 +1086,16 @@ module.exports.addInvitationMessage = (req, res) => {
 	let data = req.body
 	eventService.addInvitationMessage(data).then((response) => {
 		return res.status(200).json({ data: response })
+	}).catch((error) => {
+		return res.status(error.status).json({ message: error.message })
+	})
+}
+
+module.exports.setWelcomeMessage = (req, res) => {
+	let data = req.body
+	console.log("details of welcome message", data)
+	eventService.addWelcomeMessage(data).then((response) => {
+		return res.status(200).json({ data: response.message })
 	}).catch((error) => {
 		return res.status(error.status).json({ message: error.message })
 	})

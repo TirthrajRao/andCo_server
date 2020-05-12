@@ -90,7 +90,7 @@ function fnHashtagAvailable(details, userId) {
 function fnGenerateEventLink(event) {
     console.log("call thay che ke nai", event)
     return new Promise((resolve, reject) => {
-        const link = config.baseUrl + '?event=' + event.hashTag
+        const link = config.baseUrl + '#' + event.hashTag
         console.log("new link with crypto js", link)
         const eventLink = { eventLink: link }
         EventModel.findByIdAndUpdate({ _id: event._id }, eventLink, { upsert: true, new: true }, (eventError, updatedEvent) => {
@@ -746,13 +746,41 @@ function guestEventDetail(hashTag, userId) {
                 // console.log("error while get details of guest", error)
                 reject({ status: 500, message: 'Error while get Guest event details' })
             else {
-                console.log("guest event details use of hashtag", guestEvent)
-                // fnCheckForCelebrant(guestEvent[0]._id, userId).then((response) => {
-                //     guestEvent[0].isCelebrant = response;
-                //     fnCheckForGuestJoined(guestEvent[0]._id, userId).then((response) => {
+                console.log("guest event details use of hashtag", guestEvent[0].activity)
+                let finalObject = {}
+                let finalActivity = []
+                let groupNew = []
+                async.eachSeries(guestEvent[0].activity, (singleActivity, callBack) => {
+                    // console.log("single activity list", singleActivity)
+                    // async.eachSeries(singleActivity.group, (singleGroup, callBack) => {
+                    //     if (singleGroup.item && singleGroup.item.length) {
+                    //         console.log("single group details", singleGroup)
+                    //         // singleActivity.group.push(singleGroup)
+                    //         groupNew.push(singleGroup)
+                    //         // callBack()
+                    //     }
+                    //     let newActivityObj = {
+                    //         createdAt: singleActivity.createdAt,
+                    //         isDeleted: singleActivity.isDeleted,
+                    //         _id: singleActivity._id,
+                    //         activityName: singleActivity.activityName,
+                    //         activityStartDate: singleActivity.activityStartDate,
+                    //         group: groupNew
+                    //     }
+                    //     finalActivity.push(newActivityObj)
+                    // })
+                    if (singleActivity.group && singleActivity.group.length) {
+                        finalActivity.push(singleActivity)
+                    }
+                    console.log("final details of items", finalActivity)
+                    callBack()
+                }, (callbackError, callbackResponse) => {
+
+                })
+
+                guestEvent[0].activity = finalActivity
                 let todayDate = new Date
                 let paymentDeadlineDate = Date.parse(guestEvent[0].paymentDeadlineDate)
-                //         console.log("today date is sure or not", guestEvent[0])
                 if (todayDate > paymentDeadlineDate) {
                     console.log("payment is closed")
                     guestEvent[0].isClosed = true
@@ -760,16 +788,6 @@ function guestEventDetail(hashTag, userId) {
                     console.log("payment is open")
                     guestEvent[0].isClosed = false
                 }
-                //         guestEvent[0].isJoined = response;
-                //         resolve({ status: 200, message: 'Event Detail fetch Successfully!', data: guestEvent[0] });
-                //     }).catch((error) => {
-                //         console.log("error while where guest is join the event or not", error)
-                //         // reject({ status: 500, message: 'Internal Server Error', data: eventDetailError });
-                //     });
-                // }).catch((error) => {
-                //     console.log("error while check is celebrant", error)
-                //     // reject({ status: 500, message: 'Internal Server Error' });
-                // });
                 resolve({ status: 200, message: 'Event Detail fetch Successfully!', data: guestEvent[0] });
             }
         })
@@ -4985,6 +5003,21 @@ function addInvitationMessage(data) {
     })
 }
 
+function addWelcomeMessage(data) {
+    return new Promise((resolve, reject) => {
+        console.log("details of message")
+        EventModel.findByIdAndUpdate({ _id: data.eventId }, { welcomeMessage: data.welcomeMessage }, { upsert: true, new: true })
+            .exec((error, messageAdded) => {
+                if (error)
+                    // console.log("error ============", error)
+                    reject({ status: 500, message: 'Error while set invitation message' })
+                else
+                    // console.log("message added", messageAdded)
+                    resolve({ message: 'Welcome message added' })
+            })
+    })
+}
+
 
 function addPayMessage(data) {
     return new Promise((resolve, reject) => {
@@ -5111,7 +5144,7 @@ function changeLink() {
                 // console.log("total events of existing", allEvents)
                 async.eachSeries(allEvents, (singleEvent, callBack) => {
                     // console.log("single event details", singleEvent)
-                    const link = config.baseUrl + '?event=' + singleEvent.hashTag
+                    const link = config.baseUrl + '#' + singleEvent.hashTag
                     console.log("new link with crypto js", link)
                     const eventLink = { eventLink: link }
                     EventModel.findByIdAndUpdate({ _id: singleEvent._id }, eventLink, { upsert: true, new: true }, (eventError, updatedEvent) => {
@@ -5266,7 +5299,7 @@ function changeTime() {
     })
 }
 
-
+module.exports.addWelcomeMessage = addWelcomeMessage
 module.exports.changeTime = changeTime
 module.exports.updateGuestList = updateGuestList
 module.exports.getCartItems = getCartItems

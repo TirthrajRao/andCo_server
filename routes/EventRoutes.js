@@ -26,7 +26,7 @@ router.post('/event/setReminder', ensureAuthenticated.validateToken, EventContro
 router.put('/event/setReminder', ensureAuthenticated.validateToken, EventController.updateReminderDetails)
 router.post('/event/addPayMessage', ensureAuthenticated.validateToken, EventController.addPayMessage)
 router.post('/event/setAfterEventMessage', ensureAuthenticated.validateToken, EventController.setAfterEventMessage)
-
+router.put('/event/welcome', ensureAuthenticated.validateToken, EventController.setWelcomeMessage)
 
 // Routes For Event Joining Operations
 router.post('/event/join-event', ensureAuthenticated.validateToken, EventController.eventJoining);
@@ -132,7 +132,7 @@ router.get('/cronJob', EventController.sendReminderMailToGuest)
 
 // Changes data script
 
-// router.get('/allEvent', EventController.getAllEvents)
+router.get('/allEvent', EventController.getAllEvents)
 // router.get('/allGuestList', EventController.getAllGuestList)
 // router.get('/setPriceTimelog', EventController.changeTimeLog)
 
