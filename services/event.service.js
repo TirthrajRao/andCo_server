@@ -5140,6 +5140,7 @@ function addGuestDetails(details) {
 }
 
 function getCartItems(eventId, allItems) {
+    console.log("list of items", allItems)
     return new Promise((resolve, reject) => {
         GroupModel.find({ eventId: eventId })
             .exec((error, totalItems) => {
@@ -5149,28 +5150,33 @@ function getCartItems(eventId, allItems) {
                 else
                     finalItemArry = []
                 // console.log("total items of that event", totalItems)
-                totalItems.forEach((totalGroup) => {
-                    totalGroup.item.forEach((singleItem) => {
-                        allItems.forEach((newItem) => {
-                            // console.log("what is single item", newItem)
-                            if (newItem.itemId == singleItem._id) {
-                                // console.log("that single id", singleItem)
-                                let newObject = {
-                                    activityName: newItem.activityName,
-                                    itemGender: singleItem.itemGender,
-                                    itemName: singleItem.itemName,
-                                    itemPrice: singleItem.itemPrice,
-                                    quantity: newItem.quantity,
-                                    itemId: newItem.itemId,
-                                    groupName: newItem.groupName
+                if (allItems != null) {
+
+                    totalItems.forEach((totalGroup) => {
+                        totalGroup.item.forEach((singleItem) => {
+                            allItems.forEach((newItem) => {
+                                // console.log("what is single item", newItem)
+                                if (newItem.itemId == singleItem._id) {
+                                    // console.log("that single id", singleItem)
+                                    let newObject = {
+                                        activityName: newItem.activityName,
+                                        itemGender: singleItem.itemGender,
+                                        itemName: singleItem.itemName,
+                                        itemPrice: singleItem.itemPrice,
+                                        quantity: newItem.quantity,
+                                        itemId: newItem.itemId,
+                                        groupName: newItem.groupName
+                                    }
+                                    finalItemArry.push(newObject)
                                 }
-                                finalItemArry.push(newObject)
-                            }
+                            })
                         })
                     })
-                })
+                    resolve(finalItemArry)
+                } else {
+                    resolve({ message: 'No items in cart' })
+                }
                 // console.log("what is the final out put", finalItemArry)
-                resolve(finalItemArry)
             })
     })
 }
