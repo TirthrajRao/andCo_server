@@ -141,6 +141,9 @@ const event = new Schema({
 		},
 		listOfGuest: {
 			type: String
+		},
+		attachment: {
+			type: String
 		}
 	},
 	invitationMessage: {
