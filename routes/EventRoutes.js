@@ -27,6 +27,7 @@ router.put('/event/setReminder', ensureAuthenticated.validateToken, EventControl
 router.post('/event/addPayMessage', ensureAuthenticated.validateToken, EventController.addPayMessage)
 router.post('/event/setAfterEventMessage', ensureAuthenticated.validateToken, EventController.setAfterEventMessage)
 router.put('/event/welcome', ensureAuthenticated.validateToken, EventController.setWelcomeMessage)
+router.post('/event/afterMessageAttachment', cpUpload,EventController.addAttachmentInAfterMessage)
 
 // Routes For Event Joining Operations
 router.post('/event/join-event', ensureAuthenticated.validateToken, EventController.eventJoining);

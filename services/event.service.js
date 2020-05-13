@@ -1960,8 +1960,8 @@ module.exports.orderCheckout = (userId, cartData) => {
                                 console.log("mail send for purchase to guest", mailResult)
                                 // resolve({ status: 200, message: 'Order Placed successfully' })
                             }
-                            resolve({ data: thankYouDetails, message: 'Payment Successfully Done' })
                         })
+                        resolve({ data: thankYouDetails, message: 'Payment Successfully Done' })
                     }).catch((error) => {
                         console.log("error while get name of creater", error)
                         reject({ status: 500, message: 'Error while get details of user' })
@@ -5066,14 +5066,36 @@ function updateReminderDetails(reminderDetails) {
 
 
 function setAfterEventMessage(details) {
+    console.log("details of attachemnt", details)
     return new Promise((resolve, reject) => {
-        EventModel.findByIdAndUpdate({ _id: details.eventId }, { $set: { afterEventMessageDetails: details } }, { upsert: true, new: true })
+        let newData = {}
+        if (details.afterEventMessage) {
+            newData = { $set: { 'afterEventMessageDetails.afterEventMessage': details.afterEventMessage, 'afterEventMessageDetails.messageDate': details.messageDate } }
+        }
+        if (details.messageDate) {
+            newData = { $set: { 'afterEventMessageDetails.afterEventMessage': details.afterEventMessage, 'afterEventMessageDetails.messageDate': details.messageDate, 'afterEventMessageDetails.listOfGuest': details.listOfGuest } }
+        }
+        EventModel.findByIdAndUpdate({ _id: details.eventId }, newData, { upsert: true, new: true })
             .exec((error, afterMessgae) => {
                 if (error)
                     // console.log("what is error",)
                     reject({ status: 500, message: 'Error while set after Event Message' })
                 else
                     resolve({ message: 'After event message set' })
+            })
+    })
+}
+
+function setAttachmentInAfterMessage(details) {
+    console.log("values of details", details)
+    return new Promise((resolve, reject) => {
+        const newValues = { $set: { 'afterEventMessageDetails.attachment': details.attachment } }
+        EventModel.findByIdAndUpdate({ _id: details.eventId }, newValues, { upsert: true, new: true })
+            .exec((error, attachmentAdded) => {
+                if (error) console.log("error while add attchemnt", error)
+                else
+                    console.log("attachment added", attachmentAdded)
+                resolve({ message: 'Attachment added' })
             })
     })
 }
@@ -5305,6 +5327,9 @@ function changeTime() {
     })
 }
 
+
+
+module.exports.setAttachmentInAfterMessage = setAttachmentInAfterMessage
 module.exports.addWelcomeMessage = addWelcomeMessage
 module.exports.changeTime = changeTime
 module.exports.updateGuestList = updateGuestList

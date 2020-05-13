@@ -91,6 +91,25 @@ module.exports.changeProfile = (req, res) => {
 }
 
 
+module.exports.addAttachmentInAfterMessage = (req, res) => {
+
+
+	let eventData = {};
+	if (req.body.eventId) eventData['eventId'] = req.body.eventId
+	if (req.files.profile) {
+		eventData.attachment = req.files.profile[0].path;
+	}
+	eventService.setAttachmentInAfterMessage(eventData).then((response) => {
+		console.log("attachment store in details", response)
+		return res.status(200).json({ message: response.message })
+	}).catch((error) => {
+		console.log("error while store attachment", error)
+	})
+	// if (details.afterEventMessage) eventData['afterEventMessage'] = details.afterEventMessage;
+
+}
+
+
 module.exports.checkHashtag = (req, res) => {
 
 	let loginUser = req.user
