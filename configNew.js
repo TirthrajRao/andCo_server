@@ -2,7 +2,7 @@ module.exports = {
 	databaseOption: {},
 	// baseUrlServer: 'http://localhost:3000/andco_server/uploads/pdf/',
 	baseUrl: 'http://localhost:4200/',
-	forgotPasswordLink: '/#/forgot-password/',
+	forgotPasswordLink: '/forgot-password/',
 	welcomeGuest: '/#/welcome-guest/',
 	emailVerificationLink: '/#/email-verify/',
 	fbUrl: 'https://graph.facebook.com/v2.10/me',
