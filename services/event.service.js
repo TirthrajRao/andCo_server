@@ -3341,7 +3341,21 @@ const eventGuestListWithAmount = (eventId) => {
                 console.log("Guest List Error:", guestListErr);
                 reject(guestListErr);
             } else {
-                console.log("response of date", guestListRes)
+                // console.log("response of date", guestListRes)
+                async.eachSeries(guestListRes, (singleList, callBack) => {
+
+                    let vivek = singleList.firstName.split(" ")
+                    console.log("whats the value of vivek", vivek);
+                    singleList.firstLetter = vivek[0].charAt(0)
+                    // this.firstLetter.push(vivek[0].charAt(0))
+                    if (vivek[1]) {
+                        // this.secondLetter.push(vivek[1].charAt(0))
+                        // singleList['lastLetter'] = vivek[1].charAt(0)
+                        singleList.lastLetter = vivek[1].charAt(0)
+                    }
+                    console.log("single list of guets", singleList)
+                    callBack()
+                })
                 resolve({ data: guestListRes })
                 // resolve({ status: 200, message: 'Event Guest List!', data: guestListRes[0] });
             }
@@ -3487,6 +3501,74 @@ const eventGuestList = (eventId) => {
                 console.log("Guest List Error:", eventDetailError);
                 reject(eventDetailError);
             } else {
+                console.log("list of all data display", eventDetail[0])
+                if (eventDetail[0] && eventDetail[0].totalGuest[0]) {
+                    async.eachSeries(eventDetail[0].totalGuest[0], (totalList, callback) => {
+                        // console.log("total list of guest", totalList)
+                        let vivek = totalList.userName.split(" ")
+                        // console.log("whats the value of vivek", vivek);
+                        totalList.firstLetter = vivek[0].charAt(0)
+                        // this.firstLetter.push(vivek[0].charAt(0))
+                        if (vivek[1]) {
+                            totalList.lastLetter = vivek[1].charAt(0)
+                        }
+                        callback()
+                    })
+                }
+                if (eventDetail[0] && eventDetail[0].faceBookList[0]) {
+                    async.eachSeries(eventDetail[0].faceBookList[0], (totalList, callback) => {
+                        // console.log("total list of guest", totalList)
+                        let vivek = totalList.userName.split(" ")
+                        // console.log("whats the value of vivek", vivek);
+                        totalList.firstLetter = vivek[0].charAt(0)
+                        // this.firstLetter.push(vivek[0].charAt(0))
+                        if (vivek[1]) {
+                            totalList.lastLetter = vivek[1].charAt(0)
+                        }
+                        callback()
+                    })
+                }
+
+                if (eventDetail[0] && eventDetail[0].whatsUpList[0]) {
+                    async.eachSeries(eventDetail[0].whatsUpList[0], (totalList, callback) => {
+                        // console.log("total list of guest", totalList)
+                        let vivek = totalList.userName.split(" ")
+                        // console.log("whats the value of vivek", vivek);
+                        totalList.firstLetter = vivek[0].charAt(0)
+                        // this.firstLetter.push(vivek[0].charAt(0))
+                        if (vivek[1]) {
+                            totalList.lastLetter = vivek[1].charAt(0)
+                        }
+                        callback()
+                    })
+                }
+
+                if (eventDetail[0] && eventDetail[0].googleList[0]) {
+                    async.eachSeries(eventDetail[0].googleList[0], (totalList, callback) => {
+                        // console.log("total list of guest", totalList)
+                        let vivek = totalList.userName.split(" ")
+                        // console.log("whats the value of vivek", vivek);
+                        totalList.firstLetter = vivek[0].charAt(0)
+                        // this.firstLetter.push(vivek[0].charAt(0))
+                        if (vivek[1]) {
+                            totalList.lastLetter = vivek[1].charAt(0)
+                        }
+                        callback()
+                    })
+                }
+                if (eventDetail[0] && eventDetail[0].textMessageList[0]) {
+                    async.eachSeries(eventDetail[0].textMessageList[0], (totalList, callback) => {
+                        // console.log("total list of guest", totalList)
+                        let vivek = totalList.userName.split(" ")
+                        // console.log("whats the value of vivek", vivek);
+                        totalList.firstLetter = vivek[0].charAt(0)
+                        // this.firstLetter.push(vivek[0].charAt(0))
+                        if (vivek[1]) {
+                            totalList.lastLetter = vivek[1].charAt(0)
+                        }
+                        callback()
+                    })
+                }
                 resolve({ status: 200, message: 'Event Guest List!', data: eventDetail });
             }
         });

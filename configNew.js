@@ -2,7 +2,7 @@ module.exports = {
 	databaseOption: {},
 	baseUrl: 'https://test.andcowith.me/',
 	// baseUrl: 'http://localhost:4200',
-	forgotPasswordLink: '/#/forgot-password/',
+	forgotPasswordLink: '/forgot-password/',
 	welcomeGuest: '/#/welcome-guest/',
 	emailVerificationLink: '/#/email-verify/',
 	fbUrl: 'https://graph.facebook.com/v6.0/me',
