@@ -752,27 +752,30 @@ function guestEventDetail(hashTag, userId) {
                 let finalActivity = []
                 let groupNew = []
                 async.eachSeries(guestEvent[0].activity, (singleActivity, callBack) => {
-                    // console.log("single activity list", singleActivity)
-                    // async.eachSeries(singleActivity.group, (singleGroup, callBack) => {
-                    //     if (singleGroup.item && singleGroup.item.length) {
-                    //         console.log("single group details", singleGroup)
-                    //         // singleActivity.group.push(singleGroup)
-                    //         groupNew.push(singleGroup)
-                    //         // callBack()
-                    //     }
-                    //     let newActivityObj = {
-                    //         createdAt: singleActivity.createdAt,
-                    //         isDeleted: singleActivity.isDeleted,
-                    //         _id: singleActivity._id,
-                    //         activityName: singleActivity.activityName,
-                    //         activityStartDate: singleActivity.activityStartDate,
-                    //         group: groupNew
-                    //     }
-                    //     finalActivity.push(newActivityObj)
-                    // })
-                    if (singleActivity.group && singleActivity.group.length) {
-                        finalActivity.push(singleActivity)
-                    }
+                    console.log("single activity list", singleActivity.group.length)
+                    async.eachSeries(singleActivity.group, (singleGroup, callBack) => {
+                        console.log("what is the value in single group", singleGroup)
+                        callBack()
+                        //     if (singleGroup.item && singleGroup.item.length) {
+                        //         console.log("single group details", singleGroup)
+                        //         // singleActivity.group.push(singleGroup)
+                        //         groupNew.push(singleGroup)
+                        //         // callBack()
+                        //     }
+                        //     let newActivityObj = {
+                        //         createdAt: singleActivity.createdAt,
+                        //         isDeleted: singleActivity.isDeleted,
+                        //         _id: singleActivity._id,
+                        //         activityName: singleActivity.activityName,
+                        //         activityStartDate: singleActivity.activityStartDate,
+                        //         group: groupNew
+                        //     }
+                        //     finalActivity.push(newActivityObj)
+
+                        if (singleGroup.item && singleGroup.item.length) {
+                            finalActivity.push(singleActivity)
+                        }
+                    })
                     console.log("final details of items", finalActivity)
                     callBack()
                 }, (callbackError, callbackResponse) => {
