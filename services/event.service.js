@@ -5460,7 +5460,7 @@ function shareLinkToGmail(malilArray, eventId, link) {
                             hashTag: eventDetails.hashTag,
                             profilePhoto: config.ngrockUrl + eventDetails.profilePhoto,
                             eventLink: link,
-                            backGround: config.ngrockUrl + eventDetails.eventTheme
+                            backGround: config.baseUrl + eventDetails.eventTheme
                         }
                         const defaultPasswordEmailoptions = {
                             to: singleMail.email,
