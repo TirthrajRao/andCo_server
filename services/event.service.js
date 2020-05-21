@@ -60,8 +60,9 @@ module.exports.createNewEvent = (eventData) => {
  */
 function fnHashtagAvailable(details, userId) {
     console.log("details of hashtag", details)
+    hashTag = '^' + details.data + '$'
     return new Promise((resolve, reject) => {
-        EventModel.findOne({ hashTag: details.data }, (error, event) => {
+        EventModel.findOne({ "hashTag": { '$regex': hashTag, '$options': 'i' } }, (error, event) => {
             console.log("event is find or not", event)
             if (error) {
                 console.log("Internal Server Error");
@@ -145,6 +146,7 @@ module.exports.updateExistingEvent = (eventId, eventData) => {
  * @returns {Promise} available Or Not or reason why failed
  */
 function fnHashtagAvailableOnUpdate(eventId, hashTag) {
+    console.log("event hashtag while edit", hashTag)
     return new Promise((resolve, reject) => {
         EventModel.findOne({ _id: eventId }, (error, event) => {
             if (error) {
@@ -799,6 +801,33 @@ function guestEventDetail(hashTag, userId) {
 }
 
 
+function checkCaseSensitive(hashTag) {
+    console.log("details of hashtag", hashTag)
+    return new Promise((resolve, reject) => {
+        hashTag = '^' + hashTag + '$'
+        EventModel.find({ "hashTag": { '$regex': hashTag, '$options': 'i' } })
+            .exec((error, details) => {
+                if (error) console.log("error=============", error)
+                else {
+                    console.log("details=================", details)
+                    if (details && details.length) {
+                        console.log("call or not===========")
+                        guestEventDetail(details[0].hashTag).then((response) => {
+                            console.log("response of hashtag find=============", response)
+                            resolve({ data: response.data, message: response.message })
+                        }).catch((error) => {
+                            console.log("error while get details of hashtag", error)
+                            reject({ status: error.status, message: error.message })
+                        })
+                    } else {
+                        console.log("call this")
+                        resolve({ message: 'There is no event of this hashTag' })
+                    }
+                }
+            })
+
+    })
+}
 
 
 /**
@@ -5509,4 +5538,8 @@ module.exports.checkForEmailDateAndTime = checkForEmailDateAndTime;
 module.exports.cronJobForSendEmailToGuest = cronJobForSendEmailToGuest;
 module.exports.addBankAccountDetailToEvent = addBankAccountDetailToEvent;
 module.exports.MyEventListTotalTransaction = MyEventListTotalTransaction;
+
+
+
+module.exports.checkCaseSensitive = checkCaseSensitive
 

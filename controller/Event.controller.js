@@ -318,11 +318,21 @@ module.exports.guestEventDetails = (req, res) => {
 	// 	finalId = loginUser.userres._id
 	// }
 	// const userId = req.user.user._id;
-	eventService.guestEventDetail(eventhashTag).then((response) => {
-		// console.log("response of guest link event", response)
+
+	// eventService.guestEventDetail(eventhashTag).then((response) => {
+	// 	// console.log("response of guest link event", response)
+	// 	return res.status(200).json({ message: response.message, data: response.data });
+	// }).catch((error) => {
+	// 	console.log("error while get details of event", error)
+	// 	return res.status(error.status).json({ message: error.message })
+	// })
+
+
+	eventService.checkCaseSensitive(eventhashTag).then((response) => {
+		console.log("response of event which is want", response)
 		return res.status(200).json({ message: response.message, data: response.data });
 	}).catch((error) => {
-		console.log("error while get details of event", error)
+		console.log("error while get details", error)
 		return res.status(error.status).json({ message: error.message })
 	})
 }
