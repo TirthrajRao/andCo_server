@@ -129,6 +129,7 @@ router.post('/generatePdf', ensureAuthenticated.validateToken, EventController.g
 
 // ShareLink on Gmail With templeted
 router.post('/shareLink', ensureAuthenticated.validateToken, EventController.shareLinkOnGmail)
+router.post('/sharePdf', ensureAuthenticated.validateToken, EventController.sharePdfOnGmail)
 
 
 router.get('/cronJob', EventController.sendReminderMailToGuest)
