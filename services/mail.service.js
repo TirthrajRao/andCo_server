@@ -58,6 +58,11 @@ function mail(options, data, attach, callback) {
     });
 
 
+    // user: 'raoinfotechp@gmail.com',
+    // pass: 'raoinfotech@123',
+
+
+
     //Fill default options
     if (!options.from) {
         options.from = '"andCo"<no-reply@asoebi.com>';

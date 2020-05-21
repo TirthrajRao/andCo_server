@@ -1252,3 +1252,17 @@ module.exports.changeTimeLog = (req, res) => {
 	})
 }
 
+module.exports.shareLinkOnGmail = (req, res) => {
+	console.log("array of mail list to send link", req.body)
+	let mailArray = req.body.arrayOfEmail
+	let eventId = req.body.eventId
+	let eventLink = req.body.eventLink
+	eventService.shareLinkToGmail(mailArray, eventId, eventLink).then((response) => {
+		console.log("response of mail send through to gmail", response)
+		return res.status(200).json({ message: response.message })
+	}).catch((error) => {
+		console.log("error while send mail to gmail", error)
+		return res.status(error.status).json({ message: error.message })
+	})
+}
+
