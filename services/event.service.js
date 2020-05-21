@@ -5443,6 +5443,55 @@ function changeTime() {
 
 
 
+function shareLinkToGmail(malilArray, eventId, link) {
+    return new Promise((resolve, reject) => {
+        console.log("mail array list", malilArray)
+        console.log("eventid==========", eventId)
+        EventModel.findById({ _id: eventId })
+            .exec((error, eventDetails) => {
+                if (error) console.log("error while get event details", error)
+                else {
+                    // console.log("eventDetails of selected eventid", eventDetails)
+                    async.eachSeries(malilArray, (singleMail, callback) => {
+                        // console.log("single mail to send", singleMail)
+
+                        let messageData = {
+                            eventTitle: eventDetails.eventTitle,
+                            hashTag: eventDetails.hashTag,
+                            profilePhoto: config.ngrockUrl + eventDetails.profilePhoto,
+                            eventLink: link,
+                            backGround: config.ngrockUrl + eventDetails.eventTheme
+                        }
+                        const defaultPasswordEmailoptions = {
+                            to: singleMail.email,
+                            subject: 'Share Link',
+                            template: 'invitationLink'
+                        };
+                        mailService.mail(defaultPasswordEmailoptions, messageData, null, function (err, mailResult) {
+                            console.log('Mail Result:', mailResult);
+                            if (err) {
+                                resolve({ status: 200, message: 'Order Placed successfully but mail not sent for some reason' });
+                            } else {
+                                console.log("mail send for purchase to guest", mailResult)
+                                // resolve({ status: 200, message: 'Order Placed successfully' })
+                            }
+                        })
+                        callback()
+                    }, (callbackError, callbackResponse) => {
+                        if (callbackError) {
+                            reject({ status: 500, message: 'Error to send mail' })
+                        } else {
+                            // console.lo
+                            resolve({ message: 'Mail send to all user' })
+                        }
+                    })
+                }
+            })
+    })
+}
+
+
+module.exports.shareLinkToGmail = shareLinkToGmail
 module.exports.setAttachmentInAfterMessage = setAttachmentInAfterMessage
 module.exports.addWelcomeMessage = addWelcomeMessage
 module.exports.changeTime = changeTime
