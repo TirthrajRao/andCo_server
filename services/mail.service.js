@@ -52,8 +52,8 @@ function mail(options, data, attach, callback) {
         port: 587,
         secure: false,
         auth: {
-            user: 'vivekkbharda@gmail.com',
-            pass: 'raoinfotech@09',
+            user: 'raoinfotechp@gmail.com',
+            pass: 'raoinfotech@123',
         },
     });
 
