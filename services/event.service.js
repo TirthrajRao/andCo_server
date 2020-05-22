@@ -520,6 +520,14 @@ const eventDetail = (eventId, userId) => {
                             eventDetail[0].isClosed = false
                         }
                         eventDetail[0].isJoined = response;
+                        let newBackGround = eventDetail[0].eventTheme.split('/')
+                        let test1 = newBackGround[2].split('.')
+                        console.log("new background image set", test1)
+
+                        let finalBackGround = newBackGround[0] + '/' + newBackGround[1] + '/' + test1[0] + '-small.png'
+                        console.log("this is the final background to save", finalBackGround)
+                        eventDetail[0].eventTheme = finalBackGround
+                        // console.log("details of event ", eventDetail[0])
                         resolve({ status: 200, message: 'Event Detail fetch Successfully!', data: eventDetail[0] });
                     }).catch((error) => {
                         reject({ status: 500, message: 'Internal Server Error', data: eventDetailError });

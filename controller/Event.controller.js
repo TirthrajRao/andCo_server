@@ -15,10 +15,15 @@ const config = require("../configNew");
  */
 module.exports.createNewEvent = (req, res) => {
 
-	console.log("-------------FILES------------", req.files);
-	console.log("-------------USER-------------", req.user.userres);
-	console.log("-------------BODY-------------", req.body);
+	// console.log("-------------FILES------------", req.files);
+	// console.log("-------------USER-------------", req.user.userres);
+	// console.log("-------------BODY-------------", req.body.background);
+	let newBackGround = req.body.background.split('/')
+	let test1 = newBackGround[2].split('-')
+	console.log("new background image set", test1)
 
+	let finalBackGround = newBackGround[0] + '/' + newBackGround[1] + '/' + test1[0] + '.png'
+	console.log("this is the final background to save", finalBackGround)
 	let loginUser = req.user
 	let finalId
 	// const loginUserId= loginUser.user._id
@@ -36,7 +41,7 @@ module.exports.createNewEvent = (req, res) => {
 		userId: finalId,
 		eventType: req.body.eventType,
 		eventTitle: req.body.eventTitle,
-		eventTheme: req.body.background,
+		eventTheme: finalBackGround,
 		hashTag: hashTag,
 	}
 
@@ -425,6 +430,14 @@ module.exports.updateExistingEvent = (req, res) => {
 	}
 	const eventId = req.body.eventId;
 	let hashTag = req.body.hashTag.split(' ').join('_');
+	if (req.body.background) {
+		let newBackGround = req.body.background.split('/')
+		let test1 = newBackGround[2].split('-')
+		// console.log("new background image set", test1)
+
+		let finalBackGround = newBackGround[0] + '/' + newBackGround[1] + '/' + test1[0] + '.png'
+		console.log("this is the final background to save", finalBackGround)
+	}
 
 	let eventData = {};
 
@@ -432,7 +445,7 @@ module.exports.updateExistingEvent = (req, res) => {
 	if (req.body.eventType) eventData['eventType'] = req.body.eventType;
 	if (req.body.eventTitle) eventData['eventTitle'] = req.body.eventTitle;
 	if (req.body.hashTag) eventData['hashTag'] = hashTag;
-	if (req.body.background) eventData['eventTheme'] = req.body.background
+	if (req.body.background) eventData['eventTheme'] = finalBackGround
 	// if (req.body.isPublic) eventData['isPublic'] = req.body.isPublic;
 	// if (req.body.deadlineDate) eventData['paymentDeadlineDate'] = req.body.deadlineDate;
 	// if (req.body.isLogistics) eventData['isLogistics'] = req.body.isLogistics;
